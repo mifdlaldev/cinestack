@@ -1,65 +1,121 @@
-import Image from "next/image";
+import { Suspense } from "react";
+import {
+  getTrending,
+  getPopular,
+  getTopRated,
+  getUpcoming,
+  getNowPlaying,
+} from "@/lib/tmdb";
+import { HeroSection } from "@/components/layout/HeroSection";
+import { MovieRow } from "@/components/ui/MovieRow";
+import { MovieCardSkeleton } from "@/components/ui/MovieCardSkeleton";
 
-export default function Home() {
+export const revalidate = 3600;
+
+function RowSkeleton() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex gap-4 sm:gap-5">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="w-[160px] flex-shrink-0 sm:w-[180px] md:w-[200px]">
+          <MovieCardSkeleton />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      ))}
     </div>
+  );
+}
+
+async function TrendingHero() {
+  const data = await getTrending("week");
+  return <HeroSection movie={data.results[0]} />;
+}
+
+async function TrendingRow() {
+  const data = await getTrending("week");
+  return (
+    <MovieRow
+      title="Trending Now"
+      movies={data.results.slice(0, 16)}
+      href="/trending"
+    />
+  );
+}
+
+async function PopularRow() {
+  const data = await getPopular();
+  return (
+    <MovieRow
+      title="Popular"
+      movies={data.results.slice(0, 16)}
+      href="/popular"
+    />
+  );
+}
+
+async function TopRatedRow() {
+  const data = await getTopRated();
+  return (
+    <MovieRow
+      title="Top Rated"
+      movies={data.results.slice(0, 16)}
+      href="/top-rated"
+    />
+  );
+}
+
+async function UpcomingRow() {
+  const data = await getUpcoming();
+  return (
+    <MovieRow
+      title="Upcoming"
+      movies={data.results.slice(0, 16)}
+      href="/upcoming"
+    />
+  );
+}
+
+async function NowPlayingRow() {
+  const data = await getNowPlaying();
+  return (
+    <MovieRow
+      title="Now Playing"
+      movies={data.results.slice(0, 16)}
+      href="/now-playing"
+    />
+  );
+}
+
+export default function HomePage() {
+  return (
+    <>
+      <Suspense
+        fallback={
+          <div className="min-h-[70vh] bg-surface animate-pulse" />
+        }
+      >
+        <TrendingHero />
+      </Suspense>
+
+      <div className="mx-auto max-w-[1400px] space-y-10 px-4 py-10 md:px-6 md:py-12 lg:px-8">
+        <Suspense fallback={<RowSkeleton />}>
+          <TrendingRow />
+        </Suspense>
+
+        <Suspense fallback={<RowSkeleton />}>
+          <PopularRow />
+        </Suspense>
+
+        <Suspense fallback={<RowSkeleton />}>
+          <TopRatedRow />
+        </Suspense>
+
+        <Suspense fallback={<RowSkeleton />}>
+          <UpcomingRow />
+        </Suspense>
+
+        <Suspense fallback={<RowSkeleton />}>
+          <NowPlayingRow />
+        </Suspense>
+      </div>
+    </>
   );
 }
