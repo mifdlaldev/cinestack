@@ -1,6 +1,11 @@
-import { createClient } from './supabase'
-import { redirect } from 'next/navigation'
-import { revalidatePath } from 'next/cache'
+// ─────────────────────────────────────────────────────────────
+// Auth Helpers — Server Actions & Auth Utilities
+//
+// IMPORTANT: This file uses dynamic imports for server-only
+// modules (next/cache, next/headers, next/navigation) so that
+// it can be safely imported by Client Components that only
+// use client-safe exports like signInWithGoogle / signInWithGoogle.
+// ─────────────────────────────────────────────────────────────
 
 export type AuthResult = {
   error?: string
@@ -16,6 +21,7 @@ export async function signUp(
   password: string,
   name: string
 ): Promise<AuthResult> {
+  const { createClient } = await import('./supabase')
   const supabase = await createClient()
 
   const { error } = await supabase.auth.signUp({
@@ -32,6 +38,7 @@ export async function signUp(
     return { error: error.message }
   }
 
+  const { revalidatePath } = await import('next/cache')
   revalidatePath('/', 'layout')
   return { data: { email, name } }
 }
@@ -44,6 +51,7 @@ export async function signIn(
   email: string,
   password: string
 ): Promise<AuthResult> {
+  const { createClient } = await import('./supabase')
   const supabase = await createClient()
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -55,18 +63,21 @@ export async function signIn(
     return { error: error.message }
   }
 
+  const { revalidatePath } = await import('next/cache')
   revalidatePath('/', 'layout')
   return { data: { email } }
 }
 
 /**
  * Sign in with Google OAuth.
+ * Uses the browser client — safe to call from Client Components.
  * Returns the redirect URL for the OAuth flow.
  */
 export async function signInWithGoogle(
   redirectTo?: string
 ): Promise<{ url: string } | { error: string }> {
-  const supabase = await createClient()
+  const { createClient } = await import('./supabase-client')
+  const supabase = createClient()
 
   const origin =
     process.env.NEXT_PUBLIC_SITE_URL ?? process.env.VERCEL_URL ?? 'http://localhost:3000'
@@ -74,7 +85,7 @@ export async function signInWithGoogle(
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${origin}/api/auth/callback?next=${redirectTo ?? '/'}`,
+      redirectTo: `${origin}/auth/callback?next=${redirectTo ?? '/'}`,
     },
   })
 
@@ -90,6 +101,7 @@ export async function signInWithGoogle(
  * Server Action compatible.
  */
 export async function signOut(): Promise<void> {
+  const { createClient } = await import('./supabase')
   const supabase = await createClient()
 
   const { error } = await supabase.auth.signOut()
@@ -98,6 +110,10 @@ export async function signOut(): Promise<void> {
     throw new Error(error.message)
   }
 
+  const [{ revalidatePath }, { redirect }] = await Promise.all([
+    import('next/cache'),
+    import('next/navigation'),
+  ])
   revalidatePath('/', 'layout')
   redirect('/')
 }
@@ -107,6 +123,7 @@ export async function signOut(): Promise<void> {
  * Uses getUser() which verifies the JWT — secure.
  */
 export async function getCurrentUser() {
+  const { createClient } = await import('./supabase')
   const supabase = await createClient()
 
   const {
@@ -122,6 +139,7 @@ export async function getCurrentUser() {
  * getSession() is useful for checking session existence without validation.
  */
 export async function getSession() {
+  const { createClient } = await import('./supabase')
   const supabase = await createClient()
 
   const {
@@ -141,6 +159,7 @@ export async function isAdmin(): Promise<boolean> {
     return false
   }
 
+  const { createClient } = await import('./supabase')
   const supabase = await createClient()
 
   const { data: profile } = await supabase

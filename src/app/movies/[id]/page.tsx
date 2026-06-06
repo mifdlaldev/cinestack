@@ -18,6 +18,7 @@ import {
   getLogoUrl,
   TmdbApiError,
 } from "@/lib/tmdb";
+import { ReviewSection } from "@/components/ui/ReviewSection";
 import type {
   TmdbCastMember,
   TmdbMovie,
@@ -531,6 +532,9 @@ export default async function MovieDetailPage({
               </div>
             </section>
           )}
+
+          {/* ── Reviews ── */}
+          <ReviewSection movieId={movieId} />
         </div>
       </div>
     );
