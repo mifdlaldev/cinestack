@@ -9,6 +9,10 @@ import {
 import { HeroSection } from "@/components/layout/HeroSection";
 import { MovieRow } from "@/components/ui/MovieRow";
 import { MovieCardSkeleton } from "@/components/ui/MovieCardSkeleton";
+import {
+  NewsSection,
+  NewsSectionSkeleton,
+} from "@/components/ui/NewsSection";
 
 export const revalidate = 3600;
 
@@ -114,6 +118,10 @@ export default function HomePage() {
 
         <Suspense fallback={<RowSkeleton />}>
           <NowPlayingRow />
+        </Suspense>
+
+        <Suspense fallback={<NewsSectionSkeleton />}>
+          <NewsSection />
         </Suspense>
       </div>
     </>
