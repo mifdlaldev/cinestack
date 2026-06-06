@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Star, Info, BookmarkPlus } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import type { TmdbMovie } from "@/types/tmdb";
 import { getBackdropUrl } from "@/lib/tmdb";
 
@@ -9,6 +12,7 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ movie }: HeroSectionProps) {
+  const shouldReduceMotion = useReducedMotion();
   const backdropUrl = getBackdropUrl(movie.backdrop_path, "original");
   const year = movie.release_date?.slice(0, 4);
   const rating = movie.vote_average.toFixed(1);
@@ -39,7 +43,12 @@ export function HeroSection({ movie }: HeroSectionProps) {
 
       {/* Content */}
       <div className="relative z-10 mx-auto flex min-h-[70vh] max-w-[1400px] items-end px-4 pb-16 md:px-6 md:pb-24 lg:px-8">
-        <div className="max-w-2xl">
+        <motion.div
+          className="max-w-2xl"
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 40 }}
+          animate={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
           {/* Rating + Year */}
           <div className="mb-4 flex items-center gap-4">
             <div className="flex items-center gap-1.5">
@@ -79,7 +88,7 @@ export function HeroSection({ movie }: HeroSectionProps) {
               Add to Watchlist
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

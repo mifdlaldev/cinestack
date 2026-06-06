@@ -19,6 +19,7 @@ import {
   TmdbApiError,
 } from "@/lib/tmdb";
 import { ReviewSection } from "@/components/ui/ReviewSection";
+import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import type {
   TmdbCastMember,
   TmdbMovie,
@@ -279,9 +280,38 @@ export default async function MovieDetailPage({
     ? new Date(movie.release_date).getFullYear()
     : null;
 
+  // ── JSON-LD structured data ──
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Movie",
+    name: movie.title,
+    description: movie.overview?.slice(0, 500) ?? undefined,
+    image: posterUrl ?? undefined,
+    datePublished: movie.release_date ?? undefined,
+    duration: movie.runtime ? `PT${movie.runtime}M` : undefined,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: movie.vote_average.toFixed(1),
+      ratingCount: movie.vote_count,
+      bestRating: "10",
+    },
+    genre: movie.genres.map((g) => g.name),
+    actors: credits.cast.slice(0, 10).map((c) => ({
+      "@type": "Person",
+      name: c.name,
+      ...(c.character ? { characterName: c.character } : {}),
+    })),
+  };
+
   return (
     <div>
-        {/* ── Hero Section ── */}
+      {/* ── JSON-LD Structured Data ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* ── Hero Section ── */}
         <section className="relative min-h-[60dvh] md:min-h-[70dvh]">
           {/* Backdrop */}
           {backdropUrl ? (
@@ -404,76 +434,84 @@ export default async function MovieDetailPage({
         <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-6 lg:px-8 md:py-14">
           {/* ── Cast Section ── */}
           {cast.length > 0 && (
-            <section className="mb-14">
-              <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
-                Cast
-              </h2>
-              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin">
-                {cast.map((member) => (
-                  <CastCard key={member.id} member={member} />
-                ))}
-              </div>
-            </section>
+            <AnimatedSection>
+              <section className="mb-14">
+                <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
+                  Cast
+                </h2>
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin">
+                  {cast.map((member) => (
+                    <CastCard key={member.id} member={member} />
+                  ))}
+                </div>
+              </section>
+            </AnimatedSection>
           )}
 
           {/* ── Trailer Section ── */}
           {trailer && (
-            <section className="mb-14">
-              <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
-                Trailer
-              </h2>
-              <div className="aspect-video w-full max-w-3xl overflow-hidden rounded-xl">
-                <iframe
-                  src={`https://www.youtube.com/embed/${trailer.key}`}
-                  title={trailer.name}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="h-full w-full"
-                />
-              </div>
-            </section>
+            <AnimatedSection>
+              <section className="mb-14">
+                <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
+                  Trailer
+                </h2>
+                <div className="aspect-video w-full max-w-3xl overflow-hidden rounded-xl">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${trailer.key}`}
+                    title={trailer.name}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    loading="lazy"
+                    className="h-full w-full"
+                  />
+                </div>
+              </section>
+            </AnimatedSection>
           )}
 
           {/* ── Watch Providers ── */}
           {providers && (
-            <section className="mb-14">
-              <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
-                Where to Watch
-              </h2>
-              <div className="flex flex-col gap-4">
-                {providers.flatrate && (
-                  <WatchProviderRow
-                    label="Stream"
-                    providers={providers.flatrate}
-                  />
+            <AnimatedSection>
+              <section className="mb-14">
+                <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
+                  Where to Watch
+                </h2>
+                <div className="flex flex-col gap-4">
+                  {providers.flatrate && (
+                    <WatchProviderRow
+                      label="Stream"
+                      providers={providers.flatrate}
+                    />
+                  )}
+                  {providers.rent && (
+                    <WatchProviderRow
+                      label="Rent"
+                      providers={providers.rent}
+                    />
+                  )}
+                  {providers.buy && (
+                    <WatchProviderRow
+                      label="Buy"
+                      providers={providers.buy}
+                    />
+                  )}
+                </div>
+                {!providers.flatrate && !providers.rent && !providers.buy && (
+                  <p className="text-sm text-text-secondary">
+                    No streaming information available for this region.
+                  </p>
                 )}
-                {providers.rent && (
-                  <WatchProviderRow
-                    label="Rent"
-                    providers={providers.rent}
-                  />
-                )}
-                {providers.buy && (
-                  <WatchProviderRow
-                    label="Buy"
-                    providers={providers.buy}
-                  />
-                )}
-              </div>
-              {!providers.flatrate && !providers.rent && !providers.buy && (
-                <p className="text-sm text-text-secondary">
-                  No streaming information available for this region.
-                </p>
-              )}
-            </section>
+              </section>
+            </AnimatedSection>
           )}
 
           {/* ── Movie Details ── */}
-          <section className="mb-14">
-            <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
-              Details
-            </h2>
-            <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-3 lg:grid-cols-4">
+          <AnimatedSection>
+            <section className="mb-14">
+              <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
+                Details
+              </h2>
+              <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-3 lg:grid-cols-4">
               {movie.budget > 0 && (
                 <div className="rounded-lg bg-surface p-4">
                   <p className="text-xs text-text-secondary">Budget</p>
@@ -518,23 +556,28 @@ export default async function MovieDetailPage({
               )}
             </div>
           </section>
+          </AnimatedSection>
 
           {/* ── Similar Movies ── */}
           {similar.results.length > 0 && (
-            <section>
-              <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
-                Similar Movies
-              </h2>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                {similar.results.slice(0, 12).map((sMovie) => (
-                  <SimilarMovieCard key={sMovie.id} movie={sMovie} />
-                ))}
-              </div>
-            </section>
+            <AnimatedSection>
+              <section>
+                <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
+                  Similar Movies
+                </h2>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                  {similar.results.slice(0, 12).map((sMovie) => (
+                    <SimilarMovieCard key={sMovie.id} movie={sMovie} />
+                  ))}
+                </div>
+              </section>
+            </AnimatedSection>
           )}
 
           {/* ── Reviews ── */}
-          <ReviewSection movieId={movieId} />
+          <AnimatedSection>
+            <ReviewSection movieId={movieId} />
+          </AnimatedSection>
         </div>
       </div>
     );

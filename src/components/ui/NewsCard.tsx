@@ -2,9 +2,12 @@
 // NewsCard — Article card for listing pages
 // ─────────────────────────────────────────────────────────────
 
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Calendar, Clock, User } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import type { NewsArticle, NewsAuthor } from "@/types/news";
 import { normalizeAuthor } from "@/types/news";
 
@@ -13,6 +16,8 @@ interface NewsCardProps {
     NewsArticle,
     "title" | "slug" | "excerpt" | "cover_image" | "published_at"
   > & { author: NewsAuthor };
+  /** Stagger delay in seconds. Default: 0 */
+  delay?: number;
 }
 
 function formatDate(dateString: string | null): string {
@@ -31,10 +36,11 @@ function readingTime(text: string | null): number {
   return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
 }
 
-export function NewsCard({ article }: NewsCardProps) {
+export function NewsCard({ article, delay = 0 }: NewsCardProps) {
+  const shouldReduceMotion = useReducedMotion();
   const author = normalizeAuthor(article.author);
 
-  return (
+  const cardContent = (
     <Link
       href={`/news/${article.slug}`}
       className="group block overflow-hidden rounded-xl border border-border bg-surface transition-all duration-300 hover:scale-[1.02] hover:border-accent/30 hover:shadow-[0_0_30px_rgba(245,197,24,0.08)]"
@@ -92,5 +98,24 @@ export function NewsCard({ article }: NewsCardProps) {
         </div>
       </div>
     </Link>
+  );
+
+  if (shouldReduceMotion) {
+    return cardContent;
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{
+        duration: 0.5,
+        delay,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+    >
+      {cardContent}
+    </motion.div>
   );
 }

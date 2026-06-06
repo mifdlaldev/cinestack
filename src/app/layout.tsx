@@ -31,7 +31,29 @@ export const metadata: Metadata = {
   },
   description:
     "Discover, review, and track your favorite movies. Your personal cinema companion.",
+  metadataBase: new URL("https://cinestack.vercel.app"),
   keywords: ["movies", "film", "database", "reviews", "watchlist"],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "CineStack",
+    title: "CineStack — Movie Database",
+    description:
+      "Discover, review, and track your favorite movies. Your personal cinema companion.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CineStack — Movie Database",
+    description:
+      "Discover, review, and track your favorite movies. Your personal cinema companion.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  other: {
+    "theme-color": "#0a0a0f",
+  },
 };
 
 export default function RootLayout({

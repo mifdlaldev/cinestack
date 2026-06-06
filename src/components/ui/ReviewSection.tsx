@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase-client";
 import { submitReview, updateReview, deleteReview } from "@/actions/review-actions";
@@ -47,6 +48,7 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   // ── Check auth state on mount ──
   useEffect(() => {
@@ -286,28 +288,85 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
 
       {/* ── Reviews list ── */}
       {!isLoading && !isError && displayedReviews.length > 0 && (
-        <div className="space-y-4">
-          {displayedReviews.map((review) => (
-            <ReviewCard
-              key={review.id}
-              review={review}
-              isOwn={review.user_id === currentUserId}
-              onEdit={
-                review.user_id === currentUserId
-                  ? () => handleEdit(review)
-                  : undefined
-              }
-              onDelete={
-                review.user_id === currentUserId
-                  ? () => handleDelete(review.id)
-                  : undefined
-              }
-              className={
-                deletingId === review.id ? "opacity-50 transition-opacity" : ""
-              }
-            />
-          ))}
-        </div>
+        shouldReduceMotion ? (
+          <div className="space-y-4">
+            {displayedReviews.map((review) => (
+              <ReviewCard
+                key={review.id}
+                review={review}
+                isOwn={review.user_id === currentUserId}
+                onEdit={
+                  review.user_id === currentUserId
+                    ? () => handleEdit(review)
+                    : undefined
+                }
+                onDelete={
+                  review.user_id === currentUserId
+                    ? () => handleDelete(review.id)
+                    : undefined
+                }
+                className={
+                  deletingId === review.id
+                    ? "opacity-50 transition-opacity"
+                    : ""
+                }
+              />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            className="space-y-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.06,
+                  delayChildren: 0.1,
+                },
+              },
+            }}
+          >
+            {displayedReviews.map((review) => (
+              <motion.div
+                key={review.id}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      duration: 0.4,
+                      ease: [0.16, 1, 0.3, 1],
+                    },
+                  },
+                }}
+              >
+                <ReviewCard
+                  review={review}
+                  isOwn={review.user_id === currentUserId}
+                  onEdit={
+                    review.user_id === currentUserId
+                      ? () => handleEdit(review)
+                      : undefined
+                  }
+                  onDelete={
+                    review.user_id === currentUserId
+                      ? () => handleDelete(review.id)
+                      : undefined
+                  }
+                  className={
+                    deletingId === review.id
+                      ? "opacity-50 transition-opacity"
+                      : ""
+                  }
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )
       )}
 
       {/* ── Pagination ── */}
