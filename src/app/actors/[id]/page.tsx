@@ -114,7 +114,7 @@ function FilmCard({ credit }: { credit: TmdbPersonCastMember }) {
           {credit.title}
         </h4>
         <p className="line-clamp-1 text-xs text-text-secondary">
-          {credit.character || credit.character}
+          {credit.character}
         </p>
         <div className="flex items-center gap-3 text-xs text-text-secondary/70">
           {year && <span>{year}</span>}

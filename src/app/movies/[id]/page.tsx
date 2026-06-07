@@ -401,7 +401,7 @@ export default async function MovieDetailPage({
                 <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
                   Cast
                 </h2>
-                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin">
+                <div className="flex gap-4 overflow-x-auto pb-4">
                   {cast.map((member) => (
                     <CastCard key={member.id} member={member} />
                   ))}

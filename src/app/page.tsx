@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import {
-  getTrending,
+  getTrendingCached,
   getPopular,
   getTopRated,
   getUpcoming,
@@ -31,12 +31,12 @@ function RowSkeleton() {
 }
 
 async function TrendingHero() {
-  const data = await getTrending("week");
+  const data = await getTrendingCached();
   return <HeroSection movie={data.results[0]} />;
 }
 
 async function TrendingRow() {
-  const data = await getTrending("week");
+  const data = await getTrendingCached();
   return (
     <MovieRowWithProviders
       title="Trending Now"

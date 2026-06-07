@@ -107,7 +107,7 @@ export function Navbar() {
           </Link>
 
           <Link
-            href="/auth/sign-in"
+            href="/login"
             className="hidden rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] md:inline-block"
           >
             Sign In

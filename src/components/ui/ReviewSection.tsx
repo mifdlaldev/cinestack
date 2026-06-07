@@ -214,7 +214,7 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
         <div className="mb-8 rounded-xl border border-border bg-surface p-6 text-center">
           <p className="text-sm text-text-secondary">
             <Link
-              href="/auth/sign-in"
+              href="/login"
               className="font-medium text-accent transition-colors hover:text-accent-hover"
             >
               Sign in

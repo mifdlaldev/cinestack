@@ -169,6 +169,8 @@ async function fetchFromTmdb<T>(
   throw new TmdbApiError("Max retries exhausted", "MAX_RETRIES");
 }
 
+import { cache } from "react";
+
 // ─── Image URL helpers ──────────────────────────────────────
 
 type PosterSize = "w92" | "w154" | "w185" | "w342" | "w500" | "w780";
@@ -528,6 +530,12 @@ export function getPersonMovieCredits(
     { revalidate: DEFAULT_REVALIDATE },
   );
 }
+
+/**
+ * Cached version of `getTrending("week")` to avoid duplicate TMDB calls.
+ * Deduplicates requests within the same render pass via React's `cache()`.
+ */
+export const getTrendingCached = cache(() => getTrending("week"));
 
 // Re-export types for convenience.
 export type {

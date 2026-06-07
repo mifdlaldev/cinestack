@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   if (!movieIdParam) {
     return NextResponse.json(
-      { error: "movieId query parameter is required" },
+      { error: { code: "MISSING_PARAM", message: "movieId query parameter is required" } },
       { status: 400 },
     );
   }
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   const movieId = parseInt(movieIdParam, 10);
   if (isNaN(movieId)) {
     return NextResponse.json(
-      { error: "Invalid movieId" },
+      { error: { code: "INVALID_PARAM", message: "Invalid movieId" } },
       { status: 400 },
     );
   }
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     .range(from, to);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: { code: "INTERNAL_ERROR", message: error.message } }, { status: 500 });
   }
 
   return NextResponse.json({
