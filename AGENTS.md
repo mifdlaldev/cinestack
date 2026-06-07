@@ -149,7 +149,7 @@ import { formatDate } from './utils';                // relative
 | Element | Value |
 |---|---|
 | **Primary color** | `#f5c518` (warm gold) |
-| **Background** | `#0a0a0f` (off-black) |
+| **Background** | `#000000` (pure black) |
 | **Surface** | `#1a1a24` (card bg) |
 | **Text** | `#f5f5f1` (warm white) |
 | **Font Display** | Archivo Black (Google Fonts) |

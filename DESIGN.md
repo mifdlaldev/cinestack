@@ -1,7 +1,7 @@
 # DESIGN.md — Design System Reference
 
-> **Cinematic Dark** — Dark theme dengan warm gold accent, poster-driven layout, dan micro-interactions premium.
-> Terinspirasi dari Netflix, Disney+, IMDb, Letterboxd, Mubi, dan A24.
+> **Pure Black + Gold** — Pure black (#000000) base dengan warm gold accent, poster-driven layout, dan micro-interactions premium.
+> Terinspirasi dari A24, IMDb, Apple TV+, dan luxury brand aesthetic.
 
 ---
 
@@ -76,20 +76,21 @@
 
 ### Theme & Mood
 ```
-Pilihan: Dark Cinematic — off-black base dengan warm gold accent
-Alasan: 15/15 referensi movie platform pakai dark theme. Gold accent 
-terinspirasi dari IMDb (iconic gold star) dan sinematografi film — 
-memberi kesan premium tanpa jadi kloning Netflix (merah) atau Letterboxd (hijau).
+Pilihan: Pure Black + Gold — pure #000000 base dengan warm gold accent
+Alasan: Black + gold adalah kombinasi paling premium dan timeless — 
+terinspirasi dari A24 (pure black background), IMDb (iconic gold star), 
+dan luxury brand aesthetic (black card + gold foil). Pure black memberi 
+kesan infinite depth, sementara gold accent memberi warmth dan prestige.
 ```
 
 ### Primary Color Palette
 ```css
 /* Tokens */
---color-bg: #0a0a0f;            /* Deep near-black dengan slight blue undertone — lebih berkarakter dari pure #000 */
---color-bg-alt: #12121a;        /* Slightly lighter untuk section alternatif */
---color-surface: #1a1a24;       /* Card, sidebar, modal backgrounds */
---color-surface-hover: #24242e; /* Hover state cards */
---color-border: #2a2a35;        /* Subtle borders, dividers */
+--color-bg: #000000;            /* Pure black — infinite depth, maximum contrast, premium */
+--color-bg-alt: #000000;        /* Same pure black untuk konsistensi */
+--color-surface: #0a0a0a;       /* Near-black untuk card/modal — subtle distinction */
+--color-surface-hover: #141414; /* Slightly lighter hover state */
+--color-border: #1a1a1a;        /* Subtle borders tanpa mengurangi premium feel */
 --color-text: #f5f5f1;          /* Warm white — tidak menyilaukan seperti #fff */
 --color-text-secondary: #888899;/* Muted text untuk metadata */
 --color-accent: #f5c518;        /* Warm gold — iconic, cinematic, premium */
@@ -97,7 +98,7 @@ memberi kesan premium tanpa jadi kloning Netflix (merah) atau Letterboxd (hijau)
 --color-accent-dim: #8a6d0d;    /* Gold dim untuk subtle elements */
 --color-success: #22c55e;
 --color-error: #ef4444;
---color-overlay: rgba(0, 0, 0, 0.7);  /* Gradient overlay untuk hero */
+--color-overlay: rgba(0, 0, 0, 0.85);  /* Gradient overlay untuk hero */
 ```
 
 ### Typography

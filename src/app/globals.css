@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Cinematic Dark Theme */
-  --color-bg: #0a0a0f;
-  --color-bg-alt: #12121a;
-  --color-surface: #1a1a24;
-  --color-surface-hover: #24242e;
-  --color-border: #2a2a35;
+  /* Pure Black + Gold Theme */
+  --color-bg: #000000;
+  --color-bg-alt: #000000;
+  --color-surface: #0a0a0a;
+  --color-surface-hover: #141414;
+  --color-border: #1a1a1a;
   --color-text: #f5f5f1;
   --color-text-secondary: #888899;
   --color-accent: #f5c518;
@@ -14,7 +14,7 @@
   --color-accent-dim: #8a6d0d;
   --color-success: #22c55e;
   --color-error: #ef4444;
-  --color-overlay: rgba(0, 0, 0, 0.7);
+  --color-overlay: rgba(0, 0, 0, 0.85);
 
   /* Fonts - resolved via next/font CSS variables */
   --font-display: var(--font-archivo-black);
