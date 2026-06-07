@@ -154,8 +154,43 @@ async function ArticleContent({ slug }: { slug: string }) {
   const readTime = readingTime(article.content);
   const formattedContent = formatContent(article.content);
 
+  const articleUrl = `https://cinestack.vercel.app/news/${slug}`;
+
   return (
     <article>
+      {/* NewsArticle JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "NewsArticle",
+            headline: article.title,
+            description: article.excerpt ?? undefined,
+            image: article.cover_image ?? undefined,
+            datePublished: article.published_at ?? undefined,
+            dateModified: article.updated_at ?? undefined,
+            author: article.author
+              ? {
+                  "@type": "Person",
+                  name:
+                    (article.author as { name?: string }).name ??
+                    "CineStack",
+                }
+              : undefined,
+            publisher: {
+              "@type": "Organization",
+              name: "CineStack",
+              url: "https://cinestack.vercel.app",
+            },
+            mainEntityOfPage: {
+              "@type": "WebPage",
+              "@id": articleUrl,
+            },
+          }),
+        }}
+      />
+
       {/* Back link */}
       <Link
         href="/news"

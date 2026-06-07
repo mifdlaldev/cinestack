@@ -51,6 +51,9 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: "https://cinestack.vercel.app",
+  },
   other: {
     "theme-color": "#0a0a0f",
   },
@@ -68,6 +71,29 @@ export default function RootLayout({
     >
       <body className="min-h-screen flex flex-col bg-bg text-text antialiased">
         <Providers>
+          {/* WebSite JSON-LD */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: "CineStack",
+                url: "https://cinestack.vercel.app",
+                description:
+                  "Discover, review, and track your favorite movies. Your personal cinema companion.",
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: {
+                    "@type": "EntryPoint",
+                    urlTemplate:
+                      "https://cinestack.vercel.app/search?q={search_term_string}",
+                  },
+                  "query-input": "required name=search_term_string",
+                },
+              }),
+            }}
+          />
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
