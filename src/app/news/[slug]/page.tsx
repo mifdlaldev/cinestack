@@ -6,9 +6,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, Calendar, Clock, User, Share2 } from "lucide-react";
+import { ChevronLeft, Calendar, Clock, User } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { normalizeAuthor } from "@/types/news";
+import { ShareButton } from "@/components/ui/ShareButton";
 
 export const revalidate = 3600;
 
@@ -108,38 +109,15 @@ function formatContent(content: string): string {
   return content;
 }
 
-// ─── Share Button (Client Component) ─────────────────────────
+// ─── Share Button wrapper ────────────────────────────────────
 
-function ShareButton() {
-  async function handleShare() {
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({
-          title: document.title,
-          url: window.location.href,
-        });
-      } catch {
-        // User cancelled
-      }
-    } else {
-      // Fallback: copy URL
-      try {
-        await navigator.clipboard.writeText(window.location.href);
-      } catch {
-        // Clipboard not available
-      }
-    }
-  }
-
+function ArticleShareButton({ title }: { title: string }) {
   return (
-    <button
-      onClick={handleShare}
-      className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary transition-all hover:bg-surface hover:text-text active:scale-[0.97]"
-      aria-label="Share article"
-    >
-      <Share2 className="h-4 w-4" />
-      Share
-    </button>
+    <ShareButton
+      title={title}
+      text={`Read "${title}" on CineStack`}
+      variant="button"
+    />
   );
 }
 
@@ -223,7 +201,7 @@ async function ArticleContent({ slug }: { slug: string }) {
 
         {/* Share button */}
         <div className="mt-6 flex items-center gap-4 border-b border-border pb-6">
-          <ShareButton />
+          <ArticleShareButton title={article.title} />
           {article.source === "tmdb_auto" && (
             <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
               Auto-generated

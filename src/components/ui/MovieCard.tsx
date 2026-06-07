@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Star } from "lucide-react";
 import type { TmdbMovie } from "@/types/tmdb";
 import { getImageUrl } from "@/lib/tmdb";
+import { MovieProviderStrip } from "@/components/ui/MovieProviderStrip";
 
 
 interface MovieCardProps {
@@ -52,6 +53,11 @@ export function MovieCard({ movie, priority = false }: MovieCardProps) {
         {year && (
           <p className="text-xs text-text-secondary">{year}</p>
         )}
+      </div>
+
+      {/* Streaming provider strip */}
+      <div className="mt-2">
+        <MovieProviderStrip movieId={movie.id} />
       </div>
     </Link>
   );

@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Filter, RotateCcw } from "lucide-react";
+import { Filter, RotateCcw, Monitor } from "lucide-react";
+import { useServicesStore } from "@/stores/services-store";
+import { MyServicesModal } from "./MyServicesModal";
 
 export interface FilterValues {
   genreId: number | null;
   year: number | null;
   sortBy: string;
+  providerIds: number[];
 }
 
 interface FilterPanelProps {
@@ -46,19 +49,30 @@ export function FilterPanel({
     initialValues?.sortBy ?? "popularity.desc",
   );
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [servicesModalOpen, setServicesModalOpen] = useState(false);
+
+  const { selectedProviders } = useServicesStore();
 
   const handleApply = useCallback(() => {
-    onApply({ genreId, year, sortBy });
-  }, [genreId, year, sortBy, onApply]);
+    onApply({ genreId, year, sortBy, providerIds: selectedProviders });
+  }, [genreId, year, sortBy, selectedProviders, onApply]);
 
   const handleReset = useCallback(() => {
     setGenreId(null);
     setYear(null);
     setSortBy("popularity.desc");
-    onApply({ genreId: null, year: null, sortBy: "popularity.desc" });
+    onApply({
+      genreId: null,
+      year: null,
+      sortBy: "popularity.desc",
+      providerIds: [],
+    });
   }, [onApply]);
 
-  const hasActiveFilters = genreId !== null || year !== null;
+  const hasActiveFilters =
+    genreId !== null || year !== null || selectedProviders.length > 0;
+
+  const providerCount = selectedProviders.length;
 
   const filterContent = (
     <>
@@ -102,6 +116,29 @@ export function FilterPanel({
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Streaming On */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+          Streaming On
+        </label>
+        <button
+          onClick={() => setServicesModalOpen(true)}
+          className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text transition-colors hover:border-accent/30 hover:bg-accent/5 active:scale-[0.98]"
+        >
+          <Monitor className="h-4 w-4 flex-shrink-0 text-text-secondary" />
+          <span className="flex-1 text-left">
+            {providerCount > 0
+              ? `${providerCount} service${providerCount > 1 ? "s" : ""} selected`
+              : "Select services"}
+          </span>
+          {providerCount > 0 && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-bg">
+              {providerCount}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Sort */}
@@ -176,6 +213,12 @@ export function FilterPanel({
           </div>
         )}
       </div>
+
+      {/* Services Modal */}
+      <MyServicesModal
+        open={servicesModalOpen}
+        onClose={() => setServicesModalOpen(false)}
+      />
     </>
   );
 }

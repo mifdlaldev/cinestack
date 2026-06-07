@@ -9,6 +9,7 @@ import {
 import { HeroSection } from "@/components/layout/HeroSection";
 import { MovieRow } from "@/components/ui/MovieRow";
 import { MovieCardSkeleton } from "@/components/ui/MovieCardSkeleton";
+import { MyServicesRow } from "@/components/ui/MyServicesRow";
 import {
   NewsSection,
   NewsSectionSkeleton,
@@ -100,6 +101,11 @@ export default function HomePage() {
       </Suspense>
 
       <div className="mx-auto max-w-[1400px] space-y-10 px-4 py-10 md:px-6 md:py-12 lg:px-8">
+        {/* Smart row: available on user's streaming services */}
+        <Suspense fallback={null}>
+          <MyServicesRow />
+        </Suspense>
+
         <Suspense fallback={<RowSkeleton />}>
           <TrendingRow />
         </Suspense>

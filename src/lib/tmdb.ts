@@ -9,7 +9,10 @@ import type {
   TmdbMovie,
   TmdbPaginatedResponse,
   TmdbPerson,
+  TmdbPersonCredits,
+  TmdbPersonDetail,
   TmdbVideos,
+  TmdbWatchProvider,
   TmdbWatchProviders,
 } from "@/types/tmdb";
 
@@ -340,10 +343,12 @@ export interface DiscoverParams {
   year?: number;
   sortBy?: string;
   page?: number;
+  providerIds?: number[];
+  watchRegion?: string;
 }
 
 /**
- * Discover movies filtered by genre, year, sort order, etc.
+ * Discover movies filtered by genre, year, sort order, watch providers, etc.
  */
 export function discoverMovies(
   params?: DiscoverParams,
@@ -353,6 +358,10 @@ export function discoverMovies(
   if (params?.year) queryParams.primary_release_year = String(params.year);
   if (params?.sortBy) queryParams.sort_by = params.sortBy;
   if (params?.page) queryParams.page = String(params.page);
+  if (params?.providerIds && params.providerIds.length > 0) {
+    queryParams.with_watch_providers = params.providerIds.join("|");
+    queryParams.watch_region = params.watchRegion ?? "US";
+  }
   return fetchFromTmdb<TmdbPaginatedResponse<TmdbMovie>>("/discover/movie", {
     revalidate: DEFAULT_REVALIDATE,
     params: queryParams,
@@ -373,6 +382,29 @@ export async function getMovieGenres(): Promise<TmdbGenre[]> {
     revalidate: 86_400, // 24 hours — genres rarely change
   });
   return data.genres;
+}
+
+// ─── Watch Providers (Streaming Services) ───────────────────
+
+interface TmdbWatchProviderListResult {
+  results: TmdbWatchProvider[];
+}
+
+/**
+ * Fetch the list of available streaming providers for movies.
+ * @param watchRegion - ISO 3166-1 alpha-2 country code (default: "US")
+ */
+export async function getWatchProviderList(
+  watchRegion: string = "US",
+): Promise<TmdbWatchProvider[]> {
+  const data = await fetchFromTmdb<TmdbWatchProviderListResult>(
+    "/watch/providers/movie",
+    {
+      revalidate: 86_400, // 24 hours — provider list rarely changes
+      params: { language: "en-US", watch_region: watchRegion },
+    },
+  );
+  return data.results;
 }
 
 // ─── Similar / Recommendations ──────────────────────────────
@@ -433,6 +465,33 @@ export function getTrendingActors(
   );
 }
 
+// ─── Person / Actor endpoints ──────────────────────────────────
+
+/**
+ * Fetch full detail for a single person (actor / crew).
+ * @param personId - TMDB person ID
+ */
+export function getPersonDetail(
+  personId: number,
+): Promise<TmdbPersonDetail> {
+  return fetchFromTmdb<TmdbPersonDetail>(`/person/${personId}`, {
+    revalidate: DEFAULT_REVALIDATE,
+  });
+}
+
+/**
+ * Fetch movie credits (cast + crew) for a person.
+ * @param personId - TMDB person ID
+ */
+export function getPersonMovieCredits(
+  personId: number,
+): Promise<TmdbPersonCredits> {
+  return fetchFromTmdb<TmdbPersonCredits>(
+    `/person/${personId}/movie_credits`,
+    { revalidate: DEFAULT_REVALIDATE },
+  );
+}
+
 // Re-export types for convenience.
 export type {
   TmdbCredit,
@@ -441,6 +500,8 @@ export type {
   TmdbMovie,
   TmdbPaginatedResponse,
   TmdbPerson,
+  TmdbPersonCredits,
+  TmdbPersonDetail,
   TmdbVideos,
   TmdbWatchProviders,
 } from "@/types/tmdb";

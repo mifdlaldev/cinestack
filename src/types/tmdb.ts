@@ -136,3 +136,56 @@ export interface TmdbPerson {
   popularity: number;
   known_for: TmdbMovie[];
 }
+
+/** Full person detail returned from /person/{id} endpoint. */
+export interface TmdbPersonDetail extends TmdbPerson {
+  biography: string;
+  birthday: string | null;
+  deathday: string | null;
+  place_of_birth: string | null;
+  also_known_as: string[];
+  gender: number;
+  homepage: string | null;
+  imdb_id: string | null;
+}
+
+/** Cast member in a person's movie credits response. */
+export interface TmdbPersonCastMember extends TmdbCastMember {
+  credit_id: string;
+  release_date: string;
+  vote_count: number;
+  vote_average: number;
+  popularity: number;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  overview: string;
+  genre_ids: number[];
+  original_language: string;
+  adult: boolean;
+  title: string;
+  id: number;
+}
+
+/** Crew member in a person's movie credits response. */
+export interface TmdbPersonCrewMember extends TmdbCrewMember {
+  credit_id: string;
+  release_date: string;
+  vote_count: number;
+  vote_average: number;
+  popularity: number;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  overview: string;
+  genre_ids: number[];
+  original_language: string;
+  adult: boolean;
+  title: string;
+  id: number;
+}
+
+/** Movie credits response for a person. */
+export interface TmdbPersonCredits {
+  id: number;
+  cast: TmdbPersonCastMember[];
+  crew: TmdbPersonCrewMember[];
+}

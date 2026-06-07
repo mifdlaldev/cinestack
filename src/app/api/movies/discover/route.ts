@@ -11,12 +11,23 @@ export async function GET(request: NextRequest) {
     const year = searchParams.get("year");
     const sortBy = searchParams.get("sortBy");
     const page = searchParams.get("page");
+    const providerIdsRaw = searchParams.get("providerIds");
+    const watchRegion = searchParams.get("watchRegion");
+
+    const providerIds = providerIdsRaw
+      ? providerIdsRaw
+          .split(",")
+          .map(Number)
+          .filter((id) => !Number.isNaN(id))
+      : undefined;
 
     const data = await discoverMovies({
       genreId: genreId ? Number(genreId) : undefined,
       year: year ? Number(year) : undefined,
       sortBy: sortBy ?? undefined,
       page: page ? Number(page) : undefined,
+      providerIds: providerIds && providerIds.length > 0 ? providerIds : undefined,
+      watchRegion: watchRegion ?? undefined,
     });
 
     return NextResponse.json({ data });

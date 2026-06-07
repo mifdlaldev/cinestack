@@ -14,6 +14,9 @@ async function fetchDiscover(
   if (params.genreId) searchParams.set("genreId", String(params.genreId));
   if (params.year) searchParams.set("year", String(params.year));
   if (params.sortBy) searchParams.set("sortBy", params.sortBy);
+  if (params.providerIds && params.providerIds.length > 0) {
+    searchParams.set("providerIds", params.providerIds.join(","));
+  }
   searchParams.set("page", String(params.page));
 
   const res = await fetch(`/api/movies/discover?${searchParams.toString()}`);
@@ -51,7 +54,9 @@ export default function DiscoverPage() {
     genreId: null,
     year: null,
     sortBy: "popularity.desc",
+    providerIds: [],
   });
+
   // Fetch genres once
   const { data: genres = [] } = useQuery({
     queryKey: ["genres"],
@@ -60,7 +65,10 @@ export default function DiscoverPage() {
   });
 
   // Fetch movies based on filters
-  const hasActiveFilters = filters.genreId !== null || filters.year !== null;
+  const hasActiveFilters =
+    filters.genreId !== null ||
+    filters.year !== null ||
+    filters.providerIds.length > 0;
 
   const {
     data: movieData,
@@ -72,7 +80,9 @@ export default function DiscoverPage() {
       ? ["discover", filters, page]
       : ["popular", page],
     queryFn: () =>
-      hasActiveFilters ? fetchDiscover({ ...filters, page }) : fetchPopular(page),
+      hasActiveFilters
+        ? fetchDiscover({ ...filters, page })
+        : fetchPopular(page),
     placeholderData: (prev) => prev,
   });
 
@@ -109,6 +119,12 @@ export default function DiscoverPage() {
         <FilterPanel
           onApply={handleApplyFilters}
           genres={genres}
+          initialValues={{
+            genreId: filters.genreId ?? undefined,
+            year: filters.year ?? undefined,
+            sortBy: filters.sortBy,
+            providerIds: filters.providerIds,
+          }}
           isLoading={isLoading}
         />
       </div>

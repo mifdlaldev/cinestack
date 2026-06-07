@@ -15,15 +15,15 @@ import {
   getImageUrl,
   getBackdropUrl,
   getProfileUrl,
-  getLogoUrl,
   TmdbApiError,
 } from "@/lib/tmdb";
 import { ReviewSection } from "@/components/ui/ReviewSection";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
+import { ShareButton } from "@/components/ui/ShareButton";
+import { WatchProvidersEnhanced } from "@/components/ui/WatchProvidersEnhanced";
 import type {
   TmdbCastMember,
   TmdbMovie,
-  TmdbWatchProvider,
   TmdbWatchProviders,
   TmdbMovieDetail,
   TmdbCredit,
@@ -125,48 +125,6 @@ function CastCard({ member }: { member: TmdbCastMember }) {
   );
 }
 
-// ─── Watch Provider Row ─────────────────────────────────────
-
-function WatchProviderRow({
-  label,
-  providers,
-}: {
-  label: string;
-  providers: TmdbWatchProvider[];
-}) {
-  if (providers.length === 0) return null;
-
-  return (
-    <div>
-      <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-text-secondary">
-        {label}
-      </h4>
-      <div className="flex flex-wrap gap-2">
-        {providers.map((p) => (
-          <div
-            key={p.provider_id}
-            className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2"
-            title={p.provider_name}
-          >
-            {p.logo_path ? (
-              <Image
-                src={getLogoUrl(p.logo_path, "w92") ?? ""}
-                alt={p.provider_name}
-                width={24}
-                height={24}
-                className="h-6 w-6 rounded object-contain"
-              />
-            ) : null}
-            <span className="text-xs text-text-secondary">
-              {p.provider_name}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ─── Similar Movie Card ─────────────────────────────────────
 
 function SimilarMovieCard({ movie }: { movie: TmdbMovie }) {
@@ -263,15 +221,6 @@ export default async function MovieDetailPage({
   const cast = credits.cast
     .filter((c) => c.character)
     .slice(0, 20);
-
-  // ── Watch providers: prefer US, fall back to first available ──
-  const countryCodes = Object.keys(watchProviders.results);
-  const countryKey = countryCodes.includes("US")
-    ? "US"
-    : countryCodes[0] ?? null;
-  const providers = countryKey
-    ? watchProviders.results[countryKey]
-    : null;
 
   // ── Backdrop & poster ──
   const backdropUrl = getBackdropUrl(movie.backdrop_path, "original");
@@ -420,6 +369,18 @@ export default async function MovieDetailPage({
                 </div>
               )}
 
+              <div className="flex items-center gap-3">
+                <ShareButton
+                  title={movie.title}
+                  text={
+                    movie.tagline
+                      ? `"${movie.tagline}" — ${movie.title}`
+                      : movie.title
+                  }
+                  variant="button"
+                />
+              </div>
+
               {/* Overview */}
               {movie.overview && (
                 <p className="max-w-prose text-base leading-relaxed text-text/90">
@@ -469,38 +430,11 @@ export default async function MovieDetailPage({
             </AnimatedSection>
           )}
 
-          {/* ── Watch Providers ── */}
-          {providers && (
+          {/* ── Watch Providers (Enhanced) ── */}
+          {Object.keys(watchProviders.results).length > 0 && (
             <AnimatedSection>
               <section className="mb-14">
-                <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
-                  Where to Watch
-                </h2>
-                <div className="flex flex-col gap-4">
-                  {providers.flatrate && (
-                    <WatchProviderRow
-                      label="Stream"
-                      providers={providers.flatrate}
-                    />
-                  )}
-                  {providers.rent && (
-                    <WatchProviderRow
-                      label="Rent"
-                      providers={providers.rent}
-                    />
-                  )}
-                  {providers.buy && (
-                    <WatchProviderRow
-                      label="Buy"
-                      providers={providers.buy}
-                    />
-                  )}
-                </div>
-                {!providers.flatrate && !providers.rent && !providers.buy && (
-                  <p className="text-sm text-text-secondary">
-                    No streaming information available for this region.
-                  </p>
-                )}
+                <WatchProvidersEnhanced providers={watchProviders} />
               </section>
             </AnimatedSection>
           )}
