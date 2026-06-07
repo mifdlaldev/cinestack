@@ -54,7 +54,7 @@ export function AdminSidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-border bg-surface transition-transform duration-300 md:sticky md:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col glass transition-transform duration-300 md:sticky md:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >

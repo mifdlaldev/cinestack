@@ -44,7 +44,7 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-bg/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full glass-nav">
       <nav className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-4 md:px-6 lg:px-8">
         <Link
           href="/"
@@ -69,7 +69,7 @@ export function Navbar() {
               />
             </button>
             {dropdownOpen && (
-              <ul className="absolute left-0 top-full mt-1 w-48 rounded-xl border border-border bg-bg-alt p-2 shadow-lg">
+              <ul className="absolute left-0 top-full mt-1 w-48 rounded-xl glass-strong p-2 shadow-lg animate-drop-in">
                 {movieLinks.map((link) => (
                   <li key={link.href}>
                     <Link
@@ -131,7 +131,7 @@ export function Navbar() {
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <div className="fixed inset-y-0 right-0 z-50 w-72 border-l border-border bg-bg-alt p-6 shadow-xl md:hidden">
+          <div className="fixed inset-y-0 right-0 z-50 w-72 glass-strong border-l border-border p-6 shadow-xl md:hidden">
             <div className="mb-8 flex items-center justify-between">
               <span className="font-display text-lg text-accent">
                 CineStack

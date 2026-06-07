@@ -94,7 +94,7 @@ export function MyServicesModal({ open, onClose }: MyServicesModalProps) {
             aria-modal="true"
             aria-label="Select your streaming services"
             tabIndex={-1}
-            className="relative z-10 flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-bg-alt shadow-2xl"
+            className="relative z-10 flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl glass-strong shadow-2xl"
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}

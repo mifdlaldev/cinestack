@@ -61,7 +61,7 @@ function LoginContent() {
         className="relative w-full max-w-md"
       >
         {/* Card */}
-        <div className="rounded-2xl border border-border bg-surface p-8 shadow-lg sm:p-10">
+        <div className="rounded-2xl glass-strong p-8 shadow-lg sm:p-10">
           {/* Branding */}
           <div className="mb-8 text-center">
             <Link

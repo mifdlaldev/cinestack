@@ -19,7 +19,7 @@ export function MovieCard({ movie, priority = false }: MovieCardProps) {
   return (
     <Link
       href={`/movies/${movie.id}`}
-      className="group block rounded-lg transition-all duration-300 hover:scale-[1.03]"
+      className="group block rounded-xl transition-all duration-500 hover:scale-[1.03] hover:bg-white/[0.03] hover:backdrop-blur-[12px]"
     >
       <div className="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-surface">
         {posterUrl ? (

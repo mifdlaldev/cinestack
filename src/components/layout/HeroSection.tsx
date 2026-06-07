@@ -44,11 +44,12 @@ export function HeroSection({ movie }: HeroSectionProps) {
       {/* Content */}
       <div className="relative z-10 mx-auto flex min-h-[70vh] max-w-[1400px] items-end px-4 pb-16 md:px-6 md:pb-24 lg:px-8">
         <motion.div
-          className="max-w-2xl"
+          className="max-w-xl"
           initial={shouldReduceMotion ? false : { opacity: 0, y: 40 }}
           animate={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
+          <div className="rounded-2xl glass-card p-6 md:p-8">
           {/* Rating + Year */}
           <div className="mb-4 flex items-center gap-4">
             <div className="flex items-center gap-1.5">
@@ -87,6 +88,7 @@ export function HeroSection({ movie }: HeroSectionProps) {
               <BookmarkPlus className="h-4 w-4" />
               Add to Watchlist
             </button>
+          </div>
           </div>
         </motion.div>
       </div>
