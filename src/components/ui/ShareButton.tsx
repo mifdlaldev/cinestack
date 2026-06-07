@@ -28,10 +28,19 @@ export function ShareButton({
   const showToast = useCallback((message: string) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast(message);
-    toastTimer.current = setTimeout(() => setToast(null), 2500);
+    toastTimer.current = setTimeout(() => {
+      setToast(null);
+      toastTimer.current = null;
+    }, 2500);
   }, []);
 
   const handleShare = useCallback(async () => {
+    // Clear any existing toast timer before triggering a new one
+    if (toastTimer.current) {
+      clearTimeout(toastTimer.current);
+      toastTimer.current = null;
+    }
+
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({ title, text, url: shareUrl });

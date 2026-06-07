@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { NewsCard } from "@/components/ui/NewsCard";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Newspaper } from "lucide-react";
 import type { NewsAuthor } from "@/types/news";
 
 export const metadata: Metadata = {
@@ -57,7 +57,7 @@ async function NewsList({ page }: { page: number }) {
   if (!articles || articles.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="mb-4 text-6xl">📰</div>
+        <Newspaper className="h-12 w-12 text-text-secondary/20" />
         <h2 className="font-display text-xl text-text">No articles yet</h2>
         <p className="mt-2 text-text-secondary">
           Check back soon for the latest movie news.

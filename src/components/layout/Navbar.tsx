@@ -180,7 +180,7 @@ export function Navbar() {
 
             <div className="mt-8 border-t border-border pt-6">
               <Link
-                href="/auth/sign-in"
+href="/login"
                 onClick={() => setMobileOpen(false)}
                 className="flex w-full items-center justify-center rounded-lg bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
               >

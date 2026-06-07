@@ -1,7 +1,45 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { checkRateLimit, getRateLimitConfig } from '@/lib/rate-limit'
 
 export async function middleware(request: NextRequest) {
+  // Check BEFORE auth to avoid unnecessary work on limited clients
+  let rateLimitResult: ReturnType<typeof checkRateLimit> | null = null
+  let rateLimitConfig: ReturnType<typeof getRateLimitConfig> | null = null
+
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      request.headers.get('x-real-ip') ??
+      'unknown'
+
+    const key = `${ip}:${request.nextUrl.pathname}`
+    rateLimitConfig = getRateLimitConfig(request.nextUrl.pathname)
+    rateLimitResult = checkRateLimit(key, rateLimitConfig)
+
+    if (!rateLimitResult.allowed) {
+      const retryAfter = Math.ceil(
+        (rateLimitResult.resetAt - Date.now()) / 1000,
+      )
+      return NextResponse.json(
+        {
+          error: {
+            code: 'RATE_LIMIT_EXCEEDED',
+            message: 'Too many requests. Please try again later.',
+          },
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(retryAfter),
+            'X-RateLimit-Limit': String(rateLimitConfig.limit),
+            'X-RateLimit-Remaining': '0',
+          },
+        },
+      )
+    }
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -14,15 +52,15 @@ export async function middleware(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
+            request.cookies.set(name, value),
           )
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           )
         },
       },
-    }
+    },
   )
 
   // Refreshes session and exchanges code for session if needed
@@ -33,7 +71,7 @@ export async function middleware(request: NextRequest) {
   // Protected routes that require authentication
   const protectedPaths = ['/watchlist', '/profile', '/admin']
   const isProtected = protectedPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
+    request.nextUrl.pathname.startsWith(path),
   )
 
   if (isProtected && !user) {
@@ -43,18 +81,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Admin routes check
-  const isAdminPath = request.nextUrl.pathname.startsWith('/admin')
-  if (isAdminPath && user) {
-    const { data: profile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (profile?.role !== 'admin') {
-      return NextResponse.redirect(new URL('/', request.url))
-    }
+  if (rateLimitResult && rateLimitConfig) {
+    supabaseResponse.headers.set(
+      'X-RateLimit-Limit',
+      String(rateLimitConfig.limit),
+    )
+    supabaseResponse.headers.set(
+      'X-RateLimit-Remaining',
+      String(rateLimitResult.remaining),
+    )
   }
 
   return supabaseResponse

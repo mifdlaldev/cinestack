@@ -10,12 +10,13 @@ import { HeroSection } from "@/components/layout/HeroSection";
 import { MovieRowWithProviders } from "@/components/ui/MovieRowWithProviders";
 import { MovieCardSkeleton } from "@/components/ui/MovieCardSkeleton";
 import { MyServicesRow } from "@/components/ui/MyServicesRow";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import {
   NewsSection,
   NewsSectionSkeleton,
 } from "@/components/ui/NewsSection";
 
-export const revalidate = 3600;
+export const revalidate = 2700;
 
 function RowSkeleton() {
   return (
@@ -103,7 +104,9 @@ export default function HomePage() {
       <div className="mx-auto max-w-[1400px] space-y-10 px-4 py-10 md:px-6 md:py-12 lg:px-8">
         {/* Smart row: available on user's streaming services */}
         <Suspense fallback={null}>
-          <MyServicesRow />
+          <ErrorBoundary fallback={null}>
+            <MyServicesRow />
+          </ErrorBoundary>
         </Suspense>
 
         <Suspense fallback={<RowSkeleton />}>

@@ -68,6 +68,9 @@ async function fetchFromTmdb<T>(
   endpoint: string,
   options?: FetchOptions,
 ): Promise<T> {
+  const MAX_RETRIES = 3;
+
+  // Build URL & common configuration (outside retry loop for efficiency).
   const url = new URL(`${TMDB_BASE_URL}${endpoint}`);
 
   // Authentication: prefer bearer token over API key query param.
@@ -86,50 +89,84 @@ async function fetchFromTmdb<T>(
     }
   }
 
-  // Build the Next.js fetch cache config.
+  // Build the Next.js fetch cache config (shared across retries).
   const fetchOptions: RequestInit & { next?: { revalidate?: number } } = {};
-
-  // Timeout signal to prevent hanging requests.
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
-  fetchOptions.signal = controller.signal;
-
   if (options?.revalidate !== undefined) {
     fetchOptions.next = { revalidate: options.revalidate };
   }
 
-  try {
-    const response = await fetch(url.toString(), {
-      headers: {
-        accept: "application/json",
-        ...headers,
-      },
-      next: fetchOptions.next,
-      signal: fetchOptions.signal,
-    });
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    // Each attempt gets its own abort controller & timeout.
+    const controller = new AbortController();
+    // Increased from 10s to 30s — TMDB can be slow under load.
+    const timeout = setTimeout(() => controller.abort(), 30_000);
 
-    if (!response.ok) {
+    try {
+      const response = await fetch(url.toString(), {
+        headers: {
+          accept: "application/json",
+          ...headers,
+        },
+        next: fetchOptions.next,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (response.ok) {
+        return (await response.json()) as T;
+      }
+
+      // ── 429 Rate Limit — backoff & retry ─────────────────────
+      if (response.status === 429) {
+        const retryAfter = parseInt(
+          response.headers.get("Retry-After") ?? "2",
+          10,
+        );
+        const waitTime = retryAfter * 1000 * Math.pow(2, attempt);
+        console.warn(
+          `[TMDB] Rate limited on ${endpoint}. ` +
+            `Retry ${attempt + 1}/${MAX_RETRIES} after ${waitTime}ms`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
+        continue;
+      }
+
+      // ── Non-429 errors — throw immediately ──────────────────
       const body = await response.text().catch(() => "");
       throw new TmdbApiError(
         `TMDB API responded with ${response.status}: ${body || response.statusText}`,
         "API_ERROR",
         response.status,
       );
-    }
+    } catch (error) {
+      clearTimeout(timeout);
 
-    return (await response.json()) as T;
-  } catch (error) {
-    if (error instanceof TmdbApiError) {
-      throw error;
+      // TmdbApiError from the non-429 path should propagate.
+      if (error instanceof TmdbApiError) {
+        throw error;
+      }
+
+      // Network / abort / transient errors — retry if attempts remain.
+      if (attempt < MAX_RETRIES - 1) {
+        const waitTime = 1000 * Math.pow(2, attempt);
+        console.warn(
+          `[TMDB] Error on ${endpoint}. ` +
+            `Retry ${attempt + 1}/${MAX_RETRIES} after ${waitTime}ms`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
+        continue;
+      }
+
+      throw new TmdbApiError(
+        `Failed to fetch TMDB: ${error instanceof Error ? error.message : "Unknown error"}`,
+        "NETWORK_ERROR",
+      );
     }
-    // Re-throw AbortError or network errors as TmdbApiError.
-    throw new TmdbApiError(
-      error instanceof Error ? error.message : "Unknown fetch error",
-      "NETWORK_ERROR",
-    );
-  } finally {
-    clearTimeout(timeout);
   }
+
+  // All retries exhausted.
+  throw new TmdbApiError("Max retries exhausted", "MAX_RETRIES");
 }
 
 // ─── Image URL helpers ──────────────────────────────────────

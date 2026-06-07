@@ -7,7 +7,7 @@ import type { TmdbPerson } from "@/types/tmdb";
 import { StaggerContainer } from "@/components/ui/StaggerContainer";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
 
-export const revalidate = 3600;
+export const revalidate = 7200;
 export const metadata: Metadata = {
   title: "Trending Actors",
   description: "Discover trending actors and actresses in the movie world.",

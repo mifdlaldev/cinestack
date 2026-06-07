@@ -3,7 +3,7 @@ import { getTopRated } from "@/lib/tmdb";
 import { getProvidersForMovies } from "@/lib/tmdb-providers";
 import { CategoryPageContent } from "@/components/ui/CategoryPageContent";
 
-export const revalidate = 3600;
+export const revalidate = 4200;
 
 export const metadata: Metadata = {
   title: "Top Rated Movies",

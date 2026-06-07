@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 const registerSchema = loginSchema.extend({

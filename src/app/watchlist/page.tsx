@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase";
 import { getMovieDetail } from "@/lib/tmdb";
+import type { TmdbMovieDetail } from "@/types/tmdb";
 import { getProvidersForMovies } from "@/lib/tmdb-providers";
 import { MovieGrid } from "@/components/ui/MovieGrid";
 import { MovieCardSkeleton } from "@/components/ui/MovieCardSkeleton";
@@ -46,23 +47,31 @@ async function WatchlistContent() {
 
   const movieIds = watchlist.map((row) => row.movie_id);
 
-  // Fetch full movie details from TMDB in parallel
-  // Limit to 20 to avoid excessive API calls
-  const batchSize = 20;
-  const batch = movieIds.slice(0, batchSize);
+  // Chunked fetching to avoid TMDB rate limits (max 5 concurrent, 500ms delay between chunks)
+  const CHUNK_SIZE = 5;
+  const movieDetails: (TmdbMovieDetail | null)[] = [];
 
-  const movies = await Promise.all(
-    batch.map(async (movieId) => {
-      try {
-        return await getMovieDetail(movieId);
-      } catch {
-        return null;
-      }
-    }),
-  );
+  for (let i = 0; i < movieIds.length; i += CHUNK_SIZE) {
+    const chunk = movieIds.slice(i, i + CHUNK_SIZE);
+    const results = await Promise.all(
+      chunk.map(async (movieId) => {
+        try {
+          return await getMovieDetail(movieId);
+        } catch {
+          return null;
+        }
+      }),
+    );
+    movieDetails.push(...results);
 
-  const validMovies = movies.filter(
-    (m) => m !== null && m !== undefined,
+    // Delay between chunks to avoid TMDB rate limits
+    if (i + CHUNK_SIZE < movieIds.length) {
+      await new Promise((r) => setTimeout(r, 500));
+    }
+  }
+
+  const validMovies = movieDetails.filter(
+    (m): m is TmdbMovieDetail => m !== null && m !== undefined,
   );
 
   if (validMovies.length === 0) {

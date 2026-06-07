@@ -7,11 +7,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, Calendar, Clock, User } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 import { createClient } from "@/lib/supabase";
 import { normalizeAuthor } from "@/types/news";
 import { ShareButton } from "@/components/ui/ShareButton";
 
-export const revalidate = 3600;
+export const revalidate = 7200;
 
 // ─── Generate metadata ───────────────────────────────────────
 
@@ -99,14 +100,34 @@ function readingTime(content: string): number {
 }
 
 function formatContent(content: string): string {
-  // Basic HTML sanitization - wrap bare text in paragraphs
-  if (!content.startsWith("<")) {
-    return content
+  const clean = DOMPurify.sanitize(content, {
+    ALLOWED_TAGS: [
+      "p",
+      "br",
+      "b",
+      "i",
+      "a",
+      "em",
+      "strong",
+      "ul",
+      "ol",
+      "li",
+      "h2",
+      "h3",
+      "img",
+      "blockquote",
+    ],
+    ALLOWED_ATTR: ["href", "src", "alt", "target", "rel", "class"],
+  });
+
+  // Wrap bare text (non-HTML) in paragraphs
+  if (!clean.startsWith("<")) {
+    return clean
       .split("\n\n")
       .map((p) => `<p>${p.replace(/\n/g, "<br/>")}</p>`)
       .join("");
   }
-  return content;
+  return clean;
 }
 
 // ─── Share Button wrapper ────────────────────────────────────

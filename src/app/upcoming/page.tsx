@@ -3,7 +3,7 @@ import { getUpcoming } from "@/lib/tmdb";
 import { getProvidersForMovies } from "@/lib/tmdb-providers";
 import { CategoryPageContent } from "@/components/ui/CategoryPageContent";
 
-export const revalidate = 3600;
+export const revalidate = 4500;
 
 export const metadata: Metadata = {
   title: "Upcoming Movies",

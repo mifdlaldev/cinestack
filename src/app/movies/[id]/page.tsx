@@ -18,6 +18,7 @@ import {
   TmdbApiError,
 } from "@/lib/tmdb";
 import { ReviewSection } from "@/components/ui/ReviewSection";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import { ShareButton } from "@/components/ui/ShareButton";
 import { WatchProvidersEnhanced } from "@/components/ui/WatchProvidersEnhanced";
@@ -33,7 +34,7 @@ import type {
 
 // ─── ISR configuration ──────────────────────────────────────
 
-export const revalidate = 3600;
+export const revalidate = 5400;
 
 // ─── Dynamic Metadata ───────────────────────────────────────
 
@@ -509,9 +510,11 @@ export default async function MovieDetailPage({
           )}
 
           {/* ── Reviews ── */}
-          <AnimatedSection>
-            <ReviewSection movieId={movieId} />
-          </AnimatedSection>
+          <ErrorBoundary fallback={<p className="text-text-secondary py-8 text-center">Reviews are currently unavailable.</p>}>
+            <AnimatedSection>
+              <ReviewSection movieId={movieId} />
+            </AnimatedSection>
+          </ErrorBoundary>
         </div>
       </div>
     );

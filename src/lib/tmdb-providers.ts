@@ -66,6 +66,11 @@ export async function getProvidersForMovies(
         result[id] = await getSingleProvider(id);
       }),
     );
+
+    // Small delay between chunks to avoid TMDB rate limits
+    if (i + chunkSize < uniqueIds.length) {
+      await new Promise((r) => setTimeout(r, 500));
+    }
   }
 
   return result;

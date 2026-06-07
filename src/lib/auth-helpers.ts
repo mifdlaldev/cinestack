@@ -107,7 +107,8 @@ export async function signOut(): Promise<void> {
   const { error } = await supabase.auth.signOut()
 
   if (error) {
-    throw new Error(error.message)
+    console.error('[auth] signOut error:', error.message)
+    return
   }
 
   const [{ revalidatePath }, { redirect }] = await Promise.all([

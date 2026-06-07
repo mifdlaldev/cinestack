@@ -5,7 +5,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Heart, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWatchlistStore } from "@/stores/watchlist-store";
@@ -26,7 +26,13 @@ export function WatchlistButton({ movieId, className }: WatchlistButtonProps) {
   const fetchWatchlist = useWatchlistStore((s) => s.fetchWatchlist);
 
   // Check auth status on mount and load watchlist if logged in
+  // Guard with ref to prevent re-running when Zustand store hydrates
+  const hasFetched = useRef(false);
+
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     async function checkAuth() {
       const supabase = createClient();
       const {
@@ -41,7 +47,7 @@ export function WatchlistButton({ movieId, className }: WatchlistButtonProps) {
       }
     }
     checkAuth();
-  }, [fetchWatchlist]);
+  }, []); // Empty deps — only run once on mount
 
   const handleToggle = useCallback(async () => {
     if (isAuthenticated === false) {

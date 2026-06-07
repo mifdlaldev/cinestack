@@ -18,7 +18,7 @@ import type {
   TmdbPersonCastMember,
 } from "@/types/tmdb";
 
-export const revalidate = 3600;
+export const revalidate = 7200;
 
 // ─── Dynamic Metadata ───────────────────────────────────────
 
