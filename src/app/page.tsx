@@ -7,7 +7,7 @@ import {
   getNowPlaying,
 } from "@/lib/tmdb";
 import { HeroSection } from "@/components/layout/HeroSection";
-import { MovieRow } from "@/components/ui/MovieRow";
+import { MovieRowWithProviders } from "@/components/ui/MovieRowWithProviders";
 import { MovieCardSkeleton } from "@/components/ui/MovieCardSkeleton";
 import { MyServicesRow } from "@/components/ui/MyServicesRow";
 import {
@@ -37,7 +37,7 @@ async function TrendingHero() {
 async function TrendingRow() {
   const data = await getTrending("week");
   return (
-    <MovieRow
+    <MovieRowWithProviders
       title="Trending Now"
       movies={data.results.slice(0, 16)}
       href="/trending"
@@ -48,7 +48,7 @@ async function TrendingRow() {
 async function PopularRow() {
   const data = await getPopular();
   return (
-    <MovieRow
+    <MovieRowWithProviders
       title="Popular"
       movies={data.results.slice(0, 16)}
       href="/popular"
@@ -59,7 +59,7 @@ async function PopularRow() {
 async function TopRatedRow() {
   const data = await getTopRated();
   return (
-    <MovieRow
+    <MovieRowWithProviders
       title="Top Rated"
       movies={data.results.slice(0, 16)}
       href="/top-rated"
@@ -70,7 +70,7 @@ async function TopRatedRow() {
 async function UpcomingRow() {
   const data = await getUpcoming();
   return (
-    <MovieRow
+    <MovieRowWithProviders
       title="Upcoming"
       movies={data.results.slice(0, 16)}
       href="/upcoming"
@@ -81,7 +81,7 @@ async function UpcomingRow() {
 async function NowPlayingRow() {
   const data = await getNowPlaying();
   return (
-    <MovieRow
+    <MovieRowWithProviders
       title="Now Playing"
       movies={data.results.slice(0, 16)}
       href="/now-playing"

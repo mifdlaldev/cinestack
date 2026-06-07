@@ -1,6 +1,8 @@
 // ─────────────────────────────────────────────────────────────
 // Watch Providers API — Batch (multiple movies)
 // GET /api/movies/providers/batch?movieIds=123,456,789
+//
+// Fetches providers in chunks of 5 to avoid TMDB rate limiting.
 // ─────────────────────────────────────────────────────────────
 
 import { NextRequest, NextResponse } from "next/server";
@@ -8,6 +10,8 @@ import { getMovieWatchProviders } from "@/lib/tmdb";
 import type { TmdbWatchProviders } from "@/types/tmdb";
 
 export const revalidate = 3600; // ISR — 1 hour
+
+const CHUNK_SIZE = 5;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -45,18 +49,21 @@ export async function GET(request: NextRequest) {
   const results: Record<number, TmdbWatchProviders | null> = {};
   let hasError = false;
 
-  // Fetch providers for each movie in parallel (limited concurrency)
-  const fetchPromises = ids.map(async (movieId) => {
-    try {
-      const data = await getMovieWatchProviders(movieId);
-      results[movieId] = data;
-    } catch {
-      results[movieId] = null;
-      hasError = true;
-    }
-  });
-
-  await Promise.all(fetchPromises);
+  // Fetch providers in chunks to avoid TMDB rate limiting
+  for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+    const chunk = ids.slice(i, i + CHUNK_SIZE);
+    await Promise.all(
+      chunk.map(async (movieId) => {
+        try {
+          const data = await getMovieWatchProviders(movieId);
+          results[movieId] = data;
+        } catch {
+          results[movieId] = null;
+          hasError = true;
+        }
+      }),
+    );
+  }
 
   const status = hasError ? 207 : 200;
   return NextResponse.json({ data: results }, { status });

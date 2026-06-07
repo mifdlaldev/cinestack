@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getMovieGenres, discoverMovies } from "@/lib/tmdb";
+import { getProvidersForMovies } from "@/lib/tmdb-providers";
 import { MovieGrid } from "@/components/ui/MovieGrid";
 import { GenrePagination } from "./pagination";
 import { ArrowLeft } from "lucide-react";
@@ -57,6 +58,10 @@ export default async function GenrePage({ params, searchParams }: Props) {
     page: currentPage,
   });
 
+  const providersMap = await getProvidersForMovies(
+    data.results.map((m) => m.id),
+  );
+
   const totalPages = Math.min(data.total_pages, 500); // TMDB caps at 500
 
   return (
@@ -84,7 +89,7 @@ export default async function GenrePage({ params, searchParams }: Props) {
       {/* Results */}
       {data.results.length > 0 ? (
         <>
-          <MovieGrid movies={data.results} />
+          <MovieGrid movies={data.results} providersMap={providersMap} />
           <GenrePagination
             currentPage={currentPage}
             totalPages={totalPages}

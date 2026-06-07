@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTrending } from "@/lib/tmdb";
+import { getProvidersForMovies } from "@/lib/tmdb-providers";
 import { CategoryPageContent } from "@/components/ui/CategoryPageContent";
 
 export const revalidate = 3600;
@@ -17,6 +18,9 @@ interface Props {
 export default async function TrendingPage({ searchParams }: Props) {
   const { page } = await searchParams;
   const data = await getTrending("week", page ? Number(page) : undefined);
+  const providersMap = await getProvidersForMovies(
+    data.results.map((m) => m.id),
+  );
 
   return (
     <CategoryPageContent
@@ -24,6 +28,7 @@ export default async function TrendingPage({ searchParams }: Props) {
       description="The movies everyone is watching right now."
       data={data}
       basePath="/trending"
+      providersMap={providersMap}
     />
   );
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { TmdbPaginatedResponse, TmdbMovie } from "@/types/tmdb";
+import type { TmdbPaginatedResponse, TmdbMovie, TmdbWatchProvider } from "@/types/tmdb";
 import { MovieGrid } from "./MovieGrid";
 
 interface CategoryPageContentProps {
@@ -7,6 +7,7 @@ interface CategoryPageContentProps {
   description: string;
   data: TmdbPaginatedResponse<TmdbMovie>;
   basePath: string;
+  providersMap?: Record<number, TmdbWatchProvider[]>;
 }
 
 export function CategoryPageContent({
@@ -14,6 +15,7 @@ export function CategoryPageContent({
   description,
   data,
   basePath,
+  providersMap,
 }: CategoryPageContentProps) {
   const { results, page, total_pages } = data;
   const maxPages = Math.min(total_pages, 500); // TMDB caps at 500
@@ -50,7 +52,7 @@ export function CategoryPageContent({
       </div>
 
       {/* Movie grid */}
-      <MovieGrid movies={results} />
+      <MovieGrid movies={results} providersMap={providersMap} />
 
       {/* Pagination */}
       <nav

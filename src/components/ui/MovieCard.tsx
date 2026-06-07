@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Star } from "lucide-react";
-import type { TmdbMovie } from "@/types/tmdb";
+import type { TmdbMovie, TmdbWatchProvider } from "@/types/tmdb";
 import { getImageUrl } from "@/lib/tmdb";
 import { MovieProviderStrip } from "@/components/ui/MovieProviderStrip";
 
@@ -9,9 +9,10 @@ import { MovieProviderStrip } from "@/components/ui/MovieProviderStrip";
 interface MovieCardProps {
   movie: TmdbMovie;
   priority?: boolean;
+  providers?: TmdbWatchProvider[];
 }
 
-export function MovieCard({ movie, priority = false }: MovieCardProps) {
+export function MovieCard({ movie, priority = false, providers }: MovieCardProps) {
   const posterUrl = getImageUrl(movie.poster_path, "w500");
   const year = movie.release_date?.slice(0, 4);
   const rating = movie.vote_average.toFixed(1);
@@ -57,7 +58,7 @@ export function MovieCard({ movie, priority = false }: MovieCardProps) {
 
       {/* Streaming provider strip */}
       <div className="mt-2">
-        <MovieProviderStrip movieId={movie.id} />
+        <MovieProviderStrip flatrate={providers ?? []} />
       </div>
     </Link>
   );

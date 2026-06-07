@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
-import type { TmdbMovie } from "@/types/tmdb";
+import type { TmdbMovie, TmdbWatchProvider } from "@/types/tmdb";
 import { MovieCard } from "./MovieCard";
 import { AnimatedSection } from "./AnimatedSection";
 
@@ -11,9 +11,10 @@ interface MovieRowProps {
   title: string;
   movies: TmdbMovie[];
   href?: string;
+  providersMap?: Record<number, TmdbWatchProvider[]>;
 }
 
-export function MovieRow({ title, movies, href }: MovieRowProps) {
+export function MovieRow({ title, movies, href, providersMap }: MovieRowProps) {
   const shouldReduceMotion = useReducedMotion();
 
   return (
@@ -68,7 +69,7 @@ export function MovieRow({ title, movies, href }: MovieRowProps) {
                   },
                 }}
               >
-                <MovieCard movie={movie} priority={i < 5} />
+                <MovieCard movie={movie} priority={i < 5} providers={providersMap?.[movie.id]} />
               </motion.div>
             ))}
           </motion.div>

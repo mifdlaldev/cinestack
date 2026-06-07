@@ -1,16 +1,17 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import type { TmdbMovie } from "@/types/tmdb";
+import type { TmdbMovie, TmdbWatchProvider } from "@/types/tmdb";
 import { MovieCard } from "./MovieCard";
 import { MovieCardSkeleton } from "./MovieCardSkeleton";
 
 interface MovieGridProps {
   movies: TmdbMovie[];
   isLoading?: boolean;
+  providersMap?: Record<number, TmdbWatchProvider[]>;
 }
 
-export function MovieGrid({ movies, isLoading }: MovieGridProps) {
+export function MovieGrid({ movies, isLoading, providersMap }: MovieGridProps) {
   const shouldReduceMotion = useReducedMotion();
 
   if (isLoading) {
@@ -54,7 +55,7 @@ export function MovieGrid({ movies, isLoading }: MovieGridProps) {
             },
           }}
         >
-          <MovieCard movie={movie} priority={i < 10} />
+          <MovieCard movie={movie} priority={i < 10} providers={providersMap?.[movie.id]} />
         </motion.div>
       ))}
     </motion.div>

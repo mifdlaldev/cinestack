@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getUpcoming } from "@/lib/tmdb";
+import { getProvidersForMovies } from "@/lib/tmdb-providers";
 import { CategoryPageContent } from "@/components/ui/CategoryPageContent";
 
 export const revalidate = 3600;
@@ -17,6 +18,9 @@ interface Props {
 export default async function UpcomingPage({ searchParams }: Props) {
   const { page } = await searchParams;
   const data = await getUpcoming(page ? Number(page) : undefined);
+  const providersMap = await getProvidersForMovies(
+    data.results.map((m) => m.id),
+  );
 
   return (
     <CategoryPageContent
@@ -24,6 +28,7 @@ export default async function UpcomingPage({ searchParams }: Props) {
       description="Movies coming soon to theaters."
       data={data}
       basePath="/upcoming"
+      providersMap={providersMap}
     />
   );
 }

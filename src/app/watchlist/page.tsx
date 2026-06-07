@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase";
 import { getMovieDetail } from "@/lib/tmdb";
+import { getProvidersForMovies } from "@/lib/tmdb-providers";
 import { MovieGrid } from "@/components/ui/MovieGrid";
 import { MovieCardSkeleton } from "@/components/ui/MovieCardSkeleton";
 import { EmptyWatchlist } from "@/components/ui/EmptyWatchlist";
@@ -68,6 +69,10 @@ async function WatchlistContent() {
     return <EmptyWatchlist />;
   }
 
+  const providersMap = await getProvidersForMovies(
+    validMovies.map((m) => m.id),
+  );
+
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-6 md:py-12 lg:px-8">
       <div className="mb-8">
@@ -79,7 +84,7 @@ async function WatchlistContent() {
         </p>
       </div>
 
-      <MovieGrid movies={validMovies} />
+      <MovieGrid movies={validMovies} providersMap={providersMap} />
     </div>
   );
 }
