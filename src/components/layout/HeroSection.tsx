@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Star, Info, BookmarkPlus } from "lucide-react";
+import { Star, Info } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { TmdbMovie } from "@/types/tmdb";
 import { getBackdropUrl } from "@/lib/tmdb";
@@ -82,12 +82,7 @@ export function HeroSection({ movie }: HeroSectionProps) {
               <Info className="h-4 w-4" />
               View Details
             </Link>
-            <button
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-medium text-text transition-all hover:bg-surface active:scale-[0.97]"
-            >
-              <BookmarkPlus className="h-4 w-4" />
-              Add to Watchlist
-            </button>
+
           </div>
           </div>
         </motion.div>

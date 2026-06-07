@@ -67,6 +67,20 @@ export async function generateMetadata({
   }
 }
 
+// ─── Static generation (ISR) ────────────────────────────────
+
+export async function generateStaticParams() {
+  try {
+    const { getPopular } = await import("@/lib/tmdb");
+    const data = await getPopular();
+    return data.results.slice(0, 20).map((movie) => ({
+      id: movie.id.toString(),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 // ─── Helper: format runtime ─────────────────────────────────
 
 function formatRuntime(minutes: number | null): string {
