@@ -29,7 +29,7 @@ const companyLinks = [
 ];
 
 const connectLinks = [
-  { label: "GitHub", href: "https://github.com", icon: GitHubIcon },
+  { label: "GitHub", href: "https://github.com/mifdlaldev/cinestack", icon: GitHubIcon },
 ];
 
 export function Footer() {
