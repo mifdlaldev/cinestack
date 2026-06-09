@@ -34,8 +34,8 @@ const contactMethods = [
   {
     icon: Code2,
     title: "GitHub",
-    value: "@cinestack",
-    href: "https://github.com",
+    value: "CineStack Repo",
+    href: "https://github.com/mifdlaldev/cinestack",
     description: "Star the repo and follow development",
   },
 
