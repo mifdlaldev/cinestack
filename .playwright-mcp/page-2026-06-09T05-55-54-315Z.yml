@@ -1,0 +1,1106 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "CineStack" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e12]:
+        - link [ref=e13] [cursor=pointer]:
+          - /url: /search
+          - img
+        - button "Open menu" [active] [ref=e967]:
+          - img
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - img "Mortal Kombat II" [ref=e983]
+      - generic [ref=e985]:
+        - generic [ref=e986]:
+          - generic [ref=e987]:
+            - img [ref=e988]
+            - generic [ref=e990]: "7.5"
+          - generic [ref=e991]: "2026"
+        - heading "Mortal Kombat II" [level=1] [ref=e992]
+        - paragraph [ref=e993]: The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.
+        - link "View Details" [ref=e995] [cursor=pointer]:
+          - /url: /movies/931285
+          - img
+          - text: View Details
+      - generic [ref=e34]:
+        - button "Go to slide 1" [ref=e35]
+        - button "Go to slide 2" [ref=e36]
+        - button "Go to slide 3" [ref=e37]
+        - button "Go to slide 4" [ref=e38]
+        - button "Go to slide 5" [ref=e39]
+    - generic [ref=e40]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - heading "Trending Now" [level=2] [ref=e44]
+          - link "View All" [ref=e45] [cursor=pointer]:
+            - /url: /trending
+            - text: View All
+            - img [ref=e46]
+        - generic [ref=e50]:
+          - link "Michael 8.0 Michael 2026" [ref=e52] [cursor=pointer]:
+            - /url: /movies/936075
+            - generic [ref=e53]:
+              - img "Michael" [ref=e54]
+              - generic [ref=e55]:
+                - img
+                - text: "8.0"
+            - generic [ref=e56]:
+              - heading "Michael" [level=3] [ref=e57]
+              - paragraph [ref=e58]: "2026"
+          - link "Obsession 7.9 Obsession 2026" [ref=e60] [cursor=pointer]:
+            - /url: /movies/1339713
+            - generic [ref=e61]:
+              - img "Obsession" [ref=e62]
+              - generic [ref=e63]:
+                - img
+                - text: "7.9"
+            - generic [ref=e64]:
+              - heading "Obsession" [level=3] [ref=e65]
+              - paragraph [ref=e66]: "2026"
+          - link "Backrooms 6.8 Backrooms 2026" [ref=e68] [cursor=pointer]:
+            - /url: /movies/1083381
+            - generic [ref=e69]:
+              - img "Backrooms" [ref=e70]
+              - generic [ref=e71]:
+                - img
+                - text: "6.8"
+            - generic [ref=e72]:
+              - heading "Backrooms" [level=3] [ref=e73]
+              - paragraph [ref=e74]: "2026"
+          - link "Mortal Kombat II 7.5 Mortal Kombat II 2026" [ref=e76] [cursor=pointer]:
+            - /url: /movies/931285
+            - generic [ref=e77]:
+              - img "Mortal Kombat II" [ref=e78]
+              - generic [ref=e79]:
+                - img
+                - text: "7.5"
+            - generic [ref=e80]:
+              - heading "Mortal Kombat II" [level=3] [ref=e81]
+              - paragraph [ref=e82]: "2026"
+          - link "Scary Movie 5.7 Scary Movie 2026" [ref=e84] [cursor=pointer]:
+            - /url: /movies/1273221
+            - generic [ref=e85]:
+              - img "Scary Movie" [ref=e86]
+              - generic [ref=e87]:
+                - img
+                - text: "5.7"
+            - generic [ref=e88]:
+              - heading "Scary Movie" [level=3] [ref=e89]
+              - paragraph [ref=e90]: "2026"
+          - link "Masters of the Universe 7.4 Masters of the Universe 2026" [ref=e92] [cursor=pointer]:
+            - /url: /movies/454639
+            - generic [ref=e93]:
+              - img "Masters of the Universe" [ref=e94]
+              - generic [ref=e95]:
+                - img
+                - text: "7.4"
+            - generic [ref=e96]:
+              - heading "Masters of the Universe" [level=3] [ref=e97]
+              - paragraph [ref=e98]: "2026"
+          - link "Disclosure Day 8.1 Disclosure Day 2026" [ref=e100] [cursor=pointer]:
+            - /url: /movies/1275779
+            - generic [ref=e101]:
+              - img "Disclosure Day" [ref=e102]
+              - generic [ref=e103]:
+                - img
+                - text: "8.1"
+            - generic [ref=e104]:
+              - heading "Disclosure Day" [level=3] [ref=e105]
+              - paragraph [ref=e106]: "2026"
+          - link "In the Grey 6.6 In the Grey 2026" [ref=e108] [cursor=pointer]:
+            - /url: /movies/1122573
+            - generic [ref=e109]:
+              - img "In the Grey" [ref=e110]
+              - generic [ref=e111]:
+                - img
+                - text: "6.6"
+            - generic [ref=e112]:
+              - heading "In the Grey" [level=3] [ref=e113]
+              - paragraph [ref=e114]: "2026"
+          - link "Hokum 6.8 Hokum 2026" [ref=e116] [cursor=pointer]:
+            - /url: /movies/1430077
+            - generic [ref=e117]:
+              - img "Hokum" [ref=e118]
+              - generic [ref=e119]:
+                - img
+                - text: "6.8"
+            - generic [ref=e120]:
+              - heading "Hokum" [level=3] [ref=e121]
+              - paragraph [ref=e122]: "2026"
+          - link "Office Romance 6.8 Office Romance 2026 Netflix Netflix Standard with Ads" [ref=e124] [cursor=pointer]:
+            - /url: /movies/1358005
+            - generic [ref=e125]:
+              - img "Office Romance" [ref=e126]
+              - generic [ref=e127]:
+                - img
+                - text: "6.8"
+            - generic [ref=e128]:
+              - heading "Office Romance" [level=3] [ref=e129]
+              - paragraph [ref=e130]: "2026"
+            - generic [ref=e132]:
+              - generic "Netflix" [ref=e133]:
+                - img "Netflix" [ref=e134]
+              - generic "Netflix Standard with Ads" [ref=e135]:
+                - img "Netflix Standard with Ads" [ref=e136]
+          - link "Hoppers 8.2 Hoppers 2026 Disney Plus" [ref=e138] [cursor=pointer]:
+            - /url: /movies/1327819
+            - generic [ref=e139]:
+              - img "Hoppers" [ref=e140]
+              - generic [ref=e141]:
+                - img
+                - text: "8.2"
+            - generic [ref=e142]:
+              - heading "Hoppers" [level=3] [ref=e143]
+              - paragraph [ref=e144]: "2026"
+            - generic "Disney Plus" [ref=e147]:
+              - img "Disney Plus" [ref=e148]
+          - link "Toy Story 5 0.0 Toy Story 5 2026" [ref=e150] [cursor=pointer]:
+            - /url: /movies/1084244
+            - generic [ref=e151]:
+              - img "Toy Story 5" [ref=e152]
+              - generic [ref=e153]:
+                - img
+                - text: "0.0"
+            - generic [ref=e154]:
+              - heading "Toy Story 5" [level=3] [ref=e155]
+              - paragraph [ref=e156]: "2026"
+          - link "Project Hail Mary 8.7 Project Hail Mary 2026" [ref=e158] [cursor=pointer]:
+            - /url: /movies/687163
+            - generic [ref=e159]:
+              - img "Project Hail Mary" [ref=e160]
+              - generic [ref=e161]:
+                - img
+                - text: "8.7"
+            - generic [ref=e162]:
+              - heading "Project Hail Mary" [level=3] [ref=e163]
+              - paragraph [ref=e164]: "2026"
+          - link "The Marked Woman 4.8 The Marked Woman 2026 Netflix Netflix Standard with Ads" [ref=e166] [cursor=pointer]:
+            - /url: /movies/1274706
+            - generic [ref=e167]:
+              - img "The Marked Woman" [ref=e168]
+              - generic [ref=e169]:
+                - img
+                - text: "4.8"
+            - generic [ref=e170]:
+              - heading "The Marked Woman" [level=3] [ref=e171]
+              - paragraph [ref=e172]: "2026"
+            - generic [ref=e174]:
+              - generic "Netflix" [ref=e175]:
+                - img "Netflix" [ref=e176]
+              - generic "Netflix Standard with Ads" [ref=e177]:
+                - img "Netflix Standard with Ads" [ref=e178]
+          - link "The Super Mario Galaxy Movie 8.2 The Super Mario Galaxy Movie 2026" [ref=e180] [cursor=pointer]:
+            - /url: /movies/1226863
+            - generic [ref=e181]:
+              - img "The Super Mario Galaxy Movie" [ref=e182]
+              - generic [ref=e183]:
+                - img
+                - text: "8.2"
+            - generic [ref=e184]:
+              - heading "The Super Mario Galaxy Movie" [level=3] [ref=e185]
+              - paragraph [ref=e186]: "2026"
+          - link "The Odyssey 0.0 The Odyssey 2026" [ref=e188] [cursor=pointer]:
+            - /url: /movies/1368337
+            - generic [ref=e189]:
+              - img "The Odyssey" [ref=e190]
+              - generic [ref=e191]:
+                - img
+                - text: "0.0"
+            - generic [ref=e192]:
+              - heading "The Odyssey" [level=3] [ref=e193]
+              - paragraph [ref=e194]: "2026"
+      - generic [ref=e197]:
+        - generic [ref=e198]:
+          - heading "Popular" [level=2] [ref=e199]
+          - link "View All" [ref=e200] [cursor=pointer]:
+            - /url: /popular
+            - text: View All
+            - img [ref=e201]
+        - generic [ref=e205]:
+          - link "Obsession 7.9 Obsession 2026" [ref=e207] [cursor=pointer]:
+            - /url: /movies/1339713
+            - generic [ref=e208]:
+              - img "Obsession" [ref=e209]
+              - generic [ref=e210]:
+                - img
+                - text: "7.9"
+            - generic [ref=e211]:
+              - heading "Obsession" [level=3] [ref=e212]
+              - paragraph [ref=e213]: "2026"
+          - link "Peddi 5.9 Peddi 2026" [ref=e215] [cursor=pointer]:
+            - /url: /movies/1057265
+            - generic [ref=e216]:
+              - img "Peddi" [ref=e217]
+              - generic [ref=e218]:
+                - img
+                - text: "5.9"
+            - generic [ref=e219]:
+              - heading "Peddi" [level=3] [ref=e220]
+              - paragraph [ref=e221]: "2026"
+          - link "Lee Cronin's The Mummy 8.1 Lee Cronin's The Mummy 2026" [ref=e223] [cursor=pointer]:
+            - /url: /movies/1304313
+            - generic [ref=e224]:
+              - img "Lee Cronin's The Mummy" [ref=e225]
+              - generic [ref=e226]:
+                - img
+                - text: "8.1"
+            - generic [ref=e227]:
+              - heading "Lee Cronin's The Mummy" [level=3] [ref=e228]
+              - paragraph [ref=e229]: "2026"
+          - link "Kara 6.3 Kara 2026 Netflix Netflix Standard with Ads" [ref=e231] [cursor=pointer]:
+            - /url: /movies/1433117
+            - generic [ref=e232]:
+              - img "Kara" [ref=e233]
+              - generic [ref=e234]:
+                - img
+                - text: "6.3"
+            - generic [ref=e235]:
+              - heading "Kara" [level=3] [ref=e236]
+              - paragraph [ref=e237]: "2026"
+            - generic [ref=e239]:
+              - generic "Netflix" [ref=e240]:
+                - img "Netflix" [ref=e241]
+              - generic "Netflix Standard with Ads" [ref=e242]:
+                - img "Netflix Standard with Ads" [ref=e243]
+          - link "The Mandalorian and Grogu 6.8 The Mandalorian and Grogu 2026" [ref=e245] [cursor=pointer]:
+            - /url: /movies/1228710
+            - generic [ref=e246]:
+              - img "The Mandalorian and Grogu" [ref=e247]
+              - generic [ref=e248]:
+                - img
+                - text: "6.8"
+            - generic [ref=e249]:
+              - heading "The Mandalorian and Grogu" [level=3] [ref=e250]
+              - paragraph [ref=e251]: "2026"
+          - link "The Super Mario Galaxy Movie 8.2 The Super Mario Galaxy Movie 2026" [ref=e253] [cursor=pointer]:
+            - /url: /movies/1226863
+            - generic [ref=e254]:
+              - img "The Super Mario Galaxy Movie" [ref=e255]
+              - generic [ref=e256]:
+                - img
+                - text: "8.2"
+            - generic [ref=e257]:
+              - heading "The Super Mario Galaxy Movie" [level=3] [ref=e258]
+              - paragraph [ref=e259]: "2026"
+          - link "Hai Jawani Toh Ishq Hona Hai 5.3 Hai Jawani Toh Ishq Hona Hai 2026" [ref=e261] [cursor=pointer]:
+            - /url: /movies/1308553
+            - generic [ref=e262]:
+              - img "Hai Jawani Toh Ishq Hona Hai" [ref=e263]
+              - generic [ref=e264]:
+                - img
+                - text: "5.3"
+            - generic [ref=e265]:
+              - heading "Hai Jawani Toh Ishq Hona Hai" [level=3] [ref=e266]
+              - paragraph [ref=e267]: "2026"
+          - link "In the Grey 6.6 In the Grey 2026" [ref=e269] [cursor=pointer]:
+            - /url: /movies/1122573
+            - generic [ref=e270]:
+              - img "In the Grey" [ref=e271]
+              - generic [ref=e272]:
+                - img
+                - text: "6.6"
+            - generic [ref=e273]:
+              - heading "In the Grey" [level=3] [ref=e274]
+              - paragraph [ref=e275]: "2026"
+          - link "Project Hail Mary 8.7 Project Hail Mary 2026" [ref=e277] [cursor=pointer]:
+            - /url: /movies/687163
+            - generic [ref=e278]:
+              - img "Project Hail Mary" [ref=e279]
+              - generic [ref=e280]:
+                - img
+                - text: "8.7"
+            - generic [ref=e281]:
+              - heading "Project Hail Mary" [level=3] [ref=e282]
+              - paragraph [ref=e283]: "2026"
+          - 'link "The Punisher: One Last Kill 8.4 The Punisher: One Last Kill 2026 Disney Plus" [ref=e285] [cursor=pointer]':
+            - /url: /movies/1439930
+            - generic [ref=e286]:
+              - 'img "The Punisher: One Last Kill" [ref=e287]'
+              - generic [ref=e288]:
+                - img
+                - text: "8.4"
+            - generic [ref=e289]:
+              - 'heading "The Punisher: One Last Kill" [level=3] [ref=e290]'
+              - paragraph [ref=e291]: "2026"
+            - generic "Disney Plus" [ref=e294]:
+              - img "Disney Plus" [ref=e295]
+          - link "Masters of the Universe 7.3 Masters of the Universe 2026" [ref=e297] [cursor=pointer]:
+            - /url: /movies/454639
+            - generic [ref=e298]:
+              - img "Masters of the Universe" [ref=e299]
+              - generic [ref=e300]:
+                - img
+                - text: "7.3"
+            - generic [ref=e301]:
+              - heading "Masters of the Universe" [level=3] [ref=e302]
+              - paragraph [ref=e303]: "2026"
+          - 'link "Tom Clancy''s Jack Ryan: Ghost War 7.1 Tom Clancy''s Jack Ryan: Ghost War 2026 Amazon Prime Video Amazon Prime Video with Ads" [ref=e305] [cursor=pointer]':
+            - /url: /movies/1380291
+            - generic [ref=e306]:
+              - 'img "Tom Clancy''s Jack Ryan: Ghost War" [ref=e307]'
+              - generic [ref=e308]:
+                - img
+                - text: "7.1"
+            - generic [ref=e309]:
+              - 'heading "Tom Clancy''s Jack Ryan: Ghost War" [level=3] [ref=e310]'
+              - paragraph [ref=e311]: "2026"
+            - generic [ref=e313]:
+              - generic "Amazon Prime Video" [ref=e314]:
+                - img "Amazon Prime Video" [ref=e315]
+              - generic "Amazon Prime Video with Ads" [ref=e316]:
+                - img "Amazon Prime Video with Ads" [ref=e317]
+          - link "Office Romance 6.7 Office Romance 2026 Netflix Netflix Standard with Ads" [ref=e319] [cursor=pointer]:
+            - /url: /movies/1358005
+            - generic [ref=e320]:
+              - img "Office Romance" [ref=e321]
+              - generic [ref=e322]:
+                - img
+                - text: "6.7"
+            - generic [ref=e323]:
+              - heading "Office Romance" [level=3] [ref=e324]
+              - paragraph [ref=e325]: "2026"
+            - generic [ref=e327]:
+              - generic "Netflix" [ref=e328]:
+                - img "Netflix" [ref=e329]
+              - generic "Netflix Standard with Ads" [ref=e330]:
+                - img "Netflix Standard with Ads" [ref=e331]
+          - link "Backrooms 6.8 Backrooms 2026" [ref=e333] [cursor=pointer]:
+            - /url: /movies/1083381
+            - generic [ref=e334]:
+              - img "Backrooms" [ref=e335]
+              - generic [ref=e336]:
+                - img
+                - text: "6.8"
+            - generic [ref=e337]:
+              - heading "Backrooms" [level=3] [ref=e338]
+              - paragraph [ref=e339]: "2026"
+          - link "Your Heart Will Be Broken 6.8 Your Heart Will Be Broken 2026" [ref=e341] [cursor=pointer]:
+            - /url: /movies/1523145
+            - generic [ref=e342]:
+              - img "Your Heart Will Be Broken" [ref=e343]
+              - generic [ref=e344]:
+                - img
+                - text: "6.8"
+            - generic [ref=e345]:
+              - heading "Your Heart Will Be Broken" [level=3] [ref=e346]
+              - paragraph [ref=e347]: "2026"
+          - link "Swapped 9.0 Swapped 2026 Netflix Netflix Standard with Ads" [ref=e349] [cursor=pointer]:
+            - /url: /movies/1007757
+            - generic [ref=e350]:
+              - img "Swapped" [ref=e351]
+              - generic [ref=e352]:
+                - img
+                - text: "9.0"
+            - generic [ref=e353]:
+              - heading "Swapped" [level=3] [ref=e354]
+              - paragraph [ref=e355]: "2026"
+            - generic [ref=e357]:
+              - generic "Netflix" [ref=e358]:
+                - img "Netflix" [ref=e359]
+              - generic "Netflix Standard with Ads" [ref=e360]:
+                - img "Netflix Standard with Ads" [ref=e361]
+      - generic [ref=e364]:
+        - generic [ref=e365]:
+          - heading "Top Rated" [level=2] [ref=e366]
+          - link "View All" [ref=e367] [cursor=pointer]:
+            - /url: /top-rated
+            - text: View All
+            - img [ref=e368]
+        - generic [ref=e372]:
+          - link "Swapped 9.0 Swapped 2026 Netflix Netflix Standard with Ads" [ref=e374] [cursor=pointer]:
+            - /url: /movies/1007757
+            - generic [ref=e375]:
+              - img "Swapped" [ref=e376]
+              - generic [ref=e377]:
+                - img
+                - text: "9.0"
+            - generic [ref=e378]:
+              - heading "Swapped" [level=3] [ref=e379]
+              - paragraph [ref=e380]: "2026"
+            - generic [ref=e382]:
+              - generic "Netflix" [ref=e383]:
+                - img "Netflix" [ref=e384]
+              - generic "Netflix Standard with Ads" [ref=e385]:
+                - img "Netflix Standard with Ads" [ref=e386]
+          - link "The Shawshank Redemption 8.7 The Shawshank Redemption 1994 AMC+ Roku Premium Channel YouTube TV" [ref=e388] [cursor=pointer]:
+            - /url: /movies/278
+            - generic [ref=e389]:
+              - img "The Shawshank Redemption" [ref=e390]
+              - generic [ref=e391]:
+                - img
+                - text: "8.7"
+            - generic [ref=e392]:
+              - heading "The Shawshank Redemption" [level=3] [ref=e393]
+              - paragraph [ref=e394]: "1994"
+            - generic [ref=e396]:
+              - generic "AMC+ Roku Premium Channel" [ref=e397]:
+                - img "AMC+ Roku Premium Channel" [ref=e398]
+              - generic "YouTube TV" [ref=e399]:
+                - img "YouTube TV" [ref=e400]
+          - link "The Godfather 8.7 The Godfather 1972 fuboTV Paramount Plus Premium Paramount+ Amazon Channel YouTube TV" [ref=e402] [cursor=pointer]:
+            - /url: /movies/238
+            - generic [ref=e403]:
+              - img "The Godfather" [ref=e404]
+              - generic [ref=e405]:
+                - img
+                - text: "8.7"
+            - generic [ref=e406]:
+              - heading "The Godfather" [level=3] [ref=e407]
+              - paragraph [ref=e408]: "1972"
+            - generic [ref=e410]:
+              - generic "fuboTV" [ref=e411]:
+                - img "fuboTV" [ref=e412]
+              - generic "Paramount Plus Premium" [ref=e413]:
+                - img "Paramount Plus Premium" [ref=e414]
+              - generic "Paramount+ Amazon Channel" [ref=e415]:
+                - img "Paramount+ Amazon Channel" [ref=e416]
+              - generic "YouTube TV" [ref=e417]:
+                - img "YouTube TV" [ref=e418]
+          - link "Project Hail Mary 8.7 Project Hail Mary 2026" [ref=e420] [cursor=pointer]:
+            - /url: /movies/687163
+            - generic [ref=e421]:
+              - img "Project Hail Mary" [ref=e422]
+              - generic [ref=e423]:
+                - img
+                - text: "8.7"
+            - generic [ref=e424]:
+              - heading "Project Hail Mary" [level=3] [ref=e425]
+              - paragraph [ref=e426]: "2026"
+          - link "The Godfather Part II 8.6 The Godfather Part II 1974 fuboTV Paramount Plus Premium Paramount+ Amazon Channel YouTube TV" [ref=e428] [cursor=pointer]:
+            - /url: /movies/240
+            - generic [ref=e429]:
+              - img "The Godfather Part II" [ref=e430]
+              - generic [ref=e431]:
+                - img
+                - text: "8.6"
+            - generic [ref=e432]:
+              - heading "The Godfather Part II" [level=3] [ref=e433]
+              - paragraph [ref=e434]: "1974"
+            - generic [ref=e436]:
+              - generic "fuboTV" [ref=e437]:
+                - img "fuboTV" [ref=e438]
+              - generic "Paramount Plus Premium" [ref=e439]:
+                - img "Paramount Plus Premium" [ref=e440]
+              - generic "Paramount+ Amazon Channel" [ref=e441]:
+                - img "Paramount+ Amazon Channel" [ref=e442]
+              - generic "YouTube TV" [ref=e443]:
+                - img "YouTube TV" [ref=e444]
+          - link "Schindler's List 8.6 Schindler's List 1993 Netflix Netflix Standard with Ads" [ref=e446] [cursor=pointer]:
+            - /url: /movies/424
+            - generic [ref=e447]:
+              - img "Schindler's List" [ref=e448]
+              - generic [ref=e449]:
+                - img
+                - text: "8.6"
+            - generic [ref=e450]:
+              - heading "Schindler's List" [level=3] [ref=e451]
+              - paragraph [ref=e452]: "1993"
+            - generic [ref=e454]:
+              - generic "Netflix" [ref=e455]:
+                - img "Netflix" [ref=e456]
+              - generic "Netflix Standard with Ads" [ref=e457]:
+                - img "Netflix Standard with Ads" [ref=e458]
+          - link "Remarkably Bright Creatures 8.6 Remarkably Bright Creatures 2026 Netflix Netflix Standard with Ads" [ref=e460] [cursor=pointer]:
+            - /url: /movies/1330021
+            - generic [ref=e461]:
+              - img "Remarkably Bright Creatures" [ref=e462]
+              - generic [ref=e463]:
+                - img
+                - text: "8.6"
+            - generic [ref=e464]:
+              - heading "Remarkably Bright Creatures" [level=3] [ref=e465]
+              - paragraph [ref=e466]: "2026"
+            - generic [ref=e468]:
+              - generic "Netflix" [ref=e469]:
+                - img "Netflix" [ref=e470]
+              - generic "Netflix Standard with Ads" [ref=e471]:
+                - img "Netflix Standard with Ads" [ref=e472]
+          - link "12 Angry Men 8.6 12 Angry Men 1957 Amazon Prime Video Amazon Prime Video with Ads" [ref=e474] [cursor=pointer]:
+            - /url: /movies/389
+            - generic [ref=e475]:
+              - img "12 Angry Men" [ref=e476]
+              - generic [ref=e477]:
+                - img
+                - text: "8.6"
+            - generic [ref=e478]:
+              - heading "12 Angry Men" [level=3] [ref=e479]
+              - paragraph [ref=e480]: "1957"
+            - generic [ref=e482]:
+              - generic "Amazon Prime Video" [ref=e483]:
+                - img "Amazon Prime Video" [ref=e484]
+              - generic "Amazon Prime Video with Ads" [ref=e485]:
+                - img "Amazon Prime Video with Ads" [ref=e486]
+          - link "Spirited Away 8.5 Spirited Away 2001 HBO Max Amazon Channel HBO Max" [ref=e488] [cursor=pointer]:
+            - /url: /movies/129
+            - generic [ref=e489]:
+              - img "Spirited Away" [ref=e490]
+              - generic [ref=e491]:
+                - img
+                - text: "8.5"
+            - generic [ref=e492]:
+              - heading "Spirited Away" [level=3] [ref=e493]
+              - paragraph [ref=e494]: "2001"
+            - generic [ref=e496]:
+              - generic "HBO Max Amazon Channel" [ref=e497]:
+                - img "HBO Max Amazon Channel" [ref=e498]
+              - generic "HBO Max" [ref=e499]:
+                - img "HBO Max" [ref=e500]
+          - link "The Dark Knight 8.5 The Dark Knight 2008 HBO Max Amazon Channel HBO Max" [ref=e502] [cursor=pointer]:
+            - /url: /movies/155
+            - generic [ref=e503]:
+              - img "The Dark Knight" [ref=e504]
+              - generic [ref=e505]:
+                - img
+                - text: "8.5"
+            - generic [ref=e506]:
+              - heading "The Dark Knight" [level=3] [ref=e507]
+              - paragraph [ref=e508]: "2008"
+            - generic [ref=e510]:
+              - generic "HBO Max Amazon Channel" [ref=e511]:
+                - img "HBO Max Amazon Channel" [ref=e512]
+              - generic "HBO Max" [ref=e513]:
+                - img "HBO Max" [ref=e514]
+          - link "Dilwale Dulhania Le Jayenge 8.5 Dilwale Dulhania Le Jayenge 1995 Netflix Netflix Standard with Ads" [ref=e516] [cursor=pointer]:
+            - /url: /movies/19404
+            - generic [ref=e517]:
+              - img "Dilwale Dulhania Le Jayenge" [ref=e518]
+              - generic [ref=e519]:
+                - img
+                - text: "8.5"
+            - generic [ref=e520]:
+              - heading "Dilwale Dulhania Le Jayenge" [level=3] [ref=e521]
+              - paragraph [ref=e522]: "1995"
+            - generic [ref=e524]:
+              - generic "Netflix" [ref=e525]:
+                - img "Netflix" [ref=e526]
+              - generic "Netflix Standard with Ads" [ref=e527]:
+                - img "Netflix Standard with Ads" [ref=e528]
+          - link "The Green Mile 8.5 The Green Mile 1999 YouTube TV" [ref=e530] [cursor=pointer]:
+            - /url: /movies/497
+            - generic [ref=e531]:
+              - img "The Green Mile" [ref=e532]
+              - generic [ref=e533]:
+                - img
+                - text: "8.5"
+            - generic [ref=e534]:
+              - heading "The Green Mile" [level=3] [ref=e535]
+              - paragraph [ref=e536]: "1999"
+            - generic "YouTube TV" [ref=e539]:
+              - img "YouTube TV" [ref=e540]
+          - 'link "The Lord of the Rings: The Return of the King 8.5 The Lord of the Rings: The Return of the King 2003 HBO Max Amazon Channel HBO Max" [ref=e542] [cursor=pointer]':
+            - /url: /movies/122
+            - generic [ref=e543]:
+              - 'img "The Lord of the Rings: The Return of the King" [ref=e544]'
+              - generic [ref=e545]:
+                - img
+                - text: "8.5"
+            - generic [ref=e546]:
+              - 'heading "The Lord of the Rings: The Return of the King" [level=3] [ref=e547]'
+              - paragraph [ref=e548]: "2003"
+            - generic [ref=e550]:
+              - generic "HBO Max Amazon Channel" [ref=e551]:
+                - img "HBO Max Amazon Channel" [ref=e552]
+              - generic "HBO Max" [ref=e553]:
+                - img "HBO Max" [ref=e554]
+          - link "Parasite 8.5 Parasite 2019" [ref=e556] [cursor=pointer]:
+            - /url: /movies/496243
+            - generic [ref=e557]:
+              - img "Parasite" [ref=e558]
+              - generic [ref=e559]:
+                - img
+                - text: "8.5"
+            - generic [ref=e560]:
+              - heading "Parasite" [level=3] [ref=e561]
+              - paragraph [ref=e562]: "2019"
+          - link "¿Quieres ser mi hijo? 8.5 ¿Quieres ser mi hijo? 2023 ViX Premium Amazon Channel" [ref=e564] [cursor=pointer]:
+            - /url: /movies/1181678
+            - generic [ref=e565]:
+              - img "¿Quieres ser mi hijo?" [ref=e566]
+              - generic [ref=e567]:
+                - img
+                - text: "8.5"
+            - generic [ref=e568]:
+              - heading "¿Quieres ser mi hijo?" [level=3] [ref=e569]
+              - paragraph [ref=e570]: "2023"
+            - generic "ViX Premium Amazon Channel" [ref=e573]:
+              - img "ViX Premium Amazon Channel" [ref=e574]
+          - link "Pulp Fiction 8.5 Pulp Fiction 1994 Paramount Plus Premium Paramount Plus Essential Paramount+ Amazon Channel MGM Plus" [ref=e576] [cursor=pointer]:
+            - /url: /movies/680
+            - generic [ref=e577]:
+              - img "Pulp Fiction" [ref=e578]
+              - generic [ref=e579]:
+                - img
+                - text: "8.5"
+            - generic [ref=e580]:
+              - heading "Pulp Fiction" [level=3] [ref=e581]
+              - paragraph [ref=e582]: "1994"
+            - generic [ref=e584]:
+              - generic "Paramount Plus Premium" [ref=e585]:
+                - img "Paramount Plus Premium" [ref=e586]
+              - generic "Paramount Plus Essential" [ref=e587]:
+                - img "Paramount Plus Essential" [ref=e588]
+              - generic "Paramount+ Amazon Channel" [ref=e589]:
+                - img "Paramount+ Amazon Channel" [ref=e590]
+              - generic "MGM Plus" [ref=e591]:
+                - img "MGM Plus" [ref=e592]
+      - generic [ref=e595]:
+        - generic [ref=e596]:
+          - heading "Upcoming" [level=2] [ref=e597]
+          - link "View All" [ref=e598] [cursor=pointer]:
+            - /url: /upcoming
+            - text: View All
+            - img [ref=e599]
+        - generic [ref=e603]:
+          - link "Obsession 7.9 Obsession 2026" [ref=e605] [cursor=pointer]:
+            - /url: /movies/1339713
+            - generic [ref=e606]:
+              - img "Obsession" [ref=e607]
+              - generic [ref=e608]:
+                - img
+                - text: "7.9"
+            - generic [ref=e609]:
+              - heading "Obsession" [level=3] [ref=e610]
+              - paragraph [ref=e611]: "2026"
+          - link "Peddi 5.9 Peddi 2026" [ref=e613] [cursor=pointer]:
+            - /url: /movies/1057265
+            - generic [ref=e614]:
+              - img "Peddi" [ref=e615]
+              - generic [ref=e616]:
+                - img
+                - text: "5.9"
+            - generic [ref=e617]:
+              - heading "Peddi" [level=3] [ref=e618]
+              - paragraph [ref=e619]: "2026"
+          - link "In the Grey 6.6 In the Grey 2026" [ref=e621] [cursor=pointer]:
+            - /url: /movies/1122573
+            - generic [ref=e622]:
+              - img "In the Grey" [ref=e623]
+              - generic [ref=e624]:
+                - img
+                - text: "6.6"
+            - generic [ref=e625]:
+              - heading "In the Grey" [level=3] [ref=e626]
+              - paragraph [ref=e627]: "2026"
+          - link "Masters of the Universe 7.3 Masters of the Universe 2026" [ref=e629] [cursor=pointer]:
+            - /url: /movies/454639
+            - generic [ref=e630]:
+              - img "Masters of the Universe" [ref=e631]
+              - generic [ref=e632]:
+                - img
+                - text: "7.3"
+            - generic [ref=e633]:
+              - heading "Masters of the Universe" [level=3] [ref=e634]
+              - paragraph [ref=e635]: "2026"
+          - link "Backrooms 6.9 Backrooms 2026" [ref=e637] [cursor=pointer]:
+            - /url: /movies/1083381
+            - generic [ref=e638]:
+              - img "Backrooms" [ref=e639]
+              - generic [ref=e640]:
+                - img
+                - text: "6.9"
+            - generic [ref=e641]:
+              - heading "Backrooms" [level=3] [ref=e642]
+              - paragraph [ref=e643]: "2026"
+          - link "Hokum 6.8 Hokum 2026" [ref=e645] [cursor=pointer]:
+            - /url: /movies/1430077
+            - generic [ref=e646]:
+              - img "Hokum" [ref=e647]
+              - generic [ref=e648]:
+                - img
+                - text: "6.8"
+            - generic [ref=e649]:
+              - heading "Hokum" [level=3] [ref=e650]
+              - paragraph [ref=e651]: "2026"
+          - link "Scary Movie 5.8 Scary Movie 2026" [ref=e653] [cursor=pointer]:
+            - /url: /movies/1273221
+            - generic [ref=e654]:
+              - img "Scary Movie" [ref=e655]
+              - generic [ref=e656]:
+                - img
+                - text: "5.8"
+            - generic [ref=e657]:
+              - heading "Scary Movie" [level=3] [ref=e658]
+              - paragraph [ref=e659]: "2026"
+          - 'link "Demon Slayer: Kimetsu no Yaiba Infinity Castle 7.7 Demon Slayer: Kimetsu no Yaiba Infinity Castle 2025" [ref=e661] [cursor=pointer]':
+            - /url: /movies/1311031
+            - generic [ref=e662]:
+              - 'img "Demon Slayer: Kimetsu no Yaiba Infinity Castle" [ref=e663]'
+              - generic [ref=e664]:
+                - img
+                - text: "7.7"
+            - generic [ref=e665]:
+              - 'heading "Demon Slayer: Kimetsu no Yaiba Infinity Castle" [level=3] [ref=e666]'
+              - paragraph [ref=e667]: "2025"
+          - link "Michael 7.7 Michael 2026" [ref=e669] [cursor=pointer]:
+            - /url: /movies/936075
+            - generic [ref=e670]:
+              - img "Michael" [ref=e671]
+              - generic [ref=e672]:
+                - img
+                - text: "7.7"
+            - generic [ref=e673]:
+              - heading "Michael" [level=3] [ref=e674]
+              - paragraph [ref=e675]: "2026"
+          - 'link "Greenland 2: Migration 6.4 Greenland 2: Migration 2026 HBO Max Amazon Channel HBO Max" [ref=e677] [cursor=pointer]':
+            - /url: /movies/840464
+            - generic [ref=e678]:
+              - 'img "Greenland 2: Migration" [ref=e679]'
+              - generic [ref=e680]:
+                - img
+                - text: "6.4"
+            - generic [ref=e681]:
+              - 'heading "Greenland 2: Migration" [level=3] [ref=e682]'
+              - paragraph [ref=e683]: "2026"
+            - generic [ref=e685]:
+              - generic "HBO Max Amazon Channel" [ref=e686]:
+                - img "HBO Max Amazon Channel" [ref=e687]
+              - generic "HBO Max" [ref=e688]:
+                - img "HBO Max" [ref=e689]
+          - link "Disclosure Day 8.1 Disclosure Day 2026" [ref=e691] [cursor=pointer]:
+            - /url: /movies/1275779
+            - generic [ref=e692]:
+              - img "Disclosure Day" [ref=e693]
+              - generic [ref=e694]:
+                - img
+                - text: "8.1"
+            - generic [ref=e695]:
+              - heading "Disclosure Day" [level=3] [ref=e696]
+              - paragraph [ref=e697]: "2026"
+          - link "The Furious 0.0 The Furious 2026" [ref=e699] [cursor=pointer]:
+            - /url: /movies/1280738
+            - generic [ref=e700]:
+              - img "The Furious" [ref=e701]
+              - generic [ref=e702]:
+                - img
+                - text: "0.0"
+            - generic [ref=e703]:
+              - heading "The Furious" [level=3] [ref=e704]
+              - paragraph [ref=e705]: "2026"
+          - link "Kraken 6.3 Kraken 2026" [ref=e707] [cursor=pointer]:
+            - /url: /movies/1110034
+            - generic [ref=e708]:
+              - img "Kraken" [ref=e709]
+              - generic [ref=e710]:
+                - img
+                - text: "6.3"
+            - generic [ref=e711]:
+              - heading "Kraken" [level=3] [ref=e712]
+              - paragraph [ref=e713]: "2026"
+          - link "Scream 7 6.2 Scream 7 2026 Paramount Plus Premium Paramount Plus Essential Paramount+ Amazon Channel" [ref=e715] [cursor=pointer]:
+            - /url: /movies/1159559
+            - generic [ref=e716]:
+              - img "Scream 7" [ref=e717]
+              - generic [ref=e718]:
+                - img
+                - text: "6.2"
+            - generic [ref=e719]:
+              - heading "Scream 7" [level=3] [ref=e720]
+              - paragraph [ref=e721]: "2026"
+            - generic [ref=e723]:
+              - generic "Paramount Plus Premium" [ref=e724]:
+                - img "Paramount Plus Premium" [ref=e725]
+              - generic "Paramount Plus Essential" [ref=e726]:
+                - img "Paramount Plus Essential" [ref=e727]
+              - generic "Paramount+ Amazon Channel" [ref=e728]:
+                - img "Paramount+ Amazon Channel" [ref=e729]
+          - link "Toy Story 5 0.0 Toy Story 5 2026" [ref=e731] [cursor=pointer]:
+            - /url: /movies/1084244
+            - generic [ref=e732]:
+              - img "Toy Story 5" [ref=e733]
+              - generic [ref=e734]:
+                - img
+                - text: "0.0"
+            - generic [ref=e735]:
+              - heading "Toy Story 5" [level=3] [ref=e736]
+              - paragraph [ref=e737]: "2026"
+          - link "Colony 6.8 Colony 2026" [ref=e739] [cursor=pointer]:
+            - /url: /movies/1375646
+            - generic [ref=e740]:
+              - img "Colony" [ref=e741]
+              - generic [ref=e742]:
+                - img
+                - text: "6.8"
+            - generic [ref=e743]:
+              - heading "Colony" [level=3] [ref=e744]
+              - paragraph [ref=e745]: "2026"
+      - generic [ref=e748]:
+        - generic [ref=e749]:
+          - heading "Now Playing" [level=2] [ref=e750]
+          - link "View All" [ref=e751] [cursor=pointer]:
+            - /url: /now-playing
+            - text: View All
+            - img [ref=e752]
+        - generic [ref=e756]:
+          - link "Obsession 7.9 Obsession 2026" [ref=e758] [cursor=pointer]:
+            - /url: /movies/1339713
+            - generic [ref=e759]:
+              - img "Obsession" [ref=e760]
+              - generic [ref=e761]:
+                - img
+                - text: "7.9"
+            - generic [ref=e762]:
+              - heading "Obsession" [level=3] [ref=e763]
+              - paragraph [ref=e764]: "2026"
+          - link "Peddi 5.9 Peddi 2026" [ref=e766] [cursor=pointer]:
+            - /url: /movies/1057265
+            - generic [ref=e767]:
+              - img "Peddi" [ref=e768]
+              - generic [ref=e769]:
+                - img
+                - text: "5.9"
+            - generic [ref=e770]:
+              - heading "Peddi" [level=3] [ref=e771]
+              - paragraph [ref=e772]: "2026"
+          - link "Lee Cronin's The Mummy 8.1 Lee Cronin's The Mummy 2026" [ref=e774] [cursor=pointer]:
+            - /url: /movies/1304313
+            - generic [ref=e775]:
+              - img "Lee Cronin's The Mummy" [ref=e776]
+              - generic [ref=e777]:
+                - img
+                - text: "8.1"
+            - generic [ref=e778]:
+              - heading "Lee Cronin's The Mummy" [level=3] [ref=e779]
+              - paragraph [ref=e780]: "2026"
+          - link "Kara 6.3 Kara 2026 Netflix Netflix Standard with Ads" [ref=e782] [cursor=pointer]:
+            - /url: /movies/1433117
+            - generic [ref=e783]:
+              - img "Kara" [ref=e784]
+              - generic [ref=e785]:
+                - img
+                - text: "6.3"
+            - generic [ref=e786]:
+              - heading "Kara" [level=3] [ref=e787]
+              - paragraph [ref=e788]: "2026"
+            - generic [ref=e790]:
+              - generic "Netflix" [ref=e791]:
+                - img "Netflix" [ref=e792]
+              - generic "Netflix Standard with Ads" [ref=e793]:
+                - img "Netflix Standard with Ads" [ref=e794]
+          - link "The Mandalorian and Grogu 6.8 The Mandalorian and Grogu 2026" [ref=e796] [cursor=pointer]:
+            - /url: /movies/1228710
+            - generic [ref=e797]:
+              - img "The Mandalorian and Grogu" [ref=e798]
+              - generic [ref=e799]:
+                - img
+                - text: "6.8"
+            - generic [ref=e800]:
+              - heading "The Mandalorian and Grogu" [level=3] [ref=e801]
+              - paragraph [ref=e802]: "2026"
+          - link "The Super Mario Galaxy Movie 8.2 The Super Mario Galaxy Movie 2026" [ref=e804] [cursor=pointer]:
+            - /url: /movies/1226863
+            - generic [ref=e805]:
+              - img "The Super Mario Galaxy Movie" [ref=e806]
+              - generic [ref=e807]:
+                - img
+                - text: "8.2"
+            - generic [ref=e808]:
+              - heading "The Super Mario Galaxy Movie" [level=3] [ref=e809]
+              - paragraph [ref=e810]: "2026"
+          - link "Hai Jawani Toh Ishq Hona Hai 5.3 Hai Jawani Toh Ishq Hona Hai 2026" [ref=e812] [cursor=pointer]:
+            - /url: /movies/1308553
+            - generic [ref=e813]:
+              - img "Hai Jawani Toh Ishq Hona Hai" [ref=e814]
+              - generic [ref=e815]:
+                - img
+                - text: "5.3"
+            - generic [ref=e816]:
+              - heading "Hai Jawani Toh Ishq Hona Hai" [level=3] [ref=e817]
+              - paragraph [ref=e818]: "2026"
+          - link "In the Grey 6.6 In the Grey 2026" [ref=e820] [cursor=pointer]:
+            - /url: /movies/1122573
+            - generic [ref=e821]:
+              - img "In the Grey" [ref=e822]
+              - generic [ref=e823]:
+                - img
+                - text: "6.6"
+            - generic [ref=e824]:
+              - heading "In the Grey" [level=3] [ref=e825]
+              - paragraph [ref=e826]: "2026"
+          - 'link "The Punisher: One Last Kill 8.4 The Punisher: One Last Kill 2026 Disney Plus" [ref=e828] [cursor=pointer]':
+            - /url: /movies/1439930
+            - generic [ref=e829]:
+              - 'img "The Punisher: One Last Kill" [ref=e830]'
+              - generic [ref=e831]:
+                - img
+                - text: "8.4"
+            - generic [ref=e832]:
+              - 'heading "The Punisher: One Last Kill" [level=3] [ref=e833]'
+              - paragraph [ref=e834]: "2026"
+            - generic "Disney Plus" [ref=e837]:
+              - img "Disney Plus" [ref=e838]
+          - link "Masters of the Universe 7.3 Masters of the Universe 2026" [ref=e840] [cursor=pointer]:
+            - /url: /movies/454639
+            - generic [ref=e841]:
+              - img "Masters of the Universe" [ref=e842]
+              - generic [ref=e843]:
+                - img
+                - text: "7.3"
+            - generic [ref=e844]:
+              - heading "Masters of the Universe" [level=3] [ref=e845]
+              - paragraph [ref=e846]: "2026"
+          - 'link "Tom Clancy''s Jack Ryan: Ghost War 7.1 Tom Clancy''s Jack Ryan: Ghost War 2026 Amazon Prime Video Amazon Prime Video with Ads" [ref=e848] [cursor=pointer]':
+            - /url: /movies/1380291
+            - generic [ref=e849]:
+              - 'img "Tom Clancy''s Jack Ryan: Ghost War" [ref=e850]'
+              - generic [ref=e851]:
+                - img
+                - text: "7.1"
+            - generic [ref=e852]:
+              - 'heading "Tom Clancy''s Jack Ryan: Ghost War" [level=3] [ref=e853]'
+              - paragraph [ref=e854]: "2026"
+            - generic [ref=e856]:
+              - generic "Amazon Prime Video" [ref=e857]:
+                - img "Amazon Prime Video" [ref=e858]
+              - generic "Amazon Prime Video with Ads" [ref=e859]:
+                - img "Amazon Prime Video with Ads" [ref=e860]
+          - link "Office Romance 6.7 Office Romance 2026 Netflix Netflix Standard with Ads" [ref=e862] [cursor=pointer]:
+            - /url: /movies/1358005
+            - generic [ref=e863]:
+              - img "Office Romance" [ref=e864]
+              - generic [ref=e865]:
+                - img
+                - text: "6.7"
+            - generic [ref=e866]:
+              - heading "Office Romance" [level=3] [ref=e867]
+              - paragraph [ref=e868]: "2026"
+            - generic [ref=e870]:
+              - generic "Netflix" [ref=e871]:
+                - img "Netflix" [ref=e872]
+              - generic "Netflix Standard with Ads" [ref=e873]:
+                - img "Netflix Standard with Ads" [ref=e874]
+          - link "Backrooms 6.8 Backrooms 2026" [ref=e876] [cursor=pointer]:
+            - /url: /movies/1083381
+            - generic [ref=e877]:
+              - img "Backrooms" [ref=e878]
+              - generic [ref=e879]:
+                - img
+                - text: "6.8"
+            - generic [ref=e880]:
+              - heading "Backrooms" [level=3] [ref=e881]
+              - paragraph [ref=e882]: "2026"
+          - link "Swapped 9.0 Swapped 2026 Netflix Netflix Standard with Ads" [ref=e884] [cursor=pointer]:
+            - /url: /movies/1007757
+            - generic [ref=e885]:
+              - img "Swapped" [ref=e886]
+              - generic [ref=e887]:
+                - img
+                - text: "9.0"
+            - generic [ref=e888]:
+              - heading "Swapped" [level=3] [ref=e889]
+              - paragraph [ref=e890]: "2026"
+            - generic [ref=e892]:
+              - generic "Netflix" [ref=e893]:
+                - img "Netflix" [ref=e894]
+              - generic "Netflix Standard with Ads" [ref=e895]:
+                - img "Netflix Standard with Ads" [ref=e896]
+          - link "Hokum 6.7 Hokum 2026" [ref=e898] [cursor=pointer]:
+            - /url: /movies/1430077
+            - generic [ref=e899]:
+              - img "Hokum" [ref=e900]
+              - generic [ref=e901]:
+                - img
+                - text: "6.7"
+            - generic [ref=e902]:
+              - heading "Hokum" [level=3] [ref=e903]
+              - paragraph [ref=e904]: "2026"
+          - link "The Shadow's Edge 7.7 The Shadow's Edge 2025 STARZPLAY" [ref=e906] [cursor=pointer]:
+            - /url: /movies/1419406
+            - generic [ref=e907]:
+              - img "The Shadow's Edge" [ref=e908]
+              - generic [ref=e909]:
+                - img
+                - text: "7.7"
+            - generic [ref=e910]:
+              - heading "The Shadow's Edge" [level=3] [ref=e911]
+              - paragraph [ref=e912]: "2025"
+            - generic "STARZPLAY" [ref=e915]:
+              - img "STARZPLAY" [ref=e916]
+  - contentinfo [ref=e918]:
+    - generic [ref=e919]:
+      - generic [ref=e920]:
+        - generic [ref=e921]:
+          - link "CineStack" [ref=e922] [cursor=pointer]:
+            - /url: /
+          - paragraph [ref=e923]: Your personal cinema companion. Discover, review, and track your favorite movies.
+        - generic [ref=e924]:
+          - heading "Movies" [level=3] [ref=e925]
+          - list [ref=e926]:
+            - listitem [ref=e927]:
+              - link "Trending" [ref=e928] [cursor=pointer]:
+                - /url: /trending
+            - listitem [ref=e929]:
+              - link "Popular" [ref=e930] [cursor=pointer]:
+                - /url: /popular
+            - listitem [ref=e931]:
+              - link "Top Rated" [ref=e932] [cursor=pointer]:
+                - /url: /top-rated
+            - listitem [ref=e933]:
+              - link "Upcoming" [ref=e934] [cursor=pointer]:
+                - /url: /upcoming
+        - generic [ref=e935]:
+          - heading "Company" [level=3] [ref=e936]
+          - list [ref=e937]:
+            - listitem [ref=e938]:
+              - link "About" [ref=e939] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e940]:
+              - link "Contact" [ref=e941] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e942]:
+              - link "Privacy Policy" [ref=e943] [cursor=pointer]:
+                - /url: /privacy
+            - listitem [ref=e944]:
+              - link "Terms" [ref=e945] [cursor=pointer]:
+                - /url: /terms
+        - generic [ref=e946]:
+          - heading "Connect" [level=3] [ref=e947]
+          - list [ref=e948]:
+            - listitem [ref=e949]:
+              - link "GitHub" [ref=e950] [cursor=pointer]:
+                - /url: https://github.com
+                - img [ref=e951]
+                - text: GitHub
+      - separator [ref=e953]
+      - generic [ref=e954]:
+        - paragraph [ref=e955]: This product uses the TMDB API but is not endorsed or certified by TMDB.
+        - paragraph [ref=e956]: © 2026 CineStack. All rights reserved.
+  - button "Open Next.js Dev Tools" [ref=e962] [cursor=pointer]:
+    - img [ref=e963]
+  - alert [ref=e966]
+  - generic [ref=e997]:
+    - heading "Navigation" [level=2] [ref=e999]
+    - generic [ref=e1000]:
+      - generic [ref=e1001]: CineStack
+      - button "Close" [ref=e1002]:
+        - img
+        - generic [ref=e1003]: Close
+    - list [ref=e1004]:
+      - listitem [ref=e1005]:
+        - paragraph [ref=e1006]: Movies
+        - list [ref=e1007]:
+          - listitem [ref=e1008]:
+            - link "Trending" [ref=e1009] [cursor=pointer]:
+              - /url: /trending
+          - listitem [ref=e1010]:
+            - link "Popular" [ref=e1011] [cursor=pointer]:
+              - /url: /popular
+          - listitem [ref=e1012]:
+            - link "Top Rated" [ref=e1013] [cursor=pointer]:
+              - /url: /top-rated
+          - listitem [ref=e1014]:
+            - link "Upcoming" [ref=e1015] [cursor=pointer]:
+              - /url: /upcoming
+          - listitem [ref=e1016]:
+            - link "Now Playing" [ref=e1017] [cursor=pointer]:
+              - /url: /now-playing
+      - listitem [ref=e1018]:
+        - link "News" [ref=e1019] [cursor=pointer]:
+          - /url: /news
+      - listitem [ref=e1020]:
+        - link "Discover" [ref=e1021] [cursor=pointer]:
+          - /url: /discover
+    - link "Sign In" [ref=e1023] [cursor=pointer]:
+      - /url: /login
+      - button "Sign In" [ref=e1024]

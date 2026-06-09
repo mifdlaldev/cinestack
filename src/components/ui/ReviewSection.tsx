@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase-client";
 import { submitReview, updateReview, deleteReview } from "@/actions/review-actions";
 import { ReviewCard } from "./ReviewCard";
 import { ReviewForm } from "./ReviewForm";
-import { Pagination } from "./Pagination";
+import { MoviePagination } from "./MoviePagination";
 import type { Review, ReviewFormValues } from "@/types/review";
 
 // ─── Props ───────────────────────────────────────────────────
@@ -295,6 +295,7 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
                 key={review.id}
                 review={review}
                 isOwn={review.user_id === currentUserId}
+                isAuthenticated={!!currentUserId}
                 onEdit={
                   review.user_id === currentUserId
                     ? () => handleEdit(review)
@@ -347,6 +348,7 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
                 <ReviewCard
                   review={review}
                   isOwn={review.user_id === currentUserId}
+                  isAuthenticated={!!currentUserId}
                   onEdit={
                     review.user_id === currentUserId
                       ? () => handleEdit(review)
@@ -371,7 +373,7 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
 
       {/* ── Pagination ── */}
       {reviewsData && reviewsData.totalPages > 1 && (
-        <Pagination
+        <MoviePagination
           currentPage={reviewsData.page}
           totalPages={reviewsData.totalPages}
           onPageChange={setPage}

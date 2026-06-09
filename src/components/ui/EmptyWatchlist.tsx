@@ -4,6 +4,7 @@
 
 import Link from "next/link";
 import { Clapperboard } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function EmptyWatchlist() {
   return (
@@ -21,12 +22,14 @@ export function EmptyWatchlist() {
         everything you want to watch.
       </p>
 
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
+      <Button
+        variant="default"
+        size="lg"
+        nativeButton={false}
+        render={<Link href="/" />}
       >
         Browse Movies
-      </Link>
+      </Button>
     </div>
   );
 }

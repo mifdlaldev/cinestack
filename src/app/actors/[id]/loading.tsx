@@ -3,7 +3,9 @@ export default function ActorDetailLoading() {
     <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-6 lg:px-8 md:py-12">
       {/* Hero skeleton */}
       <div className="mb-10 flex flex-col gap-8 md:flex-row">
-        <div className="mx-auto h-[450px] w-[300px] animate-pulse rounded-xl bg-surface md:mx-0" />
+        <div className="mx-auto w-48 flex-shrink-0 md:mx-0 md:w-64">
+          <div className="aspect-[2/3] animate-pulse rounded-xl bg-surface" />
+        </div>
         <div className="flex-1 space-y-4">
           <div className="h-10 w-64 animate-pulse rounded bg-surface" />
           <div className="h-5 w-48 animate-pulse rounded bg-surface" />

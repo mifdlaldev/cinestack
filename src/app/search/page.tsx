@@ -150,7 +150,7 @@ function SearchPageContent() {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-6 lg:px-8 md:py-12">
       {/* Header */}
-      <div className="mb-8">
+      <div className="pt-10 mb-8">
         <h1 className="mb-2 font-display text-3xl tracking-tight text-text md:text-4xl">
           Search Movies
         </h1>

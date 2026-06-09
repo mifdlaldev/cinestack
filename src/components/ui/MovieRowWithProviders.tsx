@@ -1,9 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// MovieRowWithProviders — Server component wrapper that
-// batch-fetches watch providers for all movies and passes
-// them to the client-side MovieRow.
-// ─────────────────────────────────────────────────────────────
-
 import type { TmdbMovie } from "@/types/tmdb";
 import { getProvidersForMovies } from "@/lib/tmdb-providers";
 import { MovieRow } from "./MovieRow";

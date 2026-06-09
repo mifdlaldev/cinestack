@@ -68,12 +68,12 @@ export function ShareButton({
   }, []);
 
   const baseClasses =
-    "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all duration-200 active:scale-[0.97]";
+    "inline-flex items-center justify-center gap-2 rounded-full text-sm font-medium active:scale-[0.97]";
 
   const styleClasses =
     variant === "icon"
-      ? "h-9 w-9 rounded-full border border-border text-text-secondary hover:bg-surface hover:text-text"
-      : "border border-border px-4 py-2 text-text-secondary hover:bg-surface hover:text-text";
+      ? "h-9 w-9 rounded-full border border-white/[0.06] bg-black/70 backdrop-blur-[20px] text-text-secondary"
+      : "border border-white/[0.06] bg-black/70 backdrop-blur-[20px] px-4 py-2 text-text";
 
   return (
     <>

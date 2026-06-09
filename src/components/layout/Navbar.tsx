@@ -1,8 +1,26 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { Search, Menu, X, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, Menu, ChevronDown, LogOut, User, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase-client";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuGroup,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetClose,
+} from "@/components/ui/sheet";
 
 const movieLinks = [
   { label: "Trending", href: "/trending" },
@@ -18,33 +36,66 @@ const navLinks = [
 ];
 
 export function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
+  const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLLIElement>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [user, setUser] = useState<{ email?: string } | null>(null);
+  const dropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const profileTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+  const handleLogout = useCallback(async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.refresh();
+  }, [router]);
+
+  const openDropdown = useCallback(() => {
+    if (dropdownTimer.current) clearTimeout(dropdownTimer.current);
+    setDropdownOpen(true);
+  }, []);
+
+  const closeDropdown = useCallback(() => {
+    dropdownTimer.current = setTimeout(() => setDropdownOpen(false), 150);
+  }, []);
+
+  const openProfile = useCallback(() => {
+    if (profileTimer.current) clearTimeout(profileTimer.current);
+    setProfileOpen(true);
+  }, []);
+
+  const closeProfile = useCallback(() => {
+    profileTimer.current = setTimeout(() => setProfileOpen(false), 150);
   }, []);
 
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileOpen(false);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 64);
     };
-    document.addEventListener("keydown", handleEsc);
-    return () => document.removeEventListener("keydown", handleEsc);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+      if (dropdownTimer.current) clearTimeout(dropdownTimer.current);
+      if (profileTimer.current) clearTimeout(profileTimer.current);
+    };
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full glass-nav">
+    <header
+      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        scrolled ? "glass-nav" : "bg-transparent"
+      }`}
+    >
       <nav className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-4 md:px-6 lg:px-8">
         <Link
           href="/"
@@ -54,142 +105,211 @@ export function Navbar() {
         </Link>
 
         <ul className="hidden items-center gap-1 md:flex">
-          <li ref={dropdownRef} className="relative">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface hover:text-text"
-              aria-expanded={dropdownOpen}
-              aria-haspopup="true"
-            >
-              Movies
-              <ChevronDown
-                className={`h-4 w-4 transition-transform duration-200 ${
-                  dropdownOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            {dropdownOpen && (
-              <ul className="absolute left-0 top-full mt-1 w-48 rounded-xl glass-strong p-2 shadow-lg animate-drop-in">
-                {movieLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      onClick={() => setDropdownOpen(false)}
-                      className="block rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface hover:text-accent"
+          <li
+            onMouseEnter={openDropdown}
+            onMouseLeave={closeDropdown}
+          >
+            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    className="text-xs"
+                  />
+                }
+              >
+                Movies
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                onMouseEnter={openDropdown}
+                onMouseLeave={closeDropdown}
+              >
+                <DropdownMenuGroup>
+                  {movieLinks.map((link) => (
+                    <DropdownMenuItem
+                      key={link.href}
+                      render={<Link href={link.href} />}
                     >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+                      <span>
+                        {link.label}
+                      </span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </li>
 
           {navLinks.map((link) => (
             <li key={link.href}>
-              <Link
-                href={link.href}
-                className="block rounded-lg px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface hover:text-text"
+              <Button
+                variant="ghost"
+                className="text-xs"
+                nativeButton={false}
+                render={<Link href={link.href} />}
               >
                 {link.label}
-              </Link>
+              </Button>
             </li>
           ))}
         </ul>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/search"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface hover:text-text"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-foreground/80"
+            nativeButton={false}
+            render={<Link href="/search" />}
             aria-label="Search movies"
           >
-            <Search className="h-5 w-5" />
-          </Link>
+            <Search />
+          </Button>
 
-          <Link
-            href="/login"
-            className="hidden rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] md:inline-block"
-          >
-            Sign In
-          </Link>
+          {user ? (
+            <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
+              <DropdownMenuTrigger
+                onMouseEnter={openProfile}
+                onMouseLeave={closeProfile}
+                render={
+                  <Button
+                    variant="ghost"
+                    className="text-xs gap-2"
+                  />
+                }
+              >
+                <User className="h-4 w-4" />
+                <span className="hidden lg:inline">{user.email?.split("@")[0] ?? "Profile"}</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                onMouseEnter={openProfile}
+                onMouseLeave={closeProfile}
+                align="end"
+              >
+                <DropdownMenuGroup>
+                  <DropdownMenuItem render={<Link href="/profile" />}>
+                    <User className="h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="h-4 w-4" />
+                    <span>Sign Out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              variant="default"
+              size="sm"
+              className="hidden md:inline-flex"
+              nativeButton={false}
+              render={<Link href="/login" />}
+            >
+              Sign In
+            </Button>
+          )}
 
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface hover:text-text md:hidden"
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            aria-expanded={mobileOpen}
-          >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          <Sheet>
+            <SheetTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden text-foreground/80"
+                  aria-label="Open menu"
+                />
+              }
+            >
+              <Menu className="h-5 w-5" />
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              showCloseButton={false}
+              className="w-72 bg-black/72 backdrop-blur-[20px] border-l border-white/[0.06] [&]:gap-0"
+            >
+              <SheetHeader>
+                <SheetTitle className="sr-only">Navigation</SheetTitle>
+              </SheetHeader>
+
+              <div className="flex items-center justify-between px-4 pt-0.5 mb-10">
+                <span className="font-display text-lg text-accent">
+                  CineStack
+                </span>
+                <SheetClose
+                  render={
+                    <Button variant="ghost" size="icon-sm" />
+                  }
+                >
+                  <X />
+                  <span className="sr-only">Close</span>
+                </SheetClose>
+              </div>
+
+              <ul className="flex flex-col gap-1 px-4">
+                <li className="mb-2">
+                  <p className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent">
+                    Movies
+                  </p>
+                  <ul className="mt-1 flex flex-col gap-0.5">
+                    {movieLinks.map((link) => (
+                      <li key={link.href}>
+                        <SheetClose
+                          className="block rounded-lg px-3 py-2 text-sm text-text transition-colors hover:text-accent"
+                          render={<Link href={link.href} />}
+                        >
+                          {link.label}
+                        </SheetClose>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+
+                {navLinks.map((link) => (
+                  <li key={link.href}>
+                    <SheetClose
+                      className="block rounded-lg px-3 py-2 text-sm font-medium text-text transition-colors hover:text-accent"
+                      render={<Link href={link.href} />}
+                    >
+                      {link.label}
+                    </SheetClose>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-8 border-t border-border px-4 pt-6">
+                {user ? (
+                  <div className="flex flex-col gap-2">
+                    <SheetClose
+                      className="flex w-full"
+                      render={<Link href="/profile" />}
+                    >
+                      <Button variant="default" className="w-full">
+                        <User className="h-4 w-4" />
+                        My Profile
+                      </Button>
+                    </SheetClose>
+                    <Button variant="ghost" className="w-full text-xs" onClick={handleLogout}>
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </Button>
+                  </div>
+                ) : (
+                  <SheetClose
+                    className="flex w-full"
+                    render={<Link href="/login" />}
+                  >
+                    <Button variant="default" className="w-full">
+                      Sign In
+                    </Button>
+                  </SheetClose>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </nav>
-
-      {mobileOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-overlay md:hidden"
-            onClick={() => setMobileOpen(false)}
-            aria-hidden="true"
-          />
-          <div className="fixed inset-y-0 right-0 z-50 w-72 glass-strong border-l border-border p-6 shadow-xl md:hidden">
-            <div className="mb-8 flex items-center justify-between">
-              <span className="font-display text-lg text-accent">
-                CineStack
-              </span>
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary hover:bg-surface hover:text-text"
-                aria-label="Close menu"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <ul className="flex flex-col gap-1">
-              <li className="mb-2">
-                <p className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-text-secondary">
-                  Movies
-                </p>
-                <ul className="mt-1 flex flex-col gap-0.5">
-                  {movieLinks.map((link) => (
-                    <li key={link.href}>
-                      <Link
-                        href={link.href}
-                        onClick={() => setMobileOpen(false)}
-                        className="block rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface hover:text-accent"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="block rounded-lg px-3 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-surface hover:text-text"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-8 border-t border-border pt-6">
-              <Link
-href="/login"
-                onClick={() => setMobileOpen(false)}
-                className="flex w-full items-center justify-center rounded-lg bg-accent px-4 py-3 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
-              >
-                Sign In
-              </Link>
-            </div>
-          </div>
-        </>
-      )}
     </header>
   );
 }

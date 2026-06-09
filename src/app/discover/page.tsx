@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { TmdbPaginatedResponse, TmdbMovie, TmdbGenre } from "@/types/tmdb";
 import { MovieGrid } from "@/components/ui/MovieGrid";
-import { Pagination } from "@/components/ui/Pagination";
 import { FilterPanel, type FilterValues } from "@/components/ui/FilterPanel";
 
 async function fetchDiscover(
@@ -107,7 +106,7 @@ export default function DiscoverPage() {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-6 lg:px-8">
       {/* Header */}
-      <header className="mb-8">
+      <header className="pt-10 mb-8">
         <h1 className="font-display text-3xl tracking-tight text-text md:text-4xl">
           Discover
         </h1>
@@ -153,13 +152,52 @@ export default function DiscoverPage() {
       <MovieGrid movies={movies} isLoading={isLoading && !movieData} />
 
       {/* Pagination */}
-      {movies.length > 0 && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      )}
+      {movies.length > 0 && totalPages > 1 && (() => {
+        const maxVisible = 5;
+        const half = Math.floor(maxVisible / 2);
+        let start = Math.max(1, page - half);
+        const end = Math.min(totalPages, start + maxVisible - 1);
+        if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
+        const pages: (number | "ellipsis")[] = [];
+        if (start > 1) { pages.push(1); if (start > 2) pages.push("ellipsis"); }
+        for (let i = start; i <= end; i++) pages.push(i);
+        if (end < totalPages) { if (end < totalPages - 1) pages.push("ellipsis"); pages.push(totalPages); }
+
+        return (
+          <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Page navigation">
+            {page > 1 && (
+              <button onClick={() => handlePageChange(page - 1)} className="rounded-full border border-border px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface hover:text-text">
+                Previous
+              </button>
+            )}
+
+            {pages.map((p, i) =>
+              p === "ellipsis" ? (
+                <span key={`ellipsis-${i}`} className="px-2 text-sm text-text-secondary">...</span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => handlePageChange(p)}
+                  className={`rounded-full px-3 py-2 text-sm transition-colors ${
+                    p === page
+                      ? "bg-accent font-semibold text-bg"
+                      : "text-text-secondary hover:bg-surface hover:text-text"
+                  }`}
+                  aria-current={p === page ? "page" : undefined}
+                >
+                  {p}
+                </button>
+              )
+            )}
+
+            {page < totalPages && (
+              <button onClick={() => handlePageChange(page + 1)} className="rounded-full border border-border px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface hover:text-text">
+                Next
+              </button>
+            )}
+          </nav>
+        );
+      })()}
     </div>
   );
 }

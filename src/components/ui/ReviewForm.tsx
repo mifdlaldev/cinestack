@@ -10,6 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { StarRating } from "./StarRating";
 import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import type { ReviewFormValues } from "@/types/review";
 
 // ─── Validation schema ───────────────────────────────────────
@@ -114,15 +116,13 @@ export function ReviewForm({
         >
           Your Review
         </label>
-        <textarea
+        <Textarea
           id="review-content"
           {...register("content")}
           rows={4}
           placeholder="What did you think of this movie?"
-          className={cn(
-            "w-full resize-none rounded-lg border bg-bg-alt px-3 py-2.5 text-sm text-text placeholder-text-secondary/50 transition-colors focus:border-accent/50 focus:outline-none focus:ring-1 focus:ring-accent/30",
-            errors.content ? "border-error" : "border-border",
-          )}
+          className="resize-none"
+          aria-invalid={!!errors.content}
         />
         <div className="flex items-center justify-between">
           {errors.content ? (
@@ -143,10 +143,9 @@ export function ReviewForm({
 
       {/* Actions */}
       <div className="flex items-center gap-3 pt-1">
-        <button
+        <Button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? (
             <>
@@ -158,17 +157,17 @@ export function ReviewForm({
           ) : (
             "Submit Review"
           )}
-        </button>
+        </Button>
 
         {onCancel && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={onCancel}
             disabled={submitting}
-            className="rounded-lg px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text disabled:opacity-50"
           >
             Cancel
-          </button>
+          </Button>
         )}
       </div>
 

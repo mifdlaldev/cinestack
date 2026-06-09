@@ -8,7 +8,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, User, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase-client";
-import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 // ── Zod schemas ──────────────────────────────────────────────
 
@@ -106,26 +108,19 @@ export function AuthForm({ mode }: AuthFormProps) {
       {/* Name field — register only */}
       {!isLogin && (
         <div className="space-y-1.5">
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-text"
-          >
+          <Label htmlFor="name">
             Full name
-          </label>
+          </Label>
           <div className="relative">
             <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
-            <input
+            <Input
               id="name"
               type="text"
               placeholder="Jane Doe"
               autoComplete="name"
+              className="pl-10"
+              aria-invalid={!!errors.name}
               {...register("name")}
-              className={cn(
-                "w-full rounded-lg border bg-bg-alt py-2.5 pl-10 pr-3 text-sm text-text placeholder:text-text-secondary/50 transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50",
-                errors.name
-                  ? "border-error"
-                  : "border-border hover:border-text-secondary/30",
-              )}
             />
           </div>
           {errors.name && (
@@ -136,26 +131,19 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       {/* Email field */}
       <div className="space-y-1.5">
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-text"
-        >
+        <Label htmlFor="email">
           Email address
-        </label>
+        </Label>
         <div className="relative">
           <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
-          <input
+          <Input
             id="email"
             type="email"
             placeholder="you@example.com"
             autoComplete="email"
+            className="pl-10"
+            aria-invalid={!!errors.email}
             {...register("email")}
-            className={cn(
-              "w-full rounded-lg border bg-bg-alt py-2.5 pl-10 pr-3 text-sm text-text placeholder:text-text-secondary/50 transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50",
-              errors.email
-                ? "border-error"
-                : "border-border hover:border-text-secondary/30",
-            )}
           />
         </div>
         {errors.email && (
@@ -165,26 +153,19 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       {/* Password field */}
       <div className="space-y-1.5">
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-text"
-        >
+        <Label htmlFor="password">
           Password
-        </label>
+        </Label>
         <div className="relative">
           <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
-          <input
+          <Input
             id="password"
             type="password"
             placeholder="••••••••"
             autoComplete={isLogin ? "current-password" : "new-password"}
+            className="pl-10"
+            aria-invalid={!!errors.password}
             {...register("password")}
-            className={cn(
-              "w-full rounded-lg border bg-bg-alt py-2.5 pl-10 pr-3 text-sm text-text placeholder:text-text-secondary/50 transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50",
-              errors.password
-                ? "border-error"
-                : "border-border hover:border-text-secondary/30",
-            )}
           />
         </div>
         {errors.password && (
@@ -200,12 +181,10 @@ export function AuthForm({ mode }: AuthFormProps) {
       )}
 
       {/* Submit button */}
-      <button
+      <Button
         type="submit"
         disabled={isSubmitting}
-        className={cn(
-          "flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60",
-        )}
+        className="w-full"
       >
         {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
         {isSubmitting
@@ -215,7 +194,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           : isLogin
             ? "Sign in"
             : "Create account"}
-      </button>
+      </Button>
 
       {/* Switch mode link */}
       <p className="text-center text-sm text-text-secondary">

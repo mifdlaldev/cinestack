@@ -8,7 +8,7 @@ export default function MovieDetailLoading() {
       {/* Hero skeleton */}
       <section className="relative min-h-[60dvh] md:min-h-[70dvh] bg-surface animate-pulse">
         <div className="absolute inset-0 bg-gradient-to-br from-surface to-bg" />
-        <div className="relative mx-auto flex h-full min-h-[60dvh] max-w-[1400px] flex-col items-start justify-end gap-6 px-4 pb-10 pt-24 md:min-h-[70dvh] md:flex-row md:items-end md:gap-10 md:px-6 md:pb-16 lg:px-8">
+        <div className="relative mx-auto flex h-full min-h-[60dvh] max-w-[1400px] flex-col items-start justify-end gap-6 px-4 pb-10 pt-24 md:min-h-[70dvh] md:gap-10 md:px-6 md:pb-16 lg:px-8">
           {/* Poster skeleton */}
           <div className="w-48 flex-shrink-0 md:w-64 lg:w-72">
             <div className="aspect-[2/3] rounded-xl bg-surface-hover" />
@@ -55,7 +55,7 @@ export default function MovieDetailLoading() {
         {/* Trailer skeleton */}
         <section>
           <div className="mb-6 h-8 w-20 animate-pulse rounded bg-surface" />
-          <div className="aspect-video w-full max-w-3xl rounded-xl bg-surface-hover" />
+          <div className="aspect-video w-full max-w-5xl mx-auto rounded-xl bg-surface-hover" />
         </section>
       </div>
     </div>

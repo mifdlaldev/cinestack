@@ -1,0 +1,171 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "CineStack" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - button "Movies" [ref=e7]:
+            - text: Movies
+            - img
+        - listitem [ref=e8]:
+          - link "News" [ref=e9] [cursor=pointer]:
+            - /url: /news
+        - listitem [ref=e10]:
+          - link "Discover" [ref=e11] [cursor=pointer]:
+            - /url: /discover
+      - generic [ref=e12]:
+        - link [ref=e13] [cursor=pointer]:
+          - /url: /search
+          - img
+        - link "Sign In" [ref=e14] [cursor=pointer]:
+          - /url: /login
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e23]:
+        - link "Back to Home" [ref=e24] [cursor=pointer]:
+          - /url: /
+          - img [ref=e25]
+          - text: Back to Home
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - img [ref=e29]
+            - text: Full-Stack Portfolio Project
+          - heading "Discover. Review. Track." [level=1] [ref=e32]:
+            - text: Discover.
+            - text: Review. Track.
+          - paragraph [ref=e33]: CineStack is a modern movie platform built with cutting-edge web technology — combining the depth of TMDB's database with a cinematic, premium user experience.
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - img [ref=e38]
+          - paragraph [ref=e40]: 500K+
+          - paragraph [ref=e41]: Movies & TV Shows
+        - generic [ref=e42]:
+          - img [ref=e43]
+          - paragraph [ref=e48]: 10K+
+          - paragraph [ref=e49]: Active Users
+        - generic [ref=e50]:
+          - img [ref=e51]
+          - paragraph [ref=e53]: 1M+
+          - paragraph [ref=e54]: Reviews Submitted
+        - generic [ref=e55]:
+          - img [ref=e56]
+          - paragraph [ref=e59]: 50+
+          - paragraph [ref=e60]: Streaming Services
+      - generic [ref=e63]:
+        - generic [ref=e64]:
+          - img [ref=e66]
+          - heading "Browse & Discover" [level=3] [ref=e68]
+          - paragraph [ref=e69]: Explore trending, popular, top-rated, upcoming, and now-playing movies. Powered by TMDB's extensive database.
+        - generic [ref=e70]:
+          - img [ref=e72]
+          - heading "Reviews & Ratings" [level=3] [ref=e74]
+          - paragraph [ref=e75]: Share your thoughts on every film. Rate movies, write reviews, and see what the community thinks.
+        - generic [ref=e76]:
+          - img [ref=e78]
+          - heading "Personal Watchlist" [level=3] [ref=e81]
+          - paragraph [ref=e82]: Save movies to your watchlist, track what you've seen, and never lose track of what to watch next.
+      - generic [ref=e84]:
+        - generic [ref=e85]:
+          - heading "Built With" [level=2] [ref=e86]
+          - paragraph [ref=e87]: Modern tools and technologies powering the platform
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - paragraph [ref=e90]: Next.js 15
+            - paragraph [ref=e91]: Framework
+          - generic [ref=e92]:
+            - paragraph [ref=e93]: React 19
+            - paragraph [ref=e94]: UI Library
+          - generic [ref=e95]:
+            - paragraph [ref=e96]: TypeScript
+            - paragraph [ref=e97]: Language
+          - generic [ref=e98]:
+            - paragraph [ref=e99]: Tailwind CSS v4
+            - paragraph [ref=e100]: Styling
+          - generic [ref=e101]:
+            - paragraph [ref=e102]: Supabase
+            - paragraph [ref=e103]: DB + Auth
+          - generic [ref=e104]:
+            - paragraph [ref=e105]: PostgreSQL
+            - paragraph [ref=e106]: Database
+          - generic [ref=e107]:
+            - paragraph [ref=e108]: TMDB API
+            - paragraph [ref=e109]: Data Source
+          - generic [ref=e110]:
+            - paragraph [ref=e111]: Framer Motion
+            - paragraph [ref=e112]: Animations
+          - generic [ref=e113]:
+            - paragraph [ref=e114]: Vercel
+            - paragraph [ref=e115]: Deploy
+      - generic [ref=e117]:
+        - generic [ref=e118]:
+          - heading "Design Inspiration" [level=2] [ref=e119]
+          - paragraph [ref=e120]: Cinematic dark aesthetic inspired by the best in the industry
+        - generic [ref=e121]:
+          - generic [ref=e122]:
+            - paragraph [ref=e123]: A24
+            - paragraph [ref=e124]: Pure black, typography-driven, zero decoration
+          - generic [ref=e125]:
+            - paragraph [ref=e126]: IMDb
+            - paragraph [ref=e127]: Gold accent, dense info hierarchy, rating system
+          - generic [ref=e128]:
+            - paragraph [ref=e129]: Apple TV+
+            - paragraph [ref=e130]: Restrained elegance, clean hierarchy, premium feel
+          - generic [ref=e131]:
+            - paragraph [ref=e132]: Netflix
+            - paragraph [ref=e133]: Full-bleed hero, horizontal scroll rows, poster-driven
+      - generic [ref=e136]:
+        - paragraph [ref=e137]: This product uses the TMDB API but is not endorsed or certified by TMDB. CineStack is a personal portfolio project and is not affiliated with any streaming service or movie studio.
+        - link "Start Exploring" [ref=e139] [cursor=pointer]:
+          - /url: /
+          - text: Start Exploring
+          - img
+  - contentinfo [ref=e140]:
+    - generic [ref=e141]:
+      - generic [ref=e142]:
+        - generic [ref=e143]:
+          - link "CineStack" [ref=e144] [cursor=pointer]:
+            - /url: /
+          - paragraph [ref=e145]: Your personal cinema companion. Discover, review, and track your favorite movies.
+        - generic [ref=e146]:
+          - heading "Movies" [level=3] [ref=e147]
+          - list [ref=e148]:
+            - listitem [ref=e149]:
+              - link "Trending" [ref=e150] [cursor=pointer]:
+                - /url: /trending
+            - listitem [ref=e151]:
+              - link "Popular" [ref=e152] [cursor=pointer]:
+                - /url: /popular
+            - listitem [ref=e153]:
+              - link "Top Rated" [ref=e154] [cursor=pointer]:
+                - /url: /top-rated
+            - listitem [ref=e155]:
+              - link "Upcoming" [ref=e156] [cursor=pointer]:
+                - /url: /upcoming
+        - generic [ref=e157]:
+          - heading "Company" [level=3] [ref=e158]
+          - list [ref=e159]:
+            - listitem [ref=e160]:
+              - link "About" [ref=e161] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e162]:
+              - link "Contact" [ref=e163] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e164]:
+              - link "Privacy Policy" [ref=e165] [cursor=pointer]:
+                - /url: /privacy
+            - listitem [ref=e166]:
+              - link "Terms" [ref=e167] [cursor=pointer]:
+                - /url: /terms
+        - generic [ref=e168]:
+          - heading "Connect" [level=3] [ref=e169]
+          - list [ref=e170]:
+            - listitem [ref=e171]:
+              - link "GitHub" [ref=e172] [cursor=pointer]:
+                - /url: https://github.com
+                - img [ref=e173]
+                - text: GitHub
+      - separator [ref=e175]
+      - generic [ref=e176]:
+        - paragraph [ref=e177]: This product uses the TMDB API but is not endorsed or certified by TMDB.
+        - paragraph [ref=e178]: © 2026 CineStack. All rights reserved.

@@ -2,6 +2,8 @@
 
 import { useCallback, useRef } from "react";
 import { Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface SearchBarProps {
   value: string;
@@ -40,23 +42,25 @@ export function SearchBar({
         className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-secondary"
         aria-hidden="true"
       />
-      <input
+      <Input
         ref={inputRef}
         type="text"
         defaultValue={value}
         onChange={handleChange}
         placeholder={placeholder}
         aria-label="Search movies"
-        className="w-full rounded-xl border border-border bg-surface py-3.5 pl-12 pr-12 text-base text-text placeholder-text-secondary/60 outline-none transition-all duration-200 focus:border-accent focus:ring-1 focus:ring-accent/30"
+        className="w-full py-3.5 pl-12 pr-12 text-base"
       />
       {value.length > 0 && (
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleClear}
-          className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
+          className="absolute right-3 top-1/2 -translate-y-1/2"
           aria-label="Clear search"
         >
-          <X className="h-4 w-4" />
-        </button>
+          <X />
+        </Button>
       )}
     </div>
   );

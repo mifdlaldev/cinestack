@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
 import { Inter, Archivo_Black, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
+import dynamic from "next/dynamic";
 import { Footer } from "@/components/layout/Footer";
-import { Providers } from "@/components/Providers";
+import { cn } from "@/lib/utils";
+
+const Navbar = dynamic(() => import("@/components/layout/Navbar").then((m) => m.Navbar), {
+  loading: () => <div className="h-16" />,
+});
+
+const Providers = dynamic(() => import("@/components/Providers").then((m) => m.Providers));
 
 const inter = Inter({
   subsets: ["latin"],
@@ -67,9 +73,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${archivoBlack.variable} ${jetbrainsMono.variable}`}
+      className={cn(inter.variable, archivoBlack.variable, jetbrainsMono.variable)}
     >
-      <body className="min-h-screen flex flex-col bg-bg text-text antialiased">
+      <body className="min-h-screen flex flex-col bg-bg text-text antialiased overflow-x-hidden">
         <Providers>
           {/* WebSite JSON-LD */}
           <script

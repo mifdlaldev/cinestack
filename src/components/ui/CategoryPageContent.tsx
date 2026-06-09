@@ -44,7 +44,7 @@ export function CategoryPageContent({
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-6 md:py-12 lg:px-8">
       {/* Page header */}
-      <div className="mb-8">
+      <div className="pt-10 mb-8">
         <h1 className="font-display text-3xl text-text md:text-4xl">
           {title}
         </h1>
@@ -62,7 +62,7 @@ export function CategoryPageContent({
         {page > 1 && (
           <Link
             href={`${basePath}?page=${page - 1}`}
-            className="rounded-lg border border-border px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface hover:text-text"
+            className="rounded-full border border-border px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface hover:text-text"
           >
             Previous
           </Link>
@@ -80,7 +80,7 @@ export function CategoryPageContent({
             <Link
               key={p}
               href={`${basePath}?page=${p}`}
-              className={`rounded-lg px-3 py-2 text-sm transition-colors ${
+              className={`rounded-full px-3 py-2 text-sm transition-colors ${
                 p === page
                   ? "bg-accent font-semibold text-bg"
                   : "text-text-secondary hover:bg-surface hover:text-text"
@@ -95,7 +95,7 @@ export function CategoryPageContent({
         {page < maxPages && (
           <Link
             href={`${basePath}?page=${page + 1}`}
-            className="rounded-lg border border-border px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface hover:text-text"
+            className="rounded-full border border-border px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface hover:text-text"
           >
             Next
           </Link>

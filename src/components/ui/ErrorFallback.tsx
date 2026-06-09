@@ -8,6 +8,8 @@
 
 import { AlertTriangle } from "lucide-react";
 import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface ErrorFallbackProps {
   /** Human-friendly error description */
@@ -24,24 +26,27 @@ export function ErrorFallback({
   children,
 }: ErrorFallbackProps) {
   return (
-    <div
+    <Card
       role="alert"
-      className="flex flex-col items-center gap-3 rounded-lg border border-error/20 bg-error/5 px-4 py-8 text-center"
+      className="border-error/20 bg-error/5"
     >
-      <AlertTriangle className="h-8 w-8 text-error/80" />
+      <CardContent className="flex flex-col items-center gap-3 px-4 py-8 text-center">
+        <AlertTriangle className="h-8 w-8 text-error/80" />
 
-      {children ?? (
-        <p className="max-w-sm text-sm text-text-secondary">{message}</p>
-      )}
+        {children ?? (
+          <p className="max-w-sm text-sm text-muted-foreground">{message}</p>
+        )}
 
-      {onRetry && (
-        <button
-          onClick={onRetry}
-          className="inline-flex items-center gap-1.5 rounded-md bg-surface px-3 py-1.5 text-xs font-medium text-text transition-all hover:bg-surface-hover active:scale-[0.97]"
-        >
-          Try Again
-        </button>
-      )}
-    </div>
+        {onRetry && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRetry}
+          >
+            Try Again
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 }

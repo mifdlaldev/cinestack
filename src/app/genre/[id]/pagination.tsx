@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Pagination } from "@/components/ui/Pagination";
+import { MoviePagination } from "@/components/ui/MoviePagination";
 
 interface GenrePaginationProps {
   currentPage: number;
@@ -21,7 +21,7 @@ export function GenrePagination({
   };
 
   return (
-    <Pagination
+    <MoviePagination
       currentPage={currentPage}
       totalPages={totalPages}
       onPageChange={handlePageChange}

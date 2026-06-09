@@ -180,7 +180,7 @@ export default async function NewsPage({ searchParams }: Props) {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-6 md:py-12 lg:px-8">
       {/* Page header */}
-      <div className="mb-10">
+      <div className="pt-10 mb-10">
         <h1 className="font-display text-3xl tracking-tight text-text md:text-4xl">
           Latest News
         </h1>

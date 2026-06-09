@@ -4,6 +4,14 @@ import { useState, useCallback } from "react";
 import { Filter, RotateCcw, Monitor } from "lucide-react";
 import { useServicesStore } from "@/stores/services-store";
 import { MyServicesModal } from "./MyServicesModal";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export interface FilterValues {
   genreId: number | null;
@@ -81,20 +89,23 @@ export function FilterPanel({
         <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
           Genre
         </label>
-        <select
-          value={genreId ?? ""}
-          onChange={(e) =>
-            setGenreId(e.target.value ? Number(e.target.value) : null)
+        <Select
+          value={genreId !== null ? String(genreId) : ""}
+          onValueChange={(val) =>
+            setGenreId(val ? Number(val) : null)
           }
-          className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         >
-          <option value="">All Genres</option>
-          {genres.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.name}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="All Genres" />
+          </SelectTrigger>
+          <SelectContent>
+            {genres.map((g) => (
+              <SelectItem key={g.id} value={String(g.id)}>
+                {g.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Year */}
@@ -102,20 +113,23 @@ export function FilterPanel({
         <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
           Year
         </label>
-        <select
-          value={year ?? ""}
-          onChange={(e) =>
-            setYear(e.target.value ? Number(e.target.value) : null)
+        <Select
+          value={year !== null ? String(year) : ""}
+          onValueChange={(val) =>
+            setYear(val ? Number(val) : null)
           }
-          className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         >
-          <option value="">All Years</option>
-          {YEAR_OPTIONS.map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="All Years" />
+          </SelectTrigger>
+          <SelectContent>
+            {YEAR_OPTIONS.map((y) => (
+              <SelectItem key={y} value={y}>
+                {y}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Streaming On */}
@@ -123,9 +137,10 @@ export function FilterPanel({
         <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
           Streaming On
         </label>
-        <button
+        <Button
+          variant="outline"
           onClick={() => setServicesModalOpen(true)}
-          className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text transition-colors hover:border-accent/30 hover:bg-accent/5 active:scale-[0.98]"
+          className="w-full justify-start gap-2"
         >
           <Monitor className="h-4 w-4 flex-shrink-0 text-text-secondary" />
           <span className="flex-1 text-left">
@@ -138,7 +153,7 @@ export function FilterPanel({
               {providerCount}
             </span>
           )}
-        </button>
+        </Button>
       </div>
 
       {/* Sort */}
@@ -146,40 +161,43 @@ export function FilterPanel({
         <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
           Sort By
         </label>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-        >
-          {SORT_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        <Select value={sortBy} onValueChange={(val) => val !== null && setSortBy(val)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Sort by..." />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-2 pt-2">
-        <button
+        <Button
+          variant="default"
           onClick={handleApply}
           disabled={isLoading}
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex-1 justify-center gap-2"
         >
           {isLoading ? (
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-bg border-t-transparent" />
           ) : (
             "Apply"
           )}
-        </button>
+        </Button>
         {hasActiveFilters && (
-          <button
+          <Button
+            variant="outline"
             onClick={handleReset}
-            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface hover:text-text active:scale-[0.97]"
+            className="gap-1.5"
           >
             <RotateCcw className="h-4 w-4" />
             Reset
-          </button>
+          </Button>
         )}
       </div>
     </>
@@ -194,9 +212,10 @@ export function FilterPanel({
 
       {/* Mobile: toggle button + collapsible panel */}
       <div className="md:hidden">
-        <button
+        <Button
+          variant="outline"
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-bg-alt px-4 py-3 text-sm font-medium text-text transition-colors active:scale-[0.98]"
+          className="w-full justify-center gap-2"
         >
           <Filter className="h-4 w-4" />
           {mobileOpen ? "Hide Filters" : "Show Filters"}
@@ -205,7 +224,7 @@ export function FilterPanel({
               !
             </span>
           )}
-        </button>
+        </Button>
 
         {mobileOpen && (
           <div className="mt-3 space-y-4 rounded-xl border border-border bg-bg-alt p-4">

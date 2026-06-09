@@ -1,0 +1,7 @@
+[       2ms] Error: Page crashed and was reset to about:blank.
+    at _Tab.logErrorMessage (/home/mifdlal/.local/share/pnpm/store/v11/links/@/playwright-core/1.61.0-alpha-1778188671000/b9fc01988fca4610f2c6be9232061109cb28e7d5b5dc5c6a0f6a1e17bfbf8d12/node_modules/playwright-core/lib/coreBundle.js:58013:62)
+    at Context.ensureTab (/home/mifdlal/.local/share/pnpm/store/v11/links/@/playwright-core/1.61.0-alpha-1778188671000/b9fc01988fca4610f2c6be9232061109cb28e7d5b5dc5c6a0f6a1e17bfbf8d12/node_modules/playwright-core/lib/coreBundle.js:58347:28)
+    at async Object.handle (/home/mifdlal/.local/share/pnpm/store/v11/links/@/playwright-core/1.61.0-alpha-1778188671000/b9fc01988fca4610f2c6be9232061109cb28e7d5b5dc5c6a0f6a1e17bfbf8d12/node_modules/playwright-core/lib/coreBundle.js:59838:22)
+    at async BrowserBackend.callTool (/home/mifdlal/.local/share/pnpm/store/v11/links/@/playwright-core/1.61.0-alpha-1778188671000/b9fc01988fca4610f2c6be9232061109cb28e7d5b5dc5c6a0f6a1e17bfbf8d12/node_modules/playwright-core/lib/coreBundle.js:58977:11)
+    at async /home/mifdlal/.local/share/pnpm/store/v11/links/@/playwright-core/1.61.0-alpha-1778188671000/b9fc01988fca4610f2c6be9232061109cb28e7d5b5dc5c6a0f6a1e17bfbf8d12/node_modules/playwright-core/lib/coreBundle.js:64957:26
+    at async wrappedHandler (/home/mifdlal/.local/share/pnpm/store/v11/links/@/playwright-core/1.61.0-alpha-1778188671000/b9fc01988fca4610f2c6be9232061109cb28e7d5b5dc5c6a0f6a1e17bfbf8d12/node_modules/playwright-core/lib/utilsBundle.js:82465:24)

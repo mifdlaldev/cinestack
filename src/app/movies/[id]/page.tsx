@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import {
   getMovieDetail,
   getMovieCredits,
@@ -14,14 +15,17 @@ import {
   getSimilarMovies,
   getImageUrl,
   getBackdropUrl,
-  getProfileUrl,
   TmdbApiError,
 } from "@/lib/tmdb";
-import { ReviewSection } from "@/components/ui/ReviewSection";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
 import { ShareButton } from "@/components/ui/ShareButton";
-import { WatchProvidersEnhanced } from "@/components/ui/WatchProvidersEnhanced";
+import { WatchlistButton } from "@/components/ui/WatchlistButton";
+
+const ReviewSection = dynamic(() => import("@/components/ui/ReviewSection").then((m) => m.ReviewSection));
+const CastCarousel = dynamic(() => import("@/components/ui/CastCarousel").then((m) => m.CastCarousel));
+const SimilarMoviesSection = dynamic(() => import("@/components/ui/SimilarMoviesSection").then((m) => m.SimilarMoviesSection));
+const WatchProvidersEnhanced = dynamic(() => import("@/components/ui/WatchProvidersEnhanced").then((m) => m.WatchProvidersEnhanced));
 import type {
   TmdbCastMember,
   TmdbMovie,
@@ -102,90 +106,6 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-// ─── Cast Card ──────────────────────────────────────────────
-
-const PLACEHOLDER_PROFILE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'%3E%3Crect fill='%231a1a24' width='200' height='300'/%3E%3Ccircle fill='%2324242e' cx='100' cy='90' r='40'/%3E%3Cpath fill='%2324242e' d='M30 260 Q100 170 170 260'/%3E%3C/svg%3E";
-
-function CastCard({ member }: { member: TmdbCastMember }) {
-  const profileUrl = getProfileUrl(member.profile_path, "w185");
-
-  return (
-    <div className="flex w-32 flex-shrink-0 flex-col items-center text-center sm:w-36">
-      <div className="mb-2 h-32 w-32 overflow-hidden rounded-full border-2 border-border sm:h-36 sm:w-36">
-        {profileUrl ? (
-          <Image
-            src={profileUrl}
-            alt={member.name}
-            width={144}
-            height={144}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div
-            className="h-full w-full bg-surface-hover"
-            style={{
-              backgroundImage: `url("${PLACEHOLDER_PROFILE}")`,
-              backgroundSize: "cover",
-            }}
-          />
-        )}
-      </div>
-      <p className="line-clamp-1 text-sm font-semibold text-text">
-        {member.name}
-      </p>
-      <p className="line-clamp-1 text-xs text-text-secondary">
-        {member.character}
-      </p>
-    </div>
-  );
-}
-
-// ─── Similar Movie Card ─────────────────────────────────────
-
-function SimilarMovieCard({ movie }: { movie: TmdbMovie }) {
-  const posterUrl = getImageUrl(movie.poster_path, "w342");
-  const year = movie.release_date
-    ? new Date(movie.release_date).getFullYear()
-    : null;
-  const rating = movie.vote_average.toFixed(1);
-
-  return (
-    <Link
-      href={`/movies/${movie.id}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-all duration-300 hover:border-accent/30 hover:shadow-[0_0_20px_rgba(245,197,24,0.08)]"
-    >
-      <div className="relative aspect-[2/3] overflow-hidden bg-bg-alt">
-        {posterUrl ? (
-          <Image
-            src={posterUrl}
-            alt={movie.title}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 16vw"
-            className="object-cover transition-all duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <span className="font-display text-4xl text-text-secondary/20">
-              ?
-            </span>
-          </div>
-        )}
-        <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-bg/80 px-2 py-1 text-xs font-semibold text-accent backdrop-blur-sm">
-          <span className="text-accent">★</span>
-          {rating}
-        </div>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-1 p-3">
-        <h3 className="line-clamp-1 text-sm font-semibold text-text transition-colors group-hover:text-accent">
-          {movie.title}
-        </h3>
-        {year && <p className="text-xs text-text-secondary">{year}</p>}
-      </div>
-    </Link>
-  );
-}
-
 // ─── Main Page Component ────────────────────────────────────
 
 export default async function MovieDetailPage({
@@ -225,11 +145,13 @@ export default async function MovieDetailPage({
     throw error;
   }
 
-  // ── Extract the first YouTube trailer ──
+  // ── Extract trailer ──
   const trailer = videos.results.find(
     (v) => v.type === "Trailer" && v.site === "YouTube" && v.official,
   ) ?? videos.results.find(
     (v) => v.type === "Trailer" && v.site === "YouTube",
+  ) ?? videos.results.find(
+    (v) => v.type === "Trailer" && v.site === "Vimeo",
   );
 
   // ── Cast sorted by order, top 20 ──
@@ -276,8 +198,8 @@ export default async function MovieDetailPage({
       />
 
       {/* ── Hero Section ── */}
-        <section className="relative min-h-[60dvh] md:min-h-[70dvh]">
-          {/* Backdrop */}
+        <section className="relative min-h-[60dvh] md:min-h-[70dvh] overflow-hidden">
+          {/* Backdrop image */}
           {backdropUrl ? (
             <>
               <Image
@@ -297,7 +219,7 @@ export default async function MovieDetailPage({
           )}
 
           {/* Hero content */}
-          <div className="relative mx-auto flex h-full min-h-[60dvh] max-w-[1400px] flex-col items-start justify-end gap-6 px-4 pb-10 pt-24 md:min-h-[70dvh] md:flex-row md:items-end md:gap-10 md:px-6 md:pb-16 lg:px-8">
+          <div className="relative mx-auto flex h-full min-h-[60dvh] max-w-[1400px] flex-col items-start justify-end gap-6 px-4 pb-10 pt-24 md:min-h-[70dvh] md:gap-10 md:px-6 md:pb-16 lg:px-8">
             {/* Poster */}
             <div className="relative w-48 flex-shrink-0 md:w-64 lg:w-72">
               <div className="aspect-[2/3] overflow-hidden rounded-xl shadow-[0_0_30px_rgba(245,197,24,0.12)]">
@@ -342,7 +264,7 @@ export default async function MovieDetailPage({
               {/* Meta badges */}
               <div className="flex flex-wrap items-center gap-3">
                 {/* Rating */}
-                <div className="flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1.5">
+                <div className="flex items-center gap-1.5 rounded-full bg-black/70 backdrop-blur-[20px] border border-accent/30 px-3 py-1.5">
                   <span className="text-sm text-accent">★</span>
                   <span className="text-sm font-bold text-accent">
                     {movie.vote_average.toFixed(1)}
@@ -376,7 +298,7 @@ export default async function MovieDetailPage({
                     <Link
                       key={genre.id}
                       href={`/discover?genre=${genre.id}`}
-                      className="rounded-full border border-border bg-surface/60 px-3 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-accent/40 hover:text-accent"
+                      className="rounded-full border border-white/[0.06] bg-black/70 backdrop-blur-[20px] px-3 py-1 text-xs font-medium text-text"
                     >
                       {genre.name}
                     </Link>
@@ -385,6 +307,7 @@ export default async function MovieDetailPage({
               )}
 
               <div className="flex items-center gap-3">
+                <WatchlistButton movieId={movieId} />
                 <ShareButton
                   title={movie.title}
                   text={
@@ -410,18 +333,7 @@ export default async function MovieDetailPage({
         <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-6 lg:px-8 md:py-14">
           {/* ── Cast Section ── */}
           {cast.length > 0 && (
-            <AnimatedSection>
-              <section className="mb-14">
-                <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
-                  Cast
-                </h2>
-                <div className="flex gap-4 overflow-x-auto pb-4">
-                  {cast.map((member) => (
-                    <CastCard key={member.id} member={member} />
-                  ))}
-                </div>
-              </section>
-            </AnimatedSection>
+            <CastCarousel cast={cast} />
           )}
 
           {/* ── Trailer Section ── */}
@@ -431,9 +343,12 @@ export default async function MovieDetailPage({
                 <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
                   Trailer
                 </h2>
-                <div className="aspect-video w-full max-w-3xl overflow-hidden rounded-xl">
+                <div className="aspect-video w-full max-w-5xl mx-auto overflow-hidden rounded-xl">
                   <iframe
-                    src={`https://www.youtube.com/embed/${trailer.key}`}
+                    src={trailer.site === "Vimeo"
+                      ? `https://player.vimeo.com/video/${trailer.key}`
+                      : `https://www.youtube.com/embed/${trailer.key}`
+                    }
                     title={trailer.name}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
@@ -509,26 +424,17 @@ export default async function MovieDetailPage({
 
           {/* ── Similar Movies ── */}
           {similar.results.length > 0 && (
-            <AnimatedSection>
-              <section>
-                <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
-                  Similar Movies
-                </h2>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                  {similar.results.slice(0, 12).map((sMovie) => (
-                    <SimilarMovieCard key={sMovie.id} movie={sMovie} />
-                  ))}
-                </div>
-              </section>
-            </AnimatedSection>
+            <SimilarMoviesSection movieId={movieId} initialMovies={similar.results} />
           )}
 
           {/* ── Reviews ── */}
-          <ErrorBoundary fallback={<p className="text-text-secondary py-8 text-center">Reviews are currently unavailable.</p>}>
-            <AnimatedSection>
-              <ReviewSection movieId={movieId} />
-            </AnimatedSection>
-          </ErrorBoundary>
+          <div className="pt-10">
+            <ErrorBoundary fallback={<p className="text-text-secondary py-8 text-center">Reviews are currently unavailable.</p>}>
+              <AnimatedSection>
+                <ReviewSection movieId={movieId} />
+              </AnimatedSection>
+            </ErrorBoundary>
+          </div>
         </div>
       </div>
     );

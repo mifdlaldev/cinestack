@@ -1,0 +1,98 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "CineStack" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - list [ref=e5]:
+        - listitem [ref=e6]:
+          - button "Movies" [ref=e7]:
+            - text: Movies
+            - img
+        - listitem [ref=e8]:
+          - button "News" [ref=e9] [cursor=pointer]
+        - listitem [ref=e10]:
+          - button "Discover" [ref=e11] [cursor=pointer]
+      - generic [ref=e12]:
+        - button "Search movies" [ref=e13] [cursor=pointer]:
+          - img
+        - button "Sign In" [ref=e14] [cursor=pointer]
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - heading "Discover" [level=1] [ref=e18]
+        - paragraph [ref=e19]: Trending popular movies right now
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - generic [ref=e23]: Genre
+          - combobox [ref=e24]:
+            - generic [ref=e25]: All Genres
+            - img: ▼
+          - textbox [ref=e26]
+        - generic [ref=e27]:
+          - generic [ref=e28]: Year
+          - combobox [ref=e29]:
+            - generic [ref=e30]: All Years
+            - img: ▼
+          - textbox [ref=e31]
+        - generic [ref=e32]:
+          - generic [ref=e33]: Streaming On
+          - button "Select services" [ref=e34]:
+            - img
+            - generic [ref=e35]: Select services
+        - generic [ref=e36]:
+          - generic [ref=e37]: Sort By
+          - combobox [ref=e38]:
+            - generic [ref=e39]: popularity.desc
+            - img: ▼
+          - textbox [ref=e40]: popularity.desc
+        - generic [ref=e41]:
+          - button [disabled]
+  - contentinfo [ref=e163]:
+    - generic [ref=e164]:
+      - generic [ref=e165]:
+        - generic [ref=e166]:
+          - link "CineStack" [ref=e167] [cursor=pointer]:
+            - /url: /
+          - paragraph [ref=e168]: Your personal cinema companion. Discover, review, and track your favorite movies.
+        - generic [ref=e169]:
+          - heading "Movies" [level=3] [ref=e170]
+          - list [ref=e171]:
+            - listitem [ref=e172]:
+              - link "Trending" [ref=e173] [cursor=pointer]:
+                - /url: /trending
+            - listitem [ref=e174]:
+              - link "Popular" [ref=e175] [cursor=pointer]:
+                - /url: /popular
+            - listitem [ref=e176]:
+              - link "Top Rated" [ref=e177] [cursor=pointer]:
+                - /url: /top-rated
+            - listitem [ref=e178]:
+              - link "Upcoming" [ref=e179] [cursor=pointer]:
+                - /url: /upcoming
+        - generic [ref=e180]:
+          - heading "Company" [level=3] [ref=e181]
+          - list [ref=e182]:
+            - listitem [ref=e183]:
+              - link "About" [ref=e184] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e185]:
+              - link "Contact" [ref=e186] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e187]:
+              - link "Privacy Policy" [ref=e188] [cursor=pointer]:
+                - /url: /privacy
+            - listitem [ref=e189]:
+              - link "Terms" [ref=e190] [cursor=pointer]:
+                - /url: /terms
+        - generic [ref=e191]:
+          - heading "Connect" [level=3] [ref=e192]
+          - list [ref=e193]:
+            - listitem [ref=e194]:
+              - link "GitHub" [ref=e195] [cursor=pointer]:
+                - /url: https://github.com
+                - img [ref=e196]
+                - text: GitHub
+      - separator [ref=e198]
+      - generic [ref=e199]:
+        - paragraph [ref=e200]: This product uses the TMDB API but is not endorsed or certified by TMDB.
+        - paragraph [ref=e201]: © 2026 CineStack. All rights reserved.

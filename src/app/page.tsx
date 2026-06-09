@@ -1,20 +1,6 @@
 import { Suspense } from "react";
-import {
-  getTrendingCached,
-  getPopular,
-  getTopRated,
-  getUpcoming,
-  getNowPlaying,
-} from "@/lib/tmdb";
-import { HeroSection } from "@/components/layout/HeroSection";
-import { MovieRowWithProviders } from "@/components/ui/MovieRowWithProviders";
-import { MovieCardSkeleton } from "@/components/ui/MovieCardSkeleton";
-import { MyServicesRow } from "@/components/ui/MyServicesRow";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import {
-  NewsSection,
-  NewsSectionSkeleton,
-} from "@/components/ui/NewsSection";
+import { MovieCardSkeleton } from "@/components/ui/MovieCardSkeleton";
 
 export const revalidate = 2700;
 
@@ -30,79 +16,53 @@ function RowSkeleton() {
   );
 }
 
-async function TrendingHero() {
-  const data = await getTrendingCached();
-  return <HeroSection movie={data.results[0]} />;
-}
-
-async function TrendingRow() {
-  const data = await getTrendingCached();
+function NewsSkeleton() {
   return (
-    <MovieRowWithProviders
-      title="Trending Now"
-      movies={data.results.slice(0, 16)}
-      href="/trending"
-    />
+    <div className="space-y-6">
+      <div className="h-8 w-48 rounded bg-surface" />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="h-64 rounded-xl bg-surface animate-pulse" />
+        ))}
+      </div>
+    </div>
   );
 }
 
-async function PopularRow() {
-  const data = await getPopular();
-  return (
-    <MovieRowWithProviders
-      title="Popular"
-      movies={data.results.slice(0, 16)}
-      href="/popular"
-    />
-  );
-}
+export default async function HomePage() {
+  const [
+    { HeroSection },
+    { MovieRowWithProviders },
+    { MyServicesRow },
+    { NewsSection },
+  ] = await Promise.all([
+    import("@/components/layout/HeroSection"),
+    import("@/components/ui/MovieRowWithProviders"),
+    import("@/components/ui/MyServicesRow"),
+    import("@/components/ui/NewsSection"),
+  ]);
 
-async function TopRatedRow() {
-  const data = await getTopRated();
-  return (
-    <MovieRowWithProviders
-      title="Top Rated"
-      movies={data.results.slice(0, 16)}
-      href="/top-rated"
-    />
-  );
-}
+  const { getTrendingCached, getPopular, getTopRated, getUpcoming, getNowPlaying } = await import("@/lib/tmdb");
 
-async function UpcomingRow() {
-  const data = await getUpcoming();
-  return (
-    <MovieRowWithProviders
-      title="Upcoming"
-      movies={data.results.slice(0, 16)}
-      href="/upcoming"
-    />
-  );
-}
+  const [trending, popular, topRated, upcoming, nowPlaying] = await Promise.all([
+    getTrendingCached(),
+    getPopular(),
+    getTopRated(),
+    getUpcoming(),
+    getNowPlaying(),
+  ]);
 
-async function NowPlayingRow() {
-  const data = await getNowPlaying();
-  return (
-    <MovieRowWithProviders
-      title="Now Playing"
-      movies={data.results.slice(0, 16)}
-      href="/now-playing"
-    />
-  );
-}
-
-export default function HomePage() {
   return (
     <>
       <Suspense
         fallback={
-          <div className="min-h-[70vh] bg-surface animate-pulse" />
+          <div className="min-h-dvh bg-surface animate-pulse" />
         }
       >
-        <TrendingHero />
+        <HeroSection movies={trending.results} />
       </Suspense>
 
       <div className="mx-auto max-w-[1400px] space-y-10 px-4 py-10 md:px-6 md:py-12 lg:px-8">
-        {/* Smart row: available on user's streaming services */}
         <Suspense fallback={null}>
           <ErrorBoundary fallback={null}>
             <MyServicesRow />
@@ -110,26 +70,46 @@ export default function HomePage() {
         </Suspense>
 
         <Suspense fallback={<RowSkeleton />}>
-          <TrendingRow />
+          <MovieRowWithProviders
+            title="Trending Now"
+            movies={trending.results.slice(0, 16)}
+            href="/trending"
+          />
         </Suspense>
 
         <Suspense fallback={<RowSkeleton />}>
-          <PopularRow />
+          <MovieRowWithProviders
+            title="Popular"
+            movies={popular.results.slice(0, 16)}
+            href="/popular"
+          />
         </Suspense>
 
         <Suspense fallback={<RowSkeleton />}>
-          <TopRatedRow />
+          <MovieRowWithProviders
+            title="Top Rated"
+            movies={topRated.results.slice(0, 16)}
+            href="/top-rated"
+          />
         </Suspense>
 
         <Suspense fallback={<RowSkeleton />}>
-          <UpcomingRow />
+          <MovieRowWithProviders
+            title="Upcoming"
+            movies={upcoming.results.slice(0, 16)}
+            href="/upcoming"
+          />
         </Suspense>
 
         <Suspense fallback={<RowSkeleton />}>
-          <NowPlayingRow />
+          <MovieRowWithProviders
+            title="Now Playing"
+            movies={nowPlaying.results.slice(0, 16)}
+            href="/now-playing"
+          />
         </Suspense>
 
-        <Suspense fallback={<NewsSectionSkeleton />}>
+        <Suspense fallback={<NewsSkeleton />}>
           <NewsSection />
         </Suspense>
       </div>
