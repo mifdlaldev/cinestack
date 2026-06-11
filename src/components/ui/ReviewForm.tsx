@@ -17,10 +17,10 @@ import type { ReviewFormValues } from "@/types/review";
 // ─── Validation schema ───────────────────────────────────────
 
 const reviewFormSchema = z.object({
-  rating: z.number().int().min(1, "Please select a rating").max(10),
+  rating: z.number().int().min(1, "Please select a rating").max(5),
   content: z
     .string()
-    .min(10, "Review must be at least 10 characters")
+    .min(1, "Review cannot be empty")
     .max(1000, "Review must be at most 1000 characters"),
 });
 
@@ -72,8 +72,8 @@ export function ReviewForm({
       if (result?.error) {
         setServerError(result.error);
       }
-    } catch {
-      setServerError("Something went wrong. Please try again.");
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -101,7 +101,7 @@ export function ReviewForm({
         <StarRating
           rating={currentRating}
           onChange={(val) => setValue("rating", val, { shouldValidate: true })}
-          size="sm"
+          size="md"
         />
         {errors.rating && (
           <p className="text-xs text-error">{errors.rating.message}</p>
@@ -119,10 +119,15 @@ export function ReviewForm({
         <Textarea
           id="review-content"
           {...register("content")}
-          rows={4}
+          rows={1}
           placeholder="What did you think of this movie?"
-          className="resize-none"
+          className="resize-none overflow-hidden"
           aria-invalid={!!errors.content}
+          onInput={(e: React.FormEvent<HTMLTextAreaElement>) => {
+            const el = e.currentTarget;
+            el.style.height = "auto";
+            el.style.height = el.scrollHeight + "px";
+          }}
         />
         <div className="flex items-center justify-between">
           {errors.content ? (
@@ -142,33 +147,35 @@ export function ReviewForm({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-3 pt-1">
-        <Button
-          type="submit"
-          disabled={submitting}
-        >
-          {submitting ? (
-            <>
-              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-bg border-t-transparent" />
-              {isEditing ? "Saving..." : "Submitting..."}
-            </>
-          ) : isEditing ? (
-            "Save Changes"
-          ) : (
-            "Submit Review"
-          )}
-        </Button>
-
+      <div className="flex items-center justify-end gap-3 pt-1">
         {onCancel && (
           <Button
             type="button"
             variant="ghost"
+            size="sm"
             onClick={onCancel}
             disabled={submitting}
           >
             Cancel
           </Button>
         )}
+        <Button
+          type="submit"
+          variant="default"
+          size="sm"
+          disabled={submitting}
+        >
+          {submitting ? (
+            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-bg border-t-transparent" />
+          ) : null}
+          {submitting
+            ? isEditing
+              ? "Saving..."
+              : "Submitting..."
+            : isEditing
+              ? "Save Changes"
+              : "Submit Review"}
+        </Button>
       </div>
 
       {/* Server error */}

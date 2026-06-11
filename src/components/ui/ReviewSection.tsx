@@ -6,10 +6,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, X } from "lucide-react";
 import { createClient } from "@/lib/supabase-client";
-import { submitReview, updateReview, deleteReview } from "@/actions/review-actions";
+import { submitReview, deleteReview } from "@/actions/review-actions";
 import { ReviewCard } from "./ReviewCard";
 import { ReviewForm } from "./ReviewForm";
 import { MoviePagination } from "./MoviePagination";
@@ -44,11 +45,31 @@ async function fetchReviews(movieId: number, page: number): Promise<ReviewsRespo
 export function ReviewSection({ movieId }: ReviewSectionProps) {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
-  const [editingReview, setEditingReview] = useState<Review | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState<{
+    name: string | null;
+    avatar_url: string | null;
+  } | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const shouldReduceMotion = useReducedMotion();
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [expandedThreads, setExpandedThreads] = useState<Set<string>>(new Set());
+
+  const toggleThread = (id: string) => {
+    setExpandedThreads((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  // Count total nested replies recursively
+  const countNested = (id: string): number => {
+    const nested = repliesByParent[id];
+    if (!nested?.length) return 0;
+    return nested.length + nested.reduce((sum, r) => sum + countNested(r.id), 0);
+  };
 
   // ── Check auth state on mount ──
   useEffect(() => {
@@ -59,8 +80,19 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
           data: { user },
         } = await supabase.auth.getUser();
         setCurrentUserId(user?.id ?? null);
+        if (user) {
+          const { data: profile } = await supabase
+            .from("users")
+            .select("name, avatar_url")
+            .eq("id", user.id)
+            .maybeSingle();
+          setCurrentUserProfile(
+            profile ?? { name: null, avatar_url: null },
+          );
+        }
       } catch {
         setCurrentUserId(null);
+        setCurrentUserProfile(null);
       } finally {
         setAuthLoading(false);
       }
@@ -80,13 +112,62 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
     staleTime: 30_000,
   });
 
+  // ── Recursive reply thread renderer ──
+  const renderThread = (item: Review, depth = 0): React.ReactNode => {
+    const nested = repliesByParent[item.id];
+    const totalNested = nested ? countNested(item.id) : 0;
+    const isCollapsed = depth >= 2 && !expandedThreads.has(item.id);
+
+    return (
+      <div key={item.id}>
+        <ReviewCard
+          review={item}
+          isOwn={item.user_id === currentUserId}
+          isAuthenticated={!!currentUserId}
+          onDelete={item.user_id === currentUserId ? () => handleDelete(item.id) : undefined}
+          onReplySuccess={refetchReviews}
+          className={deletingId === item.id ? "opacity-50 transition-opacity" : ""}
+        />
+        {nested?.length > 0 && (
+          <>
+            {isCollapsed ? (
+              <button
+                onClick={() => toggleThread(item.id)}
+                className="ml-6 mt-2 flex items-center gap-1.5 text-xs font-medium text-accent transition-colors hover:text-accent-hover"
+              >
+                <span className="inline-block h-3 w-3 rounded-full border-2 border-accent" />
+                See {totalNested} more repl{totalNested > 1 ? "ies" : "y"}
+              </button>
+            ) : (
+              <>
+                <div className="ml-6 mt-3 space-y-3 border-l-2 border-border pl-4">
+                  {nested.map((reply) => renderThread(reply, depth + 1))}
+                </div>
+                {depth >= 2 && (
+                  <button
+                    onClick={() => toggleThread(item.id)}
+                    className="ml-6 mt-2 flex items-center gap-1.5 text-xs font-medium text-text-secondary transition-colors hover:text-text"
+                  >
+                    <span className="inline-block h-3 w-3 rounded-full border-2 border-text-secondary" />
+                    Hide replies
+                  </button>
+                )}
+              </>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
+
   // ── Find user's own review ──
+  // Only find non-reply reviews — replies don't count as "user's own review"
   const userReview = currentUserId
-    ? reviewsData?.data?.find((r) => r.user_id === currentUserId) ?? null
+    ? reviewsData?.data?.find((r) => r.user_id === currentUserId && !r.parent_id) ?? null
     : null;
 
-  // ── Invalidate reviews cache ──
-  const invalidateReviews = useCallback(() => {
+  // ── Force refetch reviews after mutation ──
+  const refetchReviews = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["reviews", movieId] });
   }, [queryClient, movieId]);
 
@@ -97,27 +178,29 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
       if (result.error) throw new Error(result.error);
       return result;
     },
-    onSuccess: () => {
-      invalidateReviews();
-    },
-  });
-
-  // ── Update existing review ──
-  const editMutation = useMutation({
-    mutationFn: async ({
-      reviewId,
-      formData,
-    }: {
-      reviewId: string;
-      formData: ReviewFormValues;
-    }) => {
-      const result = await updateReview(reviewId, formData);
-      if (result.error) throw new Error(result.error);
-      return result;
-    },
-    onSuccess: () => {
-      setEditingReview(null);
-      invalidateReviews();
+    onSuccess: (result) => {
+      if (result?.data && currentUserId) {
+        const current = queryClient.getQueryData<ReviewsResponse>(["reviews", movieId, page]);
+        if (current?.data) {
+          const newReview: Review = {
+            id: result.data.id,
+            user_id: currentUserId,
+            movie_id: movieId,
+            rating: result.data.rating,
+            content: result.data.content,
+            created_at: result.data.created_at,
+            updated_at: result.data.updated_at,
+            parent_id: null,
+            user: currentUserProfile ?? { name: null, avatar_url: null },
+          };
+          queryClient.setQueryData<ReviewsResponse>(["reviews", movieId, page], {
+            ...current,
+            data: [newReview, ...current.data],
+            count: current.count + 1,
+          });
+        }
+      }
+      refetchReviews();
     },
   });
 
@@ -153,43 +236,39 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
     },
     onSettled: () => {
       setDeletingId(null);
-      invalidateReviews();
+      refetchReviews();
     },
   });
 
-  // ── Handle form submit ──
+  // ── Handle form submit (new review only — edits are inline) ──
   const handleFormSubmit = async (formData: ReviewFormValues) => {
-    if (editingReview) {
-      await editMutation.mutateAsync({ reviewId: editingReview.id, formData });
-    } else {
-      await createMutation.mutateAsync(formData);
-    }
-  };
-
-  // ── Handle edit click ──
-  const handleEdit = (review: Review) => {
-    setEditingReview(review);
-    // Scroll to form
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    await createMutation.mutateAsync(formData);
   };
 
   // ── Handle delete click ──
   const handleDelete = (reviewId: string) => {
-    if (window.confirm("Are you sure you want to delete your review?")) {
-      deleteMutation.mutate(reviewId);
+    setDeleteConfirmId(reviewId);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteConfirmId) {
+      deleteMutation.mutate(deleteConfirmId);
+      setDeleteConfirmId(null);
     }
   };
 
-  // ── Handle cancel edit ──
-  const handleCancelEdit = () => {
-    setEditingReview(null);
-  };
+  // ── Group reviews into parent + replies (YouTube-style nesting) ──
+  const parentReviews = (reviewsData?.data ?? [])
+    .filter((r) => !r.parent_id);
 
-  // ── Determine which reviews to display ──
-  // If editing, exclude the review being edited from the list
-  const displayedReviews = editingReview
-    ? reviewsData?.data?.filter((r) => r.id !== editingReview.id) ?? []
-    : reviewsData?.data ?? [];
+  const repliesByParent = (reviewsData?.data ?? [])
+    .filter((r) => r.parent_id)
+    .reduce<Record<string, Review[]>>((acc, r) => {
+      const pid = r.parent_id!;
+      if (!acc[pid]) acc[pid] = [];
+      acc[pid].push(r);
+      return acc;
+    }, {});
 
   return (
     <section className="mb-14">
@@ -225,18 +304,11 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
       )}
 
       {/* ── Review form (logged in, not already have a review OR editing) ── */}
-      {!authLoading && currentUserId && (!userReview || editingReview) && (
-        <div className="mb-8">
+      {!authLoading && currentUserId && !userReview && (
+        <div id="review-form-scroll" className="mb-8">
           <ReviewForm
-            key={editingReview?.id ?? "new"}
-            defaultValues={
-              editingReview
-                ? { rating: editingReview.rating, content: editingReview.content }
-                : undefined
-            }
+            key="new"
             onSubmit={handleFormSubmit}
-            onCancel={editingReview ? handleCancelEdit : undefined}
-            isEditing={!!editingReview}
           />
         </div>
       )}
@@ -276,7 +348,7 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
       )}
 
       {/* ── Empty state ── */}
-      {!isLoading && !isError && displayedReviews.length === 0 && !editingReview && (
+      {!isLoading && !isError && parentReviews.length === 0 && (
         <div className="rounded-xl border border-border bg-surface p-8 text-center">
           <p className="text-sm text-text-secondary">
             {currentUserId
@@ -286,89 +358,21 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
         </div>
       )}
 
-      {/* ── Reviews list ── */}
-      {!isLoading && !isError && displayedReviews.length > 0 && (
-        shouldReduceMotion ? (
-          <div className="space-y-4">
-            {displayedReviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-                isOwn={review.user_id === currentUserId}
-                isAuthenticated={!!currentUserId}
-                onEdit={
-                  review.user_id === currentUserId
-                    ? () => handleEdit(review)
-                    : undefined
-                }
-                onDelete={
-                  review.user_id === currentUserId
-                    ? () => handleDelete(review.id)
-                    : undefined
-                }
-                className={
-                  deletingId === review.id
-                    ? "opacity-50 transition-opacity"
-                    : ""
-                }
-              />
-            ))}
-          </div>
-        ) : (
-          <motion.div
-            className="space-y-4"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={{
-              hidden: {},
-              visible: {
-                transition: {
-                  staggerChildren: 0.06,
-                  delayChildren: 0.1,
-                },
-              },
-            }}
-          >
-            {displayedReviews.map((review) => (
-              <motion.div
-                key={review.id}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: {
-                    opacity: 1,
-                    y: 0,
-                    transition: {
-                      duration: 0.4,
-                      ease: [0.16, 1, 0.3, 1],
-                    },
-                  },
-                }}
-              >
-                <ReviewCard
-                  review={review}
-                  isOwn={review.user_id === currentUserId}
-                  isAuthenticated={!!currentUserId}
-                  onEdit={
-                    review.user_id === currentUserId
-                      ? () => handleEdit(review)
-                      : undefined
-                  }
-                  onDelete={
-                    review.user_id === currentUserId
-                      ? () => handleDelete(review.id)
-                      : undefined
-                  }
-                  className={
-                    deletingId === review.id
-                      ? "opacity-50 transition-opacity"
-                      : ""
-                  }
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        )
+      {/* ── Reviews list (YouTube-style nested) ── */}
+      {!isLoading && !isError && parentReviews.length > 0 && (
+        <motion.div
+          className="space-y-6"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {parentReviews.map((review) => (
+            <div key={review.id}>
+              {renderThread(review)}
+            </div>
+          ))}
+        </motion.div>
       )}
 
       {/* ── Pagination ── */}
@@ -378,6 +382,43 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
           totalPages={reviewsData.totalPages}
           onPageChange={setPage}
         />
+      )}
+
+      {/* Delete confirmation dialog */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
+            <div className="mb-4 flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-5 w-5 text-error" />
+                <h3 className="font-display text-lg text-text">Delete Review</h3>
+              </div>
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="text-text-secondary hover:text-text"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-text-secondary">
+              Are you sure you want to delete your review? This action cannot be undone.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="rounded-lg bg-error px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.97]"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

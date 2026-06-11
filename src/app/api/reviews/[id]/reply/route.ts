@@ -16,8 +16,11 @@ export async function POST(
   const body = await request.json();
   const { content } = body;
 
-  if (!content || content.trim().length === 0) {
-    return NextResponse.json({ error: "Content is required" }, { status: 400 });
+  if (!content || content.trim().length < 1) {
+    return NextResponse.json({ error: "Reply cannot be empty" }, { status: 400 });
+  }
+  if (content.length > 1000) {
+    return NextResponse.json({ error: "Reply must be at most 1000 characters" }, { status: 400 });
   }
 
   // Get the parent review to find the movie_id
@@ -36,7 +39,7 @@ export async function POST(
     .insert({
       user_id: user.id,
       movie_id: parent.movie_id,
-      rating: 0,
+      rating: null,
       content: content.trim(),
       parent_id: id,
     })
