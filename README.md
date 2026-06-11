@@ -472,9 +472,9 @@ Theme toggle, recommendations, social features, PWA, mobile app, i18n
   <p>
     <a href="https://github.com/mifdlaldev/cinestack/issues">Report Bug</a>
     ·
-    <a href="https://github.com/mifdlaldev/cinestack/issues">Request Feature</a>
+    <a href="https://github.com/mifdlaldev/cinestack/discussions">Discussions</a>
     ·
-    <a href="https://github.com/mifdlaldev/cinestack/discussions">Ask Question</a>
+    <a href="https://github.com/mifdlaldev/cinestack/tree/main/docs">Documentation</a>
   </p>
   <br/>
 </div>
