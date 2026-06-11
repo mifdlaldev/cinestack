@@ -201,20 +201,6 @@ export function ProfileContent({
 }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [watchlistMovies, setWatchlistMovies] = useState<TmdbMovie[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [editingName, setEditingName] = useState(false);
-  const [nameInput, setNameInput] = useState("");
-  const [avatarUploading, setAvatarUploading] = useState(false);
-  const [profileError, setProfileError] = useState<string | null>(null);
-  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
-
-  const [deleteStep, setDeleteStep] = useState(0);
-  const [deleteConfirmText, setDeleteConfirmText] = useState("");
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const profileData = profile as {
     name?: string;
@@ -229,10 +215,20 @@ export function ProfileContent({
 
   const avatarUrl = profileData?.avatar_url ?? null;
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => {
-    setNameInput(displayName);
-  }, [displayName]);
+  const [watchlistMovies, setWatchlistMovies] = useState<TmdbMovie[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(displayName);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
+
+  const [deleteStep, setDeleteStep] = useState(0);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const initials = displayName
     .split(" ")
