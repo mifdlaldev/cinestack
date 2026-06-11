@@ -53,7 +53,7 @@ export default async function GenrePage({ params, searchParams }: Props) {
   }
 
   const data = await discoverMovies({
-    genreId,
+    genreId: genreId.toString(),
     sortBy: "popularity.desc",
     page: currentPage,
   });

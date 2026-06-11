@@ -7,21 +7,24 @@ import {
   Code2,
   MessageSquare,
   Sparkles,
+  Globe,
+  ExternalLink,
+  Briefcase,
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  title: "Contact — Hire a Full-Stack Developer",
   description:
-    "Get in touch with the CineStack team. Have a question, suggestion, or just want to say hi?",
+    "Looking for a full-stack developer? CineStack is built by Mifdlal Tsaqib Alfarras — available for freelance projects, collaboration, and full-time opportunities.",
 };
 
 const contactMethods = [
   {
     icon: Mail,
     title: "Email",
-    value: "contact@cinestack.web.id",
-    href: "mailto:contact@cinestack.web.id",
-    description: "We typically respond within 24 hours",
+    value: "mifdlal@example.com",
+    href: "mailto:mifdlal@example.com",
+    description: "I typically respond within 24 hours",
   },
   {
     icon: MapPin,
@@ -31,31 +34,59 @@ const contactMethods = [
     description: "Available for remote collaboration worldwide",
   },
   {
+    icon: Briefcase,
+    title: "Fiverr",
+    value: "Hire on Fiverr",
+    href: "https://www.fiverr.com/mifdlal_afs",
+    description: "Full-stack development services",
+  },
+  {
+    icon: ExternalLink,
+    title: "LinkedIn",
+    value: "Let's Connect",
+    href: "https://www.linkedin.com/in/mifdlal-tsaqib-alfarras/",
+    description: "Professional profile and experience",
+  },
+  {
     icon: Code2,
     title: "GitHub",
     value: "CineStack Repo",
     href: "https://github.com/mifdlaldev/cinestack",
     description: "Star the repo and follow development",
   },
-
+  {
+    icon: Globe,
+    title: "Website",
+    value: "Portfolio Site",
+    href: "https://www.mtadevworks.web.id/",
+    description: "More projects and case studies",
+  },
 ];
 
 const faqs = [
   {
-    q: "Is CineStack free to use?",
-    a: "Yes, CineStack is completely free. It's a portfolio project built to showcase full-stack development skills.",
+    q: "What services do you offer?",
+    a: "Full-stack web development using Next.js, React, TypeScript, Supabase, and Tailwind CSS. I build SaaS platforms, landing pages, dashboards, e-commerce sites, and custom web applications.",
   },
   {
-    q: "Where does the movie data come from?",
-    a: "All movie data is powered by the TMDB API (The Movie Database). We're not affiliated with TMDB.",
+    q: "What's your tech stack?",
+    a: "Next.js 15, TypeScript (strict), Supabase (PostgreSQL + Auth), Tailwind CSS v4, Framer Motion, React Query, and Upstash Redis. Deployed on Vercel with CI/CD via GitHub Actions.",
   },
   {
-    q: "Can I contribute or suggest features?",
-    a: "Absolutely! Reach out via email or GitHub. Feature requests, bug reports, and feedback are always welcome.",
+    q: "How do you handle project pricing?",
+    a: "Every project is unique. I offer fixed-price quotes for well-scoped projects and hourly rates for ongoing work. Reach out with your requirements and I'll provide a detailed estimate within 48 hours.",
   },
   {
-    q: "Is my data private?",
-    a: "Your watchlist and reviews are private by default. We don't share personal data with third parties.",
+    q: "What's your typical turnaround time?",
+    a: "A standard landing page or portfolio site takes 3-7 days. A full-stack web application with auth, database, and admin panel takes 2-4 weeks depending on complexity.",
+  },
+  {
+    q: "Do you offer post-launch support?",
+    a: "Yes! All projects include 30 days of post-launch support for bug fixes and minor adjustments. Extended maintenance plans are available.",
+  },
+  {
+    q: "How can I see more of your work?",
+    a: "Check out my GitHub and portfolio website for more projects, case studies, and code samples. I'm happy to hop on a call to discuss your project.",
   },
 ];
 
@@ -91,8 +122,9 @@ export default function ContactPage() {
             </h1>
 
             <p className="mt-6 mx-auto max-w-lg text-lg leading-relaxed text-text-secondary">
-              Have a question, feedback, or just want to say hi? We&apos;d love
-              to hear from you.
+              Looking for a full-stack developer for your next project?
+              I&apos;m available for freelance work, collaboration, and
+              full-time opportunities. Let&apos;s build something great together.
             </p>
           </div>
         </div>
@@ -101,7 +133,7 @@ export default function ContactPage() {
       {/* ─── Contact Methods ─────────────────────────────────── */}
       <section className="border-b border-border">
         <div className="mx-auto max-w-[1400px] px-4 py-16 md:px-6 md:py-24 lg:px-8">
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
             {contactMethods.map((method) => {
               const Icon = method.icon;
               const content = (

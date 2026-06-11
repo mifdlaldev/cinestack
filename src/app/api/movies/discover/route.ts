@@ -26,11 +26,11 @@ export async function GET(request: NextRequest) {
       : undefined;
 
     const data = await discoverMovies({
-      genreId: genreId ? Number(genreId) : undefined,
-      year: year ? Number(year) : undefined,
+      genreId: genreId ?? undefined,
+      year: year ?? undefined,
       sortBy: sortBy ?? undefined,
       page: page ? Number(page) : undefined,
-      providerIds: providerIds && providerIds.length > 0 ? providerIds : undefined,
+      providerIds: providerIds && providerIds.length > 0 ? providerIds.join(",") : undefined,
       watchRegion: watchRegion ?? undefined,
     });
 

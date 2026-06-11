@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await discoverMovies({
-      providerIds,
+      providerIds: providerIds.map((id: number) => id.toString()).join(","),
       page: page ? Number(page) : undefined,
       watchRegion: searchParams.get("watchRegion") ?? "US",
     });
