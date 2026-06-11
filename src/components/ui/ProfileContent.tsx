@@ -581,8 +581,7 @@ export function ProfileContent({
       {/* ─── My Replies ─── */}
       {replyReviews.length > 0 && (
         <section className="mb-12">
-          <div className="mb-4 flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-accent" />
+          <div className="mb-4">
             <h2 className="font-display text-xl text-text">My Replies</h2>
           </div>
           <div className="space-y-3">
