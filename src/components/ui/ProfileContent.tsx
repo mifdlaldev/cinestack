@@ -675,8 +675,7 @@ export function ProfileContent({
       {/* ─── My Replies ─── */}
       {replyReviews.length > 0 && (
         <section className="mb-12">
-          <div className="mb-4 flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-accent" />
+          <div className="mb-4">
             <h2 className="font-display text-xl text-text">My Replies</h2>
           </div>
           <div className="space-y-3">
@@ -686,7 +685,133 @@ export function ProfileContent({
           </div>
         </section>
       )}
+      {/* ─── Account Settings ─── */}
+      {loading ? (
+        <section className="mb-12 rounded-xl border border-border bg-surface p-6">
+          <div className="mb-4 h-6 w-40 animate-pulse rounded bg-surface-hover" />
+          <div className="rounded-lg border border-error/20 bg-error/[0.03] p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-28 animate-pulse rounded bg-surface-hover" />
+                <div className="h-3 w-64 animate-pulse rounded bg-surface-hover" />
+              </div>
+              <div className="h-8 w-32 animate-pulse self-end rounded-lg bg-surface-hover sm:self-auto" />
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="mb-12 rounded-xl border border-border bg-surface p-6">
+          <h2 className="mb-4 font-display text-lg text-text">Account Settings</h2>
+          <div className="rounded-lg border border-error/20 bg-error/[0.03] p-4">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <div>
+                <h3 className="text-sm font-semibold text-error">Delete Account</h3>
+                <p className="mt-1 text-xs text-text-secondary">
+                  Permanently delete your account and all your data. This action cannot be undone.
+                </p>
+              </div>
+              <button
+                onClick={() => setDeleteStep(1)}
+                className="self-end sm:self-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-error/10 px-3 py-1.5 text-xs font-semibold text-error transition-all hover:bg-error/20 active:scale-[0.97]"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete Account
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
+      {/* ─── Delete Account - Step 1 Modal ─── */}
+      {deleteStep === 1 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
+            <div className="mb-4 flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-error" />
+              <h3 className="font-display text-lg text-text">Delete Account</h3>
+            </div>
+            <p className="text-sm text-text-secondary">
+              This will permanently delete your account, reviews, watchlist, and all
+              associated data. Are you sure you want to proceed?
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setDeleteStep(0);
+                  setDeleteConfirmText("");
+                  setDeleteError(null);
+                }}
+                className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setDeleteStep(2)}
+                className="rounded-lg bg-error px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.97]"
+              >
+                Yes, Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Delete Account - Step 2 Modal ─── */}
+      {deleteStep === 2 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
+            <div className="mb-4 flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-error" />
+              <h3 className="font-display text-lg text-text">Confirm Deletion</h3>
+            </div>
+            <p className="mb-1 text-sm text-text-secondary">
+              This action <span className="font-semibold text-text">cannot be undone</span>.
+              Type <span className="font-bold text-error">DELETE</span> below to confirm:
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type DELETE"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setDeleteStep(0);
+                  setDeleteConfirmText("");
+                  setDeleteError(null);
+                }
+              }}
+              className="mt-3 w-full rounded-lg border border-error/30 bg-bg-alt px-3 py-2 text-sm text-text outline-none placeholder:text-text-secondary/50 focus:border-error/50 focus:ring-1 focus:ring-error/30"
+            />
+            {deleteError && (
+              <p className="mt-2 flex items-center gap-1.5 text-xs text-error">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                {deleteError}
+              </p>
+            )}
+            <div className="mt-4 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setDeleteStep(0);
+                  setDeleteConfirmText("");
+                  setDeleteError(null);
+                }}
+                className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== "DELETE" || deleting}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-error px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                {deleting ? "Deleting..." : "Permanently Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {!loading && parentReviews.length === 0 && replyReviews.length === 0 && (
         <div className="rounded-xl border border-border bg-surface py-12 text-center">
           <p className="text-sm text-text-secondary">No activity yet.</p>
