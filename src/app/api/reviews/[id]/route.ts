@@ -10,7 +10,10 @@ export async function PUT(
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: { code: "UNAUTHORIZED", message: "Unauthorized" } },
+      { status: 401 },
+    );
   }
 
   // Verify ownership
@@ -21,21 +24,33 @@ export async function PUT(
     .single();
 
   if (!existing) {
-    return NextResponse.json({ error: "Review not found" }, { status: 404 });
+    return NextResponse.json(
+      { error: { code: "NOT_FOUND", message: "Review not found" } },
+      { status: 404 },
+    );
   }
 
   if (existing.user_id !== user.id) {
-    return NextResponse.json({ error: "You can only edit your own reviews" }, { status: 403 });
+    return NextResponse.json(
+      { error: { code: "FORBIDDEN", message: "You can only edit your own reviews" } },
+      { status: 403 },
+    );
   }
 
   const body = await request.json();
   const { rating, content } = body;
 
   if (!content || content.trim().length < 1) {
-    return NextResponse.json({ error: "Content cannot be empty" }, { status: 400 });
+    return NextResponse.json(
+      { error: { code: "INVALID_INPUT", message: "Content cannot be empty" } },
+      { status: 400 },
+    );
   }
   if (rating !== undefined && (rating < 1 || rating > 10)) {
-    return NextResponse.json({ error: "Rating must be between 1 and 10" }, { status: 400 });
+    return NextResponse.json(
+      { error: { code: "INVALID_INPUT", message: "Rating must be between 1 and 10" } },
+      { status: 400 },
+    );
   }
 
   const { error } = await supabase
@@ -44,8 +59,11 @@ export async function PUT(
     .eq("id", id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: { code: "INTERNAL_ERROR", message: error.message } },
+      { status: 500 },
+    );
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ data: { success: true } });
 }

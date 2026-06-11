@@ -16,13 +16,13 @@ describe("TMDB Image Utilities", () => {
     });
 
     it("accepts custom size parameter", () => {
-      const result = getImageUrl("/test.jpg", "original");
-      expect(result).toBe("https://image.tmdb.org/t/p/original/test.jpg");
+      const result = getImageUrl("/test.jpg", "w780");
+      expect(result).toBe("https://image.tmdb.org/t/p/w780/test.jpg");
     });
 
-    it("accepts w300 size parameter", () => {
-      const result = getImageUrl("/test.jpg", "w300");
-      expect(result).toBe("https://image.tmdb.org/t/p/w300/test.jpg");
+    it("accepts w185 size parameter", () => {
+      const result = getImageUrl("/test.jpg", "w185");
+      expect(result).toBe("https://image.tmdb.org/t/p/w185/test.jpg");
     });
   });
 

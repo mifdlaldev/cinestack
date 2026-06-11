@@ -16,7 +16,10 @@ export async function GET(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: { code: "UNAUTHORIZED", message: "Unauthorized" } },
+      { status: 401 },
+    );
   }
 
   const { data: profile } = await supabase
@@ -26,7 +29,10 @@ export async function GET(request: NextRequest) {
     .single();
 
   if (profile?.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json(
+      { error: { code: "FORBIDDEN", message: "Forbidden" } },
+      { status: 403 },
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -41,7 +47,10 @@ export async function GET(request: NextRequest) {
     .range(from, to);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: { code: "DB_ERROR", message: error.message } },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({
