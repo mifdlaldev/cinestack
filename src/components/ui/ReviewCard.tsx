@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import { Pencil, Trash2, MessageCircle, Star, Loader2 } from "lucide-react";
 import { StarRating } from "./StarRating";
 import { formatRelativeTime } from "@/lib/format-relative-time";
@@ -133,16 +134,28 @@ export function ReviewCard({
       {/* Header */}
       <div className="mb-3 flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold",
-              getAvatarColor(review.user?.name ?? null),
-              getAvatarTextColor(review.user?.name ?? null),
-            )}
-            aria-hidden="true"
-          >
-            {getInitials(review.user?.name ?? null)}
-          </div>
+          {review.user?.avatar_url ? (
+            <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full">
+              <Image
+                src={review.user.avatar_url}
+                alt={review.user?.name ?? "Avatar"}
+                fill
+                sizes="40px"
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <div
+              className={cn(
+                "flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold",
+                getAvatarColor(review.user?.name ?? null),
+                getAvatarTextColor(review.user?.name ?? null),
+              )}
+              aria-hidden="true"
+            >
+              {getInitials(review.user?.name ?? null)}
+            </div>
+          )}
           <div>
             <p className="text-sm font-semibold text-text">
               {review.user?.name ?? "Anonymous"}
