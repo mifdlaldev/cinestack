@@ -19,6 +19,11 @@
   </a>
   <br/>
   <br/>
+
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./public/hero-banner.png">
+    <img src="./public/hero-banner.png" alt="CineStack Hero" width="100%" style="max-width: 1200px; border-radius: 12px;" />
+  </picture>
 </div>
 
 ---
@@ -62,6 +67,11 @@ This project showcases **production-grade** full-stack development skills:
 ---
 
 ## ✨ Key Features
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./public/mockup-collage.png">
+  <img src="./public/mockup-collage.png" alt="CineStack Features" width="100%" style="max-width: 1200px; border-radius: 12px; margin-bottom: 32px;" />
+</picture>
 
 ### 🎥 Movie Discovery
 - **Browse** — Trending, popular, top-rated, now-playing, and upcoming movies.
