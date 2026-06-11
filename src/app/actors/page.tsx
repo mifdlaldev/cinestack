@@ -6,6 +6,7 @@ import { getTrendingActors, getProfileUrl } from "@/lib/tmdb";
 import type { TmdbPerson } from "@/types/tmdb";
 import { StaggerContainer } from "@/components/ui/StaggerContainer";
 import { AnimatedSection } from "@/components/ui/AnimatedSection";
+import { ActorSearchBar } from "@/components/ui/ActorSearchBar";
 
 export const revalidate = 7200;
 export const metadata: Metadata = {
@@ -17,6 +18,86 @@ export const metadata: Metadata = {
 
 interface PageProps {
   searchParams: Promise<{ page?: string }>;
+}
+
+// ─── Skeleton ───────────────────────────────────────────────
+
+function ActorGridSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      {Array.from({ length: 12 }).map((_, i) => (
+        <div key={i} className="overflow-hidden rounded-xl border border-border bg-surface">
+          <div className="aspect-[2/3] animate-pulse bg-surface-hover" />
+          <div className="space-y-2 p-3">
+            <div className="h-4 w-3/4 animate-pulse rounded bg-surface-hover" />
+            <div className="h-3 w-1/2 animate-pulse rounded bg-surface-hover" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Trending Grid (Server) ───────────────────────────────
+
+async function TrendingGrid({ page }: { page: number }) {
+  const data = await getTrendingActors("week", page);
+  const actors = data.results.filter((p) => p.known_for_department === "Acting");
+  const totalPages = Math.min(data.total_pages, 500);
+
+  if (actors.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-20 text-center">
+        <p className="text-lg text-text-secondary">No actors found.</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <StaggerContainer className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        {actors.map((actor) => (
+          <ActorCard key={actor.id} actor={actor} />
+        ))}
+      </StaggerContainer>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <nav
+          className="mt-10 flex flex-wrap items-center justify-center gap-1 md:gap-2"
+          aria-label="Actors pagination"
+        >
+          {page > 1 && (
+            <Link
+              href={`/actors?page=${page - 1}`}
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface hover:text-text"
+              aria-label="Previous page"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </Link>
+          )}
+
+          <span className="px-4 text-sm text-text-secondary">
+            Page {page} of {totalPages}
+          </span>
+
+          {page < totalPages && (
+            <Link
+              href={`/actors?page=${page + 1}`}
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface hover:text-text"
+              aria-label="Next page"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          )}
+        </nav>
+      )}
+    </>
+  );
 }
 
 // ─── Actor Card ─────────────────────────────────────────────
@@ -74,97 +155,6 @@ function ActorCard({ actor, priority }: { actor: TmdbPerson; priority?: boolean 
   );
 }
 
-// ─── Skeleton Loading ───────────────────────────────────────
-
-function ActorGridSkeleton() {
-  return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-      {Array.from({ length: 12 }).map((_, i) => (
-        <div key={i} className="overflow-hidden rounded-xl border border-border bg-surface">
-          <div className="aspect-[2/3] animate-pulse bg-surface-hover" />
-          <div className="space-y-2 p-3">
-            <div className="h-4 w-3/4 animate-pulse rounded bg-surface-hover" />
-            <div className="h-3 w-1/2 animate-pulse rounded bg-surface-hover" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Actor Grid (Server Component) ─────────────────────────
-
-async function ActorGrid({ page }: { page: number }) {
-  const data = await getTrendingActors("week", page);
-  const actors = data.results.filter((p) => p.known_for_department === "Acting");
-
-  if (actors.length === 0) {
-    return (
-      <div className="flex flex-col items-center gap-4 py-20 text-center">
-        <p className="text-lg text-text-secondary">No actors found.</p>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <StaggerContainer className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-        {actors.map((actor) => (
-          <ActorCard key={actor.id} actor={actor} />
-        ))}
-      </StaggerContainer>
-
-      {/* Pagination */}
-      {data.total_pages > 1 && (
-        <nav
-          className="mt-10 flex items-center justify-center gap-2"
-          aria-label="Actors pagination"
-        >
-          {page > 1 && (
-            <Link
-              href={`/actors?page=${page - 1}`}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface hover:text-text"
-              aria-label="Previous page"
-            >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
-            </Link>
-          )}
-
-          <span className="px-4 text-sm text-text-secondary">
-            Page {page} of {Math.min(data.total_pages, 500)}
-          </span>
-
-          {page < Math.min(data.total_pages, 500) && (
-            <Link
-              href={`/actors?page=${page + 1}`}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface hover:text-text"
-              aria-label="Next page"
-            >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          )}
-        </nav>
-      )}
-    </>
-  );
-}
-
 // ─── Page ───────────────────────────────────────────────────
 
 export default async function ActorsPage({ searchParams }: PageProps) {
@@ -172,9 +162,9 @@ export default async function ActorsPage({ searchParams }: PageProps) {
   const currentPage = Math.max(1, Math.min(500, Number(params?.page) || 1));
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-6 md:py-14 lg:px-8">
+    <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-6 md:py-12 lg:px-8">
       <AnimatedSection>
-        <div className="mb-10">
+        <div className="pt-10 mb-8">
           <h1 className="font-display text-3xl tracking-tight text-text md:text-4xl">
             Trending Actors
           </h1>
@@ -184,9 +174,11 @@ export default async function ActorsPage({ searchParams }: PageProps) {
         </div>
       </AnimatedSection>
 
-      <Suspense fallback={<ActorGridSkeleton />}>
-        <ActorGrid page={currentPage} />
-      </Suspense>
+      <ActorSearchBar>
+        <Suspense fallback={<ActorGridSkeleton />}>
+          <TrendingGrid page={currentPage} />
+        </Suspense>
+      </ActorSearchBar>
     </div>
   );
 }
