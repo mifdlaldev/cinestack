@@ -94,6 +94,7 @@ function DropdownMenuTrigger({ children, render, ...props }: React.ComponentProp
       ref: (node: HTMLElement | null) => {
         triggerElRef.current = node
         // Forward ref if the wrapped component exposes one
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const childRef = (render as any).ref
         if (childRef && typeof childRef === "object") childRef.current = node
       },
