@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
         hostname: "*.googleusercontent.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "oadoymxsuzqripwdqomz.supabase.co",
+        pathname: "/storage/v1/object/public/avatars/**",
+      },
     ],
   },
   async headers() {

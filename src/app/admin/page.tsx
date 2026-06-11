@@ -4,6 +4,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Users,
   Film,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { formatRelativeTime } from "@/lib/format-relative-time";
+import { getImageUrl } from "@/lib/tmdb";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -109,6 +111,7 @@ async function DashboardContent() {
         user:users(name, avatar_url)
       `,
       )
+      .not("rating", "is", null)
       .order("created_at", { ascending: false })
       .limit(5),
   ]);
@@ -120,14 +123,18 @@ async function DashboardContent() {
   const { data: cachedMovies } = movieIds.length
     ? await supabase
         .from("movie_cache")
-        .select("tmdb_id, title")
+        .select("tmdb_id, title, data")
         .in("tmdb_id", movieIds)
     : { data: [] };
 
-  const movieTitles: Record<number, string> = {};
+  const movieInfo: Record<number, { title: string; posterUrl: string | null }> = {};
   if (cachedMovies) {
     for (const m of cachedMovies) {
-      movieTitles[m.tmdb_id] = m.title;
+      const posterPath = (m.data as { poster_path?: string | null } | null)?.poster_path ?? null;
+      movieInfo[m.tmdb_id] = {
+        title: m.title,
+        posterUrl: posterPath ? getImageUrl(posterPath, "w92") : null,
+      };
     }
   }
 
@@ -281,38 +288,64 @@ async function DashboardContent() {
                 No reviews yet
               </p>
             ) : (
-              (recentReviewsResult.data ?? []).map(
-                (r: Record<string, unknown>) => {
-                  const userObj = Array.isArray(r.user)
-                    ? (r.user as Array<{ name: string | null; avatar_url: string | null }>)[0]
-                    : (r.user as { name: string | null; avatar_url: string | null } | null);
-                  return (
-                    <div
-                      key={r.id as string}
-                      className="flex items-start gap-3 px-5 py-3"
-                    >
-                      <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
-                        <Star className="h-3.5 w-3.5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-text">
-                          {userObj?.name ?? "Anonymous"}{" "}
-                          <span className="font-normal text-text-secondary">
-                            rated {movieTitles[r.movie_id as number] ?? `#${r.movie_id}`}{" "}
-                            <span className="text-accent">{r.rating ? ((r.rating as number) > 5 ? Math.round((r.rating as number) / 2) : (r.rating as number)) : "-"}{r.rating ? "/5" : ""}</span>
-                          </span>
-                        </p>
-                        <p className="mt-0.5 line-clamp-1 text-xs text-text-secondary">
-                          {r.content as string}
-                        </p>
-                      </div>
-                      <span className="flex-shrink-0 text-xs text-text-secondary">
-                        {formatRelativeTime(r.created_at as string)}
-                      </span>
-                    </div>
-                  );
-                },
-              )
+                  (recentReviewsResult.data ?? []).map(
+                    (r: Record<string, unknown>) => {
+                      const userObj = Array.isArray(r.user)
+                        ? (r.user as Array<{ name: string | null; avatar_url: string | null }>)[0]
+                        : (r.user as { name: string | null; avatar_url: string | null } | null);
+                      const movie = movieInfo[r.movie_id as number];
+                      return (
+                        <Link
+                          key={r.id as string}
+                          href={`/admin/reviews`}
+                          className="flex items-start gap-3 px-5 py-3 transition-colors hover:bg-surface-hover"
+                        >
+                          <div className="relative h-12 w-9 flex-shrink-0 overflow-hidden rounded bg-surface">
+                            {movie?.posterUrl ? (
+                              <Image
+                                src={movie.posterUrl}
+                                alt={movie.title}
+                                fill
+                                sizes="36px"
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center">
+                                <Film className="h-4 w-4 text-text-secondary/30" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-text">
+                              {userObj?.name ?? "Anonymous"}{" "}
+                              <span className="font-normal text-text-secondary">
+                                reviewed
+                              </span>
+                            </p>
+                            <p className="truncate text-xs text-text-secondary">
+                              {movie?.title ?? `Movie #${r.movie_id}`}
+                            </p>
+                            <p className="mt-0.5 line-clamp-1 text-xs text-text-secondary/70">
+                              &ldquo;{r.content as string}&rdquo;
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                            <span className="flex items-center gap-0.5 text-xs font-medium text-accent">
+                              <Star className="h-3 w-3 fill-accent" />
+                              {r.rating
+                                ? (r.rating as number) > 5
+                                  ? Math.round((r.rating as number) / 2)
+                                  : (r.rating as number)
+                                : "-"}
+                            </span>
+                            <span className="text-xs text-text-secondary">
+                              {formatRelativeTime(r.created_at as string)}
+                            </span>
+                          </div>
+                        </Link>
+                      );
+                    },
+                  )
             )}
           </div>
         </section>

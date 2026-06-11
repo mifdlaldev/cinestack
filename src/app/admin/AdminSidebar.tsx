@@ -50,7 +50,7 @@ export function AdminSidebar({ mobileOpen, onMobileOpenChange }: AdminSidebarPro
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-40 flex w-64 flex-col glass transition-transform duration-300 lg:sticky lg:left-0 lg:right-auto lg:translate-x-0",
+          "fixed inset-y-0 right-0 z-40 flex w-64 flex-col glass transition-transform duration-300 lg:sticky lg:top-0 lg:self-start lg:h-screen lg:translate-x-0",
           mobileOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
