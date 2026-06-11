@@ -552,11 +552,51 @@ export function ProfileContent({
         </div>
       </div>
 
+      {/* ─── Watchlist ─── */}
+      {watchlistMovies.length > 0 && (
+        <section className="mb-12">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-xl text-text">My Watchlist</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {watchlistMovies.map((movie) => (
+              <MovieCardSmall key={movie.id} movie={movie} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─── My Reviews ─── */}
+      {parentReviews.length > 0 && (
+        <section className="mb-12">
+          <h2 className="mb-4 font-display text-xl text-text">My Reviews</h2>
+          <div className="space-y-3">
+            {parentReviews.map((review) => (
+              <ReviewCardParent key={review.id} review={review} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ─── My Replies ─── */}
+      {replyReviews.length > 0 && (
+        <section className="mb-12">
+          <div className="mb-4 flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 text-accent" />
+            <h2 className="font-display text-xl text-text">My Replies</h2>
+          </div>
+          <div className="space-y-3">
+            {replyReviews.map((review) => (
+              <ReviewCardReply key={review.id} review={review} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ─── Account Settings ─── */}
       <section className="mb-12 rounded-xl border border-border bg-surface p-6">
         <h2 className="mb-4 font-display text-lg text-text">Account Settings</h2>
 
-        {/* Delete Account */}
         <div className="rounded-lg border border-error/20 bg-error/[0.03] p-4">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -645,47 +685,6 @@ export function ProfileContent({
           )}
         </div>
       </section>
-
-      {/* ─── Watchlist ─── */}
-      {watchlistMovies.length > 0 && (
-        <section className="mb-12">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-xl text-text">My Watchlist</h2>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {watchlistMovies.map((movie) => (
-              <MovieCardSmall key={movie.id} movie={movie} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ─── My Reviews ─── */}
-      {parentReviews.length > 0 && (
-        <section className="mb-12">
-          <h2 className="mb-4 font-display text-xl text-text">My Reviews</h2>
-          <div className="space-y-3">
-            {parentReviews.map((review) => (
-              <ReviewCardParent key={review.id} review={review} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ─── My Replies ─── */}
-      {replyReviews.length > 0 && (
-        <section className="mb-12">
-          <div className="mb-4 flex items-center gap-2">
-            <MessageCircle className="h-5 w-5 text-accent" />
-            <h2 className="font-display text-xl text-text">My Replies</h2>
-          </div>
-          <div className="space-y-3">
-            {replyReviews.map((review) => (
-              <ReviewCardReply key={review.id} review={review} />
-            ))}
-          </div>
-        </section>
-      )}
 
       {!loading && parentReviews.length === 0 && replyReviews.length === 0 && (
         <div className="rounded-xl border border-border bg-surface py-12 text-center">
