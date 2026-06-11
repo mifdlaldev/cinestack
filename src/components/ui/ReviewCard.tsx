@@ -15,6 +15,7 @@ interface ReviewCardProps {
   onReplySuccess?: () => void;
   isAuthenticated?: boolean;
   className?: string;
+  parentAuthorName?: string;
 }
 
 function getInitials(name: string | null): string {
@@ -60,6 +61,7 @@ export function ReviewCard({
   onReplySuccess,
   isAuthenticated = false,
   className,
+  parentAuthorName,
 }: ReviewCardProps) {
   const [replyOpen, setReplyOpen] = useState(false);
   const [replyText, setReplyText] = useState("");
@@ -175,6 +177,16 @@ export function ReviewCard({
           )}
         </div>
       </div>
+
+      {/* "Replying to" context — shown on any reply */}
+      {parentAuthorName && (
+        <p className="-mt-1.5 mb-2 text-xs text-text-secondary">
+          Replying to{" "}
+          <span className="font-medium text-text">
+            @{parentAuthorName}
+          </span>
+        </p>
+      )}
 
       {/* Rating — hidden for replies */}
       {!review.parent_id && review.rating && !editing && (

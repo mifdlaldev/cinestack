@@ -55,6 +55,18 @@ export async function submitReview(
     return { error: "You must be signed in to leave a review" };
   }
 
+  const { data: existingReview } = await supabase
+    .from("reviews")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("movie_id", parsed.data.movieId)
+    .is("parent_id", null)
+    .maybeSingle();
+
+  if (existingReview) {
+    return { error: "You have already reviewed this movie" };
+  }
+
   const { data, error } = await supabase
     .from("reviews")
     .insert({
@@ -67,9 +79,6 @@ export async function submitReview(
     .single();
 
   if (error) {
-    if (error.code === "23505") {
-      return { error: "You have already reviewed this movie" };
-    }
     return { error: error.message };
   }
 
@@ -162,10 +171,57 @@ export async function deleteReview(
     return { error: "You can only delete your own reviews" };
   }
 
-  const { error } = await supabase
+  // Can't rely on ON DELETE SET NULL — unique(user_id,movie_id) constraint in
+  // the DB blocks it when a reply's author already has their own top-level review.
+  const { data: children } = await supabase
     .from("reviews")
-    .delete()
-    .eq("id", reviewId);
+    .select("id, user_id")
+    .eq("parent_id", reviewId);
+
+  if (children && children.length > 0) {
+    const childUserIds = [...new Set(children.map((c) => c.user_id))];
+
+    const { data: existingReviews } = await supabase
+      .from("reviews")
+      .select("user_id")
+      .eq("movie_id", existing.movie_id)
+      .is("parent_id", null)
+      .neq("id", reviewId)
+      .in("user_id", childUserIds);
+
+    const usersWithOwnReview = new Set(
+      existingReviews?.map((r) => r.user_id) ?? [],
+    );
+
+    const toDelete: string[] = [];
+    const toOrphan: string[] = [];
+
+    for (const child of children) {
+      if (usersWithOwnReview.has(child.user_id)) {
+        toDelete.push(child.id);
+      } else {
+        toOrphan.push(child.id);
+      }
+    }
+
+    if (toDelete.length > 0) {
+      const { error: deleteErr } = await supabase
+        .from("reviews")
+        .delete()
+        .in("id", toDelete);
+      if (deleteErr) return { error: deleteErr.message };
+    }
+
+    if (toOrphan.length > 0) {
+      const { error: orphanErr } = await supabase
+        .from("reviews")
+        .update({ parent_id: null })
+        .in("id", toOrphan);
+      if (orphanErr) return { error: orphanErr.message };
+    }
+  }
+
+  const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
 
   if (error) {
     return { error: error.message };
