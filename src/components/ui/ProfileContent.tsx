@@ -594,27 +594,41 @@ export function ProfileContent({
       )}
 
       {/* ─── Account Settings ─── */}
-      <section className="mb-12 rounded-xl border border-border bg-surface p-6">
-        <h2 className="mb-4 font-display text-lg text-text">Account Settings</h2>
-
-        <div className="rounded-lg border border-error/20 bg-error/[0.03] p-4">
-          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            <div>
-              <h3 className="text-sm font-semibold text-error">Delete Account</h3>
-              <p className="mt-1 text-xs text-text-secondary">
-                Permanently delete your account and all your data. This action cannot be undone.
-              </p>
+      {loading ? (
+        <section className="mb-12 rounded-xl border border-border bg-surface p-6">
+          <div className="mb-4 h-6 w-40 animate-pulse rounded bg-surface-hover" />
+          <div className="rounded-lg border border-error/20 bg-error/[0.03] p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-28 animate-pulse rounded bg-surface-hover" />
+                <div className="h-3 w-64 animate-pulse rounded bg-surface-hover" />
+              </div>
+              <div className="h-8 w-32 animate-pulse self-end rounded-lg bg-surface-hover sm:self-auto" />
             </div>
-            <button
-              onClick={() => setDeleteStep(1)}
-              className="self-end sm:self-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-error/10 px-3 py-1.5 text-xs font-semibold text-error transition-all hover:bg-error/20 active:scale-[0.97]"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              Delete Account
-            </button>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className="mb-12 rounded-xl border border-border bg-surface p-6">
+          <h2 className="mb-4 font-display text-lg text-text">Account Settings</h2>
+          <div className="rounded-lg border border-error/20 bg-error/[0.03] p-4">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <div>
+                <h3 className="text-sm font-semibold text-error">Delete Account</h3>
+                <p className="mt-1 text-xs text-text-secondary">
+                  Permanently delete your account and all your data. This action cannot be undone.
+                </p>
+              </div>
+              <button
+                onClick={() => setDeleteStep(1)}
+                className="self-end sm:self-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-error/10 px-3 py-1.5 text-xs font-semibold text-error transition-all hover:bg-error/20 active:scale-[0.97]"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete Account
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ─── Delete Account - Step 1 Modal ─── */}
       {deleteStep === 1 && (
