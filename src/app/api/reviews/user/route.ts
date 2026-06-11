@@ -27,7 +27,7 @@ export async function GET() {
     ...new Set((data ?? []).map((r) => r.parent_id).filter(Boolean)),
   ] as string[];
 
-  let parentInfo: Record<string, { name: string | null }> = {};
+  const parentInfo: Record<string, { name: string | null }> = {};
 
   if (parentIds.length > 0) {
     const { data: parents } = await supabase
