@@ -111,7 +111,7 @@ async function DashboardContent() {
         user:users(name, avatar_url)
       `,
       )
-      .is("parent_id", null)
+      .not("rating", "is", null)
       .order("created_at", { ascending: false })
       .limit(5),
   ]);
