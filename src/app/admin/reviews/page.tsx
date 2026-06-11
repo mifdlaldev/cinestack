@@ -264,8 +264,8 @@ export default function AdminReviewsPage() {
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1 text-accent">
                           <Star className="h-3.5 w-3.5 fill-accent" />
-                          <span className="font-semibold">{review.rating}</span>
-                          <span className="text-text-secondary">/10</span>
+                          <span className="font-semibold">{review.rating ? (review.rating > 5 ? Math.round(review.rating / 2) : review.rating) : "-"}</span>
+                          <span className="text-text-secondary">{review.rating ? "/5" : ""}</span>
                         </span>
                       </td>
                       <td className="hidden max-w-xs px-4 py-3 text-text-secondary md:table-cell">

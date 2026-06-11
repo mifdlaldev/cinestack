@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { TmdbWatchProvider } from "@/types/tmdb";
 import { getTopRated } from "@/lib/tmdb";
 import { getProvidersForMovies } from "@/lib/tmdb-providers";
 import { CategoryPageContent } from "@/components/ui/CategoryPageContent";
@@ -18,9 +19,13 @@ interface Props {
 export default async function TopRatedPage({ searchParams }: Props) {
   const { page } = await searchParams;
   const data = await getTopRated(page ? Number(page) : undefined);
-  const providersMap = await getProvidersForMovies(
-    data.results.map((m) => m.id),
-  );
+
+  let providersMap: Record<number, TmdbWatchProvider[]> = {};
+  try {
+    providersMap = await getProvidersForMovies(data.results.map((m) => m.id));
+  } catch {
+    // Providers are optional — page still renders without them
+  }
 
   return (
     <CategoryPageContent

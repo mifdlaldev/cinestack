@@ -27,9 +27,8 @@ export function MovieGrid({ movies, isLoading, providersMap }: MovieGridProps) {
   return (
     <motion.div
       className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-      initial={shouldReduceMotion ? undefined : "hidden"}
-      whileInView={shouldReduceMotion ? undefined : "visible"}
-      viewport={{ once: true, margin: "-50px" }}
+      initial={shouldReduceMotion ? false : "hidden"}
+      animate={shouldReduceMotion ? undefined : "visible"}
       variants={{
         hidden: {},
         visible: {

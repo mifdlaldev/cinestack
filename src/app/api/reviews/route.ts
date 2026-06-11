@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
       content,
       created_at,
       updated_at,
+      parent_id,
       user:users(name, avatar_url)
     `,
       { count: "exact" },

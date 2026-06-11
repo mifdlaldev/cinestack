@@ -37,7 +37,7 @@ const SORT_OPTIONS = [
 ];
 
 const currentYear = new Date().getFullYear();
-const YEAR_OPTIONS = Array.from({ length: currentYear - 1989 }, (_, i) =>
+const YEAR_OPTIONS = Array.from({ length: currentYear - 1899 }, (_, i) =>
   String(currentYear - i),
 );
 
@@ -59,7 +59,7 @@ export function FilterPanel({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [servicesModalOpen, setServicesModalOpen] = useState(false);
 
-  const { selectedProviders } = useServicesStore();
+  const { selectedProviders, setProviders } = useServicesStore();
 
   const handleApply = useCallback(() => {
     onApply({ genreId, year, sortBy, providerIds: selectedProviders });
@@ -69,13 +69,14 @@ export function FilterPanel({
     setGenreId(null);
     setYear(null);
     setSortBy("popularity.desc");
+    setProviders([]);
     onApply({
       genreId: null,
       year: null,
       sortBy: "popularity.desc",
       providerIds: [],
     });
-  }, [onApply]);
+  }, [onApply, setProviders]);
 
   const hasActiveFilters =
     genreId !== null || year !== null || selectedProviders.length > 0;
@@ -137,13 +138,13 @@ export function FilterPanel({
         <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
           Streaming On
         </label>
-        <Button
-          variant="outline"
+        <button
+          type="button"
           onClick={() => setServicesModalOpen(true)}
-          className="w-full justify-start gap-2"
+          className="flex w-full items-center justify-start gap-1.5 rounded-full border border-border bg-transparent px-[15px] py-2 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
         >
           <Monitor className="h-4 w-4 flex-shrink-0 text-text-secondary" />
-          <span className="flex-1 text-left">
+          <span className={`flex-1 text-left ${providerCount > 0 ? "text-foreground" : "text-muted-foreground"}`}>
             {providerCount > 0
               ? `${providerCount} service${providerCount > 1 ? "s" : ""} selected`
               : "Select services"}
@@ -153,7 +154,7 @@ export function FilterPanel({
               {providerCount}
             </span>
           )}
-        </Button>
+        </button>
       </div>
 
       {/* Sort */}
@@ -165,7 +166,7 @@ export function FilterPanel({
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Sort by..." />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="min-w-[260px]">
             {SORT_OPTIONS.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
@@ -179,9 +180,10 @@ export function FilterPanel({
       <div className="flex items-center gap-2 pt-2">
         <Button
           variant="default"
+          size="sm"
           onClick={handleApply}
           disabled={isLoading}
-          className="flex-1 justify-center gap-2"
+          className="flex-1 justify-center"
         >
           {isLoading ? (
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-bg border-t-transparent" />
@@ -192,6 +194,7 @@ export function FilterPanel({
         {hasActiveFilters && (
           <Button
             variant="outline"
+            size="sm"
             onClick={handleReset}
             className="gap-1.5"
           >

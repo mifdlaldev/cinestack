@@ -104,7 +104,7 @@ export default function DiscoverPage() {
     : "Trending popular movies right now";
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-6 lg:px-8">
+    <div className="mx-auto max-w-[1400px] px-4 py-10 md:py-12 md:px-6 lg:px-8">
       {/* Header */}
       <header className="pt-10 mb-8">
         <h1 className="font-display text-3xl tracking-tight text-text md:text-4xl">
@@ -164,7 +164,7 @@ export default function DiscoverPage() {
         if (end < totalPages) { if (end < totalPages - 1) pages.push("ellipsis"); pages.push(totalPages); }
 
         return (
-          <nav className="mt-10 flex items-center justify-center gap-2" aria-label="Page navigation">
+          <nav className="mt-10 flex flex-wrap items-center justify-center gap-1 md:gap-2" aria-label="Page navigation">
             {page > 1 && (
               <button onClick={() => handlePageChange(page - 1)} className="rounded-full border border-border px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-surface hover:text-text">
                 Previous

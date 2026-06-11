@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-// StarRating — Interactive & Display Modes (1-10)
-// ─────────────────────────────────────────────────────────────
-
 "use client";
 
 import { Star } from "lucide-react";
@@ -13,6 +9,8 @@ interface StarRatingProps {
   readonly?: boolean;
   size?: "sm" | "md" | "lg";
   className?: string;
+  /** If true, rating is on 0-10 scale and gets converted to 0-5. Default: false */
+  fromTen?: boolean;
 }
 
 const sizeMap = {
@@ -27,29 +25,32 @@ export function StarRating({
   readonly = false,
   size = "md",
   className,
+  fromTen = false,
 }: StarRatingProps) {
+  const stars = fromTen ? Math.round(rating / 2) : rating;
   const starSize = sizeMap[size];
+  const maxStars = 5;
 
   if (readonly) {
     return (
       <div
         className={cn("inline-flex items-center gap-0.5", className)}
-        aria-label={`Rating: ${rating} out of 10`}
+        aria-label={`Rating: ${stars} out of ${maxStars}`}
       >
-        {Array.from({ length: 10 }, (_, i) => (
+        {Array.from({ length: maxStars }, (_, i) => (
           <Star
             key={i}
             className={cn(
               starSize,
               "transition-colors",
-              i < rating
+              i < stars
                 ? "fill-accent text-accent"
                 : "fill-none text-[#2a2a35]",
             )}
           />
         ))}
         <span className="ml-1 text-xs font-medium text-text-secondary">
-          {rating}/10
+          {stars}/{maxStars}
         </span>
       </div>
     );
@@ -61,25 +62,30 @@ export function StarRating({
       role="radiogroup"
       aria-label="Rating"
     >
-      {Array.from({ length: 10 }, (_, i) => {
+      {Array.from({ length: maxStars }, (_, i) => {
         const starValue = i + 1;
+        const isFilled = starValue <= stars;
         return (
           <button
             key={starValue}
             type="button"
-            onClick={() => onChange?.(starValue)}
+            onClick={() => onChange?.(starValue === stars ? 0 : starValue)}
             className={cn(
               starSize,
               "cursor-pointer transition-all duration-150 hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
-              starValue <= rating
-                ? "fill-accent text-accent"
-                : "fill-none text-[#2a2a35] hover:text-accent/50",
             )}
             aria-label={`${starValue} star${starValue > 1 ? "s" : ""}`}
-            aria-checked={starValue === rating}
+            aria-checked={starValue === stars}
             role="radio"
           >
-            <Star className="h-full w-full" />
+            <Star
+              className={cn(
+                "h-full w-full transition-colors",
+                isFilled
+                  ? "fill-accent text-accent"
+                  : "fill-none text-[#2a2a35]",
+              )}
+            />
           </button>
         );
       })}

@@ -71,6 +71,14 @@ function calculateAge(birthday: string | null, deathday: string | null): string 
   return deathday ? `${age} (at death)` : `${age} years old`;
 }
 
+function getFirstSentence(text: string): string {
+  // Match the first sentence ending with . ! or ? followed by space or end of string
+  const match = text.match(/^.*?[.!?](?:\s|$)/);
+  if (match) return match[0].trim();
+  // Fallback: take first 150 chars
+  return text.slice(0, 150).trim() + ".";
+}
+
 function getGenderLabel(gender: number): string {
   switch (gender) {
     case 1: return "Female";
@@ -86,7 +94,7 @@ function FilmCard({ credit }: { credit: TmdbPersonCastMember }) {
   const year = credit.release_date
     ? new Date(credit.release_date).getFullYear()
     : null;
-  const rating = credit.vote_average > 0 ? credit.vote_average.toFixed(1) : null;
+    const rating = credit.vote_average > 0 ? credit.vote_average.toFixed(1) : null;
 
   return (
     <Link
@@ -109,7 +117,7 @@ function FilmCard({ credit }: { credit: TmdbPersonCastMember }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col justify-center gap-1 px-3 py-2">
+      <div className="flex flex-1 flex-col justify-center gap-1 p-4">
         <h4 className="line-clamp-1 text-sm font-semibold text-text transition-colors group-hover:text-accent">
           {credit.title}
         </h4>
@@ -163,10 +171,18 @@ async function ActorContent({ personId }: { personId: number }) {
   const topCredits = filmography.slice(0, 3);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-6 md:py-14 lg:px-8">
+    <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-6 md:py-10 lg:px-8">
       {/* ── Hero ── */}
       <AnimatedSection>
-        <section className="mb-14 flex flex-col gap-8 md:flex-row md:gap-12">
+        <section className="relative mb-14 overflow-hidden rounded-2xl">
+          {/* Cinematic spotlight background */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/[0.02] to-bg" />
+          <div className="absolute left-1/2 top-0 h-[500px] w-[600px] -translate-x-1/2 rounded-full bg-gradient-to-b from-accent/8 via-accent/4 to-transparent blur-[120px]" />
+          <div className="absolute left-1/2 top-20 h-32 w-32 -translate-x-1/2 rounded-full bg-accent/10 blur-[60px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(245,197,24,0.03)_0%,transparent_70%)]" />
+          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.5\'/%3E%3C/svg%3E")', backgroundSize: '256px 256px' }} />
+
+          <div className="relative z-10 flex flex-col gap-8 md:flex-row md:gap-12 p-6 md:p-10">
           {/* Profile photo */}
           <div className="mx-auto w-48 flex-shrink-0 md:mx-0 md:w-64">
             <div className="aspect-[2/3] overflow-hidden rounded-xl shadow-[0_0_30px_rgba(245,197,24,0.12)]">
@@ -204,15 +220,15 @@ async function ActorContent({ personId }: { personId: number }) {
 
             {/* Bio */}
             {person.biography && (
-              <div className="max-w-prose text-base leading-relaxed text-text/90">
-                <p className="line-clamp-6">{person.biography}</p>
+            <div className="w-full text-base leading-relaxed text-text/90 text-justify">
+                <p>{getFirstSentence(person.biography)}</p>
               </div>
             )}
 
             {/* Details grid */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               {person.birthday && (
-                <div className="rounded-lg bg-surface p-3">
+                <div className="rounded-lg glass-card p-3">
                   <p className="text-xs text-text-secondary">Born</p>
                   <p className="mt-0.5 text-sm font-semibold text-text">
                     {formatDate(person.birthday)}
@@ -220,7 +236,7 @@ async function ActorContent({ personId }: { personId: number }) {
                 </div>
               )}
               {age && (
-                <div className="rounded-lg bg-surface p-3">
+                <div className="rounded-lg glass-card p-3">
                   <p className="text-xs text-text-secondary">Age</p>
                   <p className="mt-0.5 text-sm font-semibold text-text">
                     {age}
@@ -228,27 +244,27 @@ async function ActorContent({ personId }: { personId: number }) {
                 </div>
               )}
               {person.place_of_birth && (
-                <div className="rounded-lg bg-surface p-3">
+                <div className="rounded-lg glass-card p-3">
                   <p className="text-xs text-text-secondary">Place of Birth</p>
                   <p className="mt-0.5 text-sm font-semibold text-text">
                     {person.place_of_birth}
                   </p>
                 </div>
               )}
-              <div className="rounded-lg bg-surface p-3">
+              <div className="rounded-lg glass-card p-3">
                 <p className="text-xs text-text-secondary">Known for</p>
                 <p className="mt-0.5 text-sm font-semibold text-text">
                   {person.known_for_department}
                 </p>
               </div>
-              <div className="rounded-lg bg-surface p-3">
+              <div className="rounded-lg glass-card p-3">
                 <p className="text-xs text-text-secondary">Gender</p>
                 <p className="mt-0.5 text-sm font-semibold text-text">
                   {getGenderLabel(person.gender)}
                 </p>
               </div>
               {credits.cast.length > 0 && (
-                <div className="rounded-lg bg-surface p-3">
+                <div className="rounded-lg glass-card p-3">
                   <p className="text-xs text-text-secondary">Filmography</p>
                   <p className="mt-0.5 text-sm font-semibold text-text">
                     {credits.cast.length} movies
@@ -278,6 +294,7 @@ async function ActorContent({ personId }: { personId: number }) {
               </div>
             )}
           </div>
+          </div>
         </section>
       </AnimatedSection>
 
@@ -285,11 +302,13 @@ async function ActorContent({ personId }: { personId: number }) {
       {person.biography && person.biography.length > 150 && (
         <AnimatedSection>
           <section className="mb-14">
-            <h2 className="mb-4 font-display text-2xl tracking-tight text-text">
+            <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
               Biography
             </h2>
-            <div className="max-w-prose text-base leading-relaxed text-text/90">
-              <p>{person.biography}</p>
+            <div className="w-full text-base leading-relaxed text-text/90">
+              {person.biography.split(/\n\n+/).map((paragraph, i) => (
+                <p key={i} className="mb-4 last:mb-0">{paragraph}</p>
+              ))}
             </div>
           </section>
         </AnimatedSection>
@@ -298,11 +317,11 @@ async function ActorContent({ personId }: { personId: number }) {
       {/* ── Filmography ── */}
       {filmography.length > 0 && (
         <AnimatedSection>
-          <section>
+          <section className="mb-14">
             <h2 className="mb-6 font-display text-2xl tracking-tight text-text">
               Filmography
             </h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filmography.map((credit) => (
                 <FilmCard key={`${credit.id}-${credit.credit_id}`} credit={credit} />
               ))}

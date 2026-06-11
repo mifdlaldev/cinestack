@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,6 +11,10 @@ import { createClient } from "@/lib/supabase-client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { CaptchaWidget } from "@/components/ui/CaptchaWidget";
+
+const MAX_LOGIN_ATTEMPTS = 3;
+const COOLDOWN_SECONDS = 30;
 
 // ── Zod schemas ──────────────────────────────────────────────
 
@@ -49,8 +53,38 @@ export function AuthForm({ mode }: AuthFormProps) {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
   const [serverError, setServerError] = useState<string | null>(null);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
+  const cooldownTimerRef = useRef<ReturnType<typeof setInterval>>(undefined);
+  const hasTurnstile = !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   const isLogin = mode === "login";
+  const isCooldown = isLogin && cooldownRemaining > 0;
+
+  // Cooldown countdown timer
+  useEffect(() => {
+    if (cooldownRemaining <= 0) {
+      if (cooldownTimerRef.current) {
+        clearInterval(cooldownTimerRef.current);
+        cooldownTimerRef.current = undefined;
+      }
+      return;
+    }
+    cooldownTimerRef.current = setInterval(() => {
+      setCooldownRemaining((prev) => {
+        if (prev <= 1) {
+          setLoginAttempts(0);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => {
+      if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
+    };
+  }, [cooldownRemaining]);
   const schema = isLogin ? loginSchema : registerSchema;
 
   // Cast resolver to FormValues so register("name") is allowed in JSX.
@@ -68,8 +102,30 @@ export function AuthForm({ mode }: AuthFormProps) {
     },
   });
 
+  const captchaRequired = hasTurnstile && !captchaToken;
+  const canSubmit = !isSubmitting && !isCooldown && !captchaRequired;
+
   const onSubmit = async (data: FormValues) => {
     setServerError(null);
+
+    // If Turnstile is configured but no token, reject
+    if (hasTurnstile && !captchaToken) {
+      setServerError("Please complete the security check.");
+      return;
+    }
+
+    // Server-side rate limit check (by email + IP)
+    const rlRes = await fetch("/api/auth/rate-limit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: data.email }),
+    });
+    if (!rlRes.ok) {
+      setCaptchaToken(null);
+      setCaptchaResetKey((k) => k + 1);
+      setServerError("Too many attempts. Please try again later.");
+      return;
+    }
 
     const supabase = createClient();
 
@@ -94,7 +150,31 @@ export function AuthForm({ mode }: AuthFormProps) {
     }
 
     if (error) {
-      setServerError(error.message);
+      // Reset captcha so user solves a fresh challenge
+      setCaptchaToken(null);
+      setCaptchaResetKey((k) => k + 1);
+
+      const msg = error.message;
+
+      if (msg.includes("rate_limit")) {
+        setServerError("Too many attempts. Please wait a moment and try again.");
+      } else if (isLogin && (msg === "Invalid login credentials" || msg.includes("invalid"))) {
+        const attempts = loginAttempts + 1;
+        setLoginAttempts(attempts);
+
+        if (attempts >= MAX_LOGIN_ATTEMPTS) {
+          setCooldownRemaining(COOLDOWN_SECONDS);
+          setServerError(`Too many failed attempts. Please wait ${COOLDOWN_SECONDS} seconds before trying again.`);
+        } else {
+          setServerError("Invalid email or password. Please try again.");
+        }
+      } else if (msg === "Email not confirmed") {
+        setServerError("Please check your inbox and confirm your email address before signing in.");
+      } else if (msg === "User already registered") {
+        setServerError("An account with this email already exists. Please sign in instead.");
+      } else {
+        setServerError(msg);
+      }
       return;
     }
 
@@ -180,21 +260,38 @@ export function AuthForm({ mode }: AuthFormProps) {
         </div>
       )}
 
-      {/* Submit button */}
+      {isCooldown && (
+        <div className="rounded-lg border border-error/30 bg-error/10 px-4 py-3">
+          <p className="text-sm text-error">
+            Too many attempts. Try again in <span className="font-semibold">{cooldownRemaining}</span> seconds.
+          </p>
+        </div>
+      )}
+
+      <CaptchaWidget onToken={setCaptchaToken} resetKey={captchaResetKey} />
+
       <Button
         type="submit"
-        disabled={isSubmitting}
+        disabled={!canSubmit}
         className="w-full"
       >
         {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-        {isSubmitting
-          ? isLogin
-            ? "Signing in\u2026"
-            : "Creating account\u2026"
-          : isLogin
-            ? "Sign in"
-            : "Create account"}
+        {isCooldown
+          ? `Wait ${cooldownRemaining}s`
+          : isSubmitting
+            ? isLogin
+              ? "Signing in\u2026"
+              : "Creating account\u2026"
+            : isLogin
+              ? "Sign in"
+              : "Create account"}
       </Button>
+
+      {isCooldown && (
+        <p className="text-center text-xs text-text-secondary">
+          Failed attempts: {loginAttempts}/{MAX_LOGIN_ATTEMPTS}. Form will unlock automatically.
+        </p>
+      )}
 
       {/* Switch mode link */}
       <p className="text-center text-sm text-text-secondary">

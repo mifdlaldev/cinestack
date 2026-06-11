@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase-client";
 import { getImageUrl } from "@/lib/tmdb";
 import { useRouter } from "next/navigation";
 import type { TmdbMovie } from "@/types/tmdb";
+import type { User } from "@supabase/supabase-js";
 
 interface Review {
   id: string;
@@ -57,7 +58,7 @@ function MovieCardSmall({ movie }: { movie: TmdbMovie }) {
 }
 
 function ReviewCard({ review }: { review: Review }) {
-  const stars = Array.from({ length: 5 }, (_, i) => i < Math.round(review.rating / 2));
+  const stars = Array.from({ length: 5 }, (_, i) => i < Math.round((review.rating ?? 0) / 2));
   const posterUrl = review.posterPath ? getImageUrl(review.posterPath, "w185") : null;
 
   return (
@@ -102,8 +103,8 @@ export function ProfileContent({
   watchlistCount,
   reviewCount,
 }: {
-  user: any;
-  profile: any;
+  user: User;
+  profile: Record<string, unknown> | null;
   watchlistCount: number;
   reviewCount: number;
 }) {

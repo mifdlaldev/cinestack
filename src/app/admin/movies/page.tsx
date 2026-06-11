@@ -228,7 +228,7 @@ export default function AdminMoviesPage() {
                       </h3>
                       <p className="text-xs text-text-secondary">
                         {movie.release_date?.slice(0, 4) ?? "N/A"} &middot;{" "}
-                        {movie.vote_average.toFixed(1)}/10
+                        {(movie.vote_average / 2).toFixed(1)}/5
                       </p>
                       <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
                         {movie.overview || "No overview available"}
@@ -301,7 +301,7 @@ export default function AdminMoviesPage() {
                     </div>
                     <p className="text-xs text-text-secondary">
                       {movie.data.release_date?.slice(0, 4) ?? "N/A"} &middot;{" "}
-                      {movie.data.vote_average?.toFixed(1) ?? "?"}/10
+                      {movie.data.vote_average ? (movie.data.vote_average / 2).toFixed(1) : "?"}/5
                     </p>
                     <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
                       {movie.data.overview || "No overview"}

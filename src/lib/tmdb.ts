@@ -15,6 +15,7 @@ import type {
   TmdbWatchProvider,
   TmdbWatchProviders,
 } from "@/types/tmdb";
+import { redis, redisAvailable } from "@/lib/redis";
 
 // ─── Configuration ──────────────────────────────────────────
 
@@ -89,6 +90,21 @@ async function fetchFromTmdb<T>(
     }
   }
 
+  // ── Redis cache: check before hitting TMDB ────────────────
+  const ttl = options?.revalidate ?? 3600;
+  const cacheKey = `tmdb:${endpoint}:${JSON.stringify(options?.params ?? {})}`;
+
+  if (redisAvailable && redis) {
+    try {
+      const cached = await redis.get<string>(cacheKey);
+      if (cached) {
+        return JSON.parse(cached) as T;
+      }
+    } catch {
+      // Redis error — fall through to TMDB fetch
+    }
+  }
+
   // Build the Next.js fetch cache config (shared across retries).
   const fetchOptions: RequestInit & { next?: { revalidate?: number } } = {};
   if (options?.revalidate !== undefined) {
@@ -114,7 +130,21 @@ async function fetchFromTmdb<T>(
       clearTimeout(timeout);
 
       if (response.ok) {
-        return (await response.json()) as T;
+        try {
+          const data = (await response.json()) as T;
+          // Store in Redis cache (non-blocking — fire & forget)
+          if (redisAvailable && redis) {
+            redis.set(cacheKey, JSON.stringify(data), { ex: ttl }).catch(() => {});
+          }
+          return data;
+        } catch {
+          const text = await response.text().catch(() => "");
+          throw new TmdbApiError(
+            `TMDB returned empty or invalid JSON: ${text.slice(0, 200)}`,
+            "INVALID_RESPONSE",
+            response.status,
+          );
+        }
       }
 
       // ── 429 Rate Limit — backoff & retry ─────────────────────
@@ -502,6 +532,24 @@ export function getTrendingActors(
       params: page ? { page: String(page) } : undefined,
     },
   );
+}
+
+/**
+ * Search for actors/people by name.
+ * @param query - Search query string
+ * @param page - Page number (default: 1)
+ */
+export function searchActors(
+  query: string,
+  page?: number,
+): Promise<TmdbPaginatedResponse<TmdbPerson>> {
+  return fetchFromTmdb<TmdbPaginatedResponse<TmdbPerson>>("/search/person", {
+    revalidate: 300, // 5 minutes — search results change faster
+    params: {
+      query,
+      ...(page ? { page: String(page) } : {}),
+    },
+  });
 }
 
 // ─── Person / Actor endpoints ──────────────────────────────────

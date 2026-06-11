@@ -153,7 +153,7 @@ export function MyServicesModal({ open, onClose }: MyServicesModalProps) {
                         alt={provider.provider_name}
                         width={24}
                         height={24}
-                        className="flex-shrink-0 rounded object-contain brightness-0 invert"
+                        className="flex-shrink-0 rounded object-contain"
                       />
                     ) : (
                       <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded bg-surface text-[10px] font-bold uppercase text-text-secondary">

@@ -13,12 +13,12 @@ import { revalidatePath } from "next/cache";
 const submitReviewSchema = z.object({
   movieId: z.number().int().positive(),
   rating: z.number().int().min(1).max(10),
-  content: z.string().min(10, "Review must be at least 10 characters").max(1000, "Review must be at most 1000 characters"),
+  content: z.string().min(1, "Review cannot be empty").max(1000, "Review must be at most 1000 characters"),
 });
 
 const updateReviewSchema = z.object({
   rating: z.number().int().min(1).max(10),
-  content: z.string().min(10, "Review must be at least 10 characters").max(1000, "Review must be at most 1000 characters"),
+  content: z.string().min(1, "Review cannot be empty").max(1000, "Review must be at most 1000 characters"),
 });
 
 // ─── Action result type ──────────────────────────────────────

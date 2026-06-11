@@ -21,9 +21,13 @@ export function WatchlistButton({ movieId, className }: WatchlistButtonProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  const isInWatchlist = useWatchlistStore((s) => s.isInWatchlist(movieId));
+  const storeIsInWatchlist = useWatchlistStore((s) => s.isInWatchlist(movieId));
+  const storeIsLoading = useWatchlistStore((s) => s.isLoading);
   const toggleItem = useWatchlistStore((s) => s.toggleItem);
   const fetchWatchlist = useWatchlistStore((s) => s.fetchWatchlist);
+  // Only show "in watchlist" when authenticated AND store has synced with server
+  // This prevents stale localStorage data from a previous session
+  const isInWatchlist = storeIsInWatchlist && isAuthenticated === true && !storeIsLoading;
 
   // Check auth status on mount and load watchlist if logged in
   // Guard with ref to prevent re-running when Zustand store hydrates

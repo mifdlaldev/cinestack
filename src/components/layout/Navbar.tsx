@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Search, Menu, ChevronDown, LogOut, User, X } from "lucide-react";
+import { Search, Menu, ChevronDown, LogOut, User, Shield, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase-client";
 import {
@@ -33,22 +32,23 @@ const movieLinks = [
 const navLinks = [
   { label: "News", href: "/news" },
   { label: "Discover", href: "/discover" },
+  { label: "Actors", href: "/actors" },
 ];
 
 export function Navbar() {
-  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [user, setUser] = useState<{ email?: string } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const dropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const profileTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleLogout = useCallback(async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.refresh();
-  }, [router]);
+    window.location.reload();
+  }, []);
 
   const openDropdown = useCallback(() => {
     if (dropdownTimer.current) clearTimeout(dropdownTimer.current);
@@ -79,9 +79,19 @@ export function Navbar() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null);
+      if (data.user) {
+        fetch("/api/admin/stats").then((r) => setIsAdmin(r.ok)).catch(() => {});
+      }
+    });
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetch("/api/admin/stats").then((r) => setIsAdmin(r.ok)).catch(() => {});
+      } else {
+        setIsAdmin(false);
+      }
     });
     return () => {
       listener?.subscription.unsubscribe();
@@ -168,6 +178,7 @@ export function Navbar() {
           </Button>
 
           {user ? (
+            <div className="hidden md:block">
             <DropdownMenu open={profileOpen} onOpenChange={setProfileOpen}>
               <DropdownMenuTrigger
                 onMouseEnter={openProfile}
@@ -192,6 +203,12 @@ export function Navbar() {
                     <User className="h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem render={<Link href="/admin" />}>
+                      <Shield className="h-4 w-4" />
+                      <span>Admin</span>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="h-4 w-4" />
                     <span>Sign Out</span>
@@ -199,6 +216,7 @@ export function Navbar() {
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
+            </div>
           ) : (
             <Button
               variant="default"
@@ -290,6 +308,17 @@ export function Navbar() {
                         My Profile
                       </Button>
                     </SheetClose>
+                    {isAdmin && (
+                      <SheetClose
+                        className="flex w-full"
+                        render={<Link href="/admin" />}
+                      >
+                        <Button variant="ghost" className="w-full text-xs">
+                          <Shield className="h-4 w-4" />
+                          Admin
+                        </Button>
+                      </SheetClose>
+                    )}
                     <Button variant="ghost" className="w-full text-xs" onClick={handleLogout}>
                       <LogOut className="h-4 w-4" />
                       Sign Out

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Pencil, Trash2, MessageCircle, Flag } from "lucide-react";
+import { Pencil, Trash2, MessageCircle, Star, Loader2 } from "lucide-react";
 import { StarRating } from "./StarRating";
 import { formatRelativeTime } from "@/lib/format-relative-time";
 import type { Review } from "@/types/review";
@@ -12,6 +12,7 @@ interface ReviewCardProps {
   isOwn?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  onReplySuccess?: () => void;
   isAuthenticated?: boolean;
   className?: string;
 }
@@ -56,6 +57,7 @@ export function ReviewCard({
   isOwn = false,
   onEdit,
   onDelete,
+  onReplySuccess,
   isAuthenticated = false,
   className,
 }: ReviewCardProps) {
@@ -63,10 +65,11 @@ export function ReviewCard({
   const [replyText, setReplyText] = useState("");
   const [replySubmitting, setReplySubmitting] = useState(false);
   const [replyError, setReplyError] = useState<string | null>(null);
-  const [reported, setReported] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
-  const [reportReason, setReportReason] = useState("");
-  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editContent, setEditContent] = useState("");
+  const [editRating, setEditRating] = useState<number>(review.rating ?? 1);
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   const handleReply = useCallback(async () => {
     if (!replyText.trim()) return;
@@ -81,32 +84,47 @@ export function ReviewCard({
       if (!res.ok) throw new Error("Failed to submit reply");
       setReplyText("");
       setReplyOpen(false);
+      onReplySuccess?.();
     } catch {
       setReplyError("Failed to send reply");
     } finally {
       setReplySubmitting(false);
     }
-  }, [replyText, review.id]);
+  }, [replyText, review.id, onReplySuccess]);
 
-  const handleReport = useCallback(async () => {
-    if (!reportReason.trim()) return;
-    setReportSubmitting(true);
+  const startEditing = () => {
+    setEditContent(review.content);
+    setEditRating(review.rating || 1);
+    setEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setEditing(false);
+    setEditError(null);
+  };
+
+  const saveEditing = async () => {
+    if (!editContent.trim() || editContent.length < 1) return;
+    setEditSubmitting(true);
+    setEditError(null);
     try {
-      const res = await fetch(`/api/reviews/${review.id}/report`, {
-        method: "POST",
+      const res = await fetch(`/api/reviews/${review.id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: reportReason.trim() }),
+        body: JSON.stringify({ rating: editRating, content: editContent.trim() }),
       });
-      if (!res.ok) throw new Error("Failed to report");
-      setReported(true);
-      setReportOpen(false);
-      setReportReason("");
-    } catch {
-      setReplyError("Failed to submit report");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error?.message ?? "Failed to update review");
+      }
+      setEditing(false);
+      onReplySuccess?.(); // refetch reviews
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : "Failed to update");
     } finally {
-      setReportSubmitting(false);
+      setEditSubmitting(false);
     }
-  }, [reportReason, review.id]);
+  };
 
   return (
     <div className={cn("rounded-xl border border-border bg-surface p-5", className)}>
@@ -129,7 +147,7 @@ export function ReviewCard({
             </p>
             <p className="text-xs text-text-secondary">
               {formatRelativeTime(review.created_at)}
-              {review.created_at !== review.updated_at && " (edited)"}
+              {review.created_at !== review.updated_at && editing === false && " (edited)"}
             </p>
           </div>
         </div>
@@ -137,65 +155,104 @@ export function ReviewCard({
         {/* Actions */}
         <div className="flex items-center gap-1">
           {isAuthenticated && !isOwn && (
-            <>
-              <button
-                onClick={() => setReplyOpen(!replyOpen)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-accent"
-                aria-label="Reply"
-              >
-                <MessageCircle className="h-4 w-4" />
-              </button>
-              {!reported ? (
-                <button
-                  onClick={() => setReportOpen(!reportOpen)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-error"
-                  aria-label="Report"
-                >
-                  <Flag className="h-4 w-4" />
-                </button>
-              ) : (
-                <span className="text-[10px] text-text-secondary/60 px-1">Reported</span>
-              )}
-            </>
+            <button
+              onClick={() => setReplyOpen(!replyOpen)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-accent"
+              aria-label="Reply"
+            >
+              <MessageCircle className="h-4 w-4" />
+            </button>
           )}
-          {isOwn && (
+          {isOwn && !editing && (
             <>
-              {onEdit && (
-                <button onClick={onEdit} className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-accent" aria-label="Edit review">
-                  <Pencil className="h-4 w-4" />
-                </button>
-              )}
-              {onDelete && (
-                <button onClick={onDelete} className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-error" aria-label="Delete review">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              )}
+              <button onClick={startEditing} className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-accent" aria-label="Edit review">
+                <Pencil className="h-4 w-4" />
+              </button>
+              <button onClick={onDelete} className="flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-error" aria-label="Delete review">
+                <Trash2 className="h-4 w-4" />
+              </button>
             </>
           )}
         </div>
       </div>
 
-      {/* Rating */}
-      <div className="mb-2">
-        <StarRating rating={review.rating} readonly size="sm" />
-      </div>
+      {/* Rating — hidden for replies */}
+      {!review.parent_id && review.rating && !editing && (
+        <div className="mb-2">
+          <StarRating rating={review.rating > 5 ? Math.round(review.rating / 2) : review.rating} readonly size="sm" />
+        </div>
+      )}
 
-      {/* Content */}
-      <p className="text-sm leading-relaxed text-text/90 whitespace-pre-wrap">
-        {review.content}
-      </p>
+      {/* Edit mode */}
+      {editing ? (
+        <div className="space-y-3">
+          <textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value.slice(0, 1000))}
+            rows={3}
+            maxLength={1000}
+            autoFocus
+            className="w-full resize-none rounded-lg border border-border bg-bg-alt px-3 py-2 text-sm text-text placeholder:text-text-secondary/50 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30"
+          />
+          {!review.parent_id && (
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-text-secondary">Rating:</label>
+              <StarRating
+                rating={editRating > 5 ? Math.round(editRating / 2) : editRating}
+                onChange={(val) => setEditRating(val)}
+                size="sm"
+              />
+            </div>
+          )}
+          {editError && <p className="text-xs text-error">{editError}</p>}
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={cancelEditing}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={saveEditing}
+              disabled={editSubmitting || !editContent.trim()}
+              className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:opacity-50"
+            >
+              {editSubmitting && <Loader2 className="h-3 w-3 animate-spin" />}
+              Save
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Content */}
+          <p className="text-sm leading-relaxed text-text/90 whitespace-pre-wrap">
+            {review.content}
+          </p>
+        </>
+      )}
 
       {/* Reply form */}
       {replyOpen && (
         <div className="mt-4 space-y-2 border-t border-border pt-4">
           <textarea
             value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
+            onChange={(e) => {
+              setReplyText(e.target.value.slice(0, 1000));
+              e.target.style.height = "auto";
+              e.target.style.height = e.target.scrollHeight + "px";
+            }}
             placeholder="Write a reply..."
-            rows={2}
-            className="w-full resize-none rounded-lg border border-border bg-bg-alt px-3 py-2 text-sm text-text placeholder:text-text-secondary/50 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30"
+            rows={1}
+            maxLength={1000}
+            className="w-full resize-none overflow-hidden rounded-lg border border-border bg-bg-alt px-3 py-2 text-sm text-text placeholder:text-text-secondary/50 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30"
           />
-          {replyError && <p className="text-xs text-error">{replyError}</p>}
+          <div className="flex items-center justify-between">
+            {replyError && <p className="text-xs text-error">{replyError}</p>}
+            {!replyError && <span />}
+            <span className={`text-xs ${replyText.length > 950 ? "text-error" : "text-text-secondary"}`}>
+              {replyText.length}/1000
+            </span>
+          </div>
           <div className="flex justify-end gap-2">
             <button
               onClick={() => { setReplyOpen(false); setReplyText(""); setReplyError(null); }}
@@ -206,37 +263,10 @@ export function ReviewCard({
             <button
               onClick={handleReply}
               disabled={replySubmitting || !replyText.trim()}
-              className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:opacity-50"
             >
-              {replySubmitting ? "Sending..." : "Reply"}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Report form */}
-      {reportOpen && (
-        <div className="mt-4 space-y-2 border-t border-border pt-4">
-          <textarea
-            value={reportReason}
-            onChange={(e) => setReportReason(e.target.value)}
-            placeholder="Why are you reporting this review?"
-            rows={2}
-            className="w-full resize-none rounded-lg border border-border bg-bg-alt px-3 py-2 text-sm text-text placeholder:text-text-secondary/50 outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30"
-          />
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={() => { setReportOpen(false); setReportReason(""); }}
-              className="rounded-lg px-3 py-1.5 text-xs text-text-secondary transition-colors hover:text-text"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleReport}
-              disabled={reportSubmitting || !reportReason.trim()}
-              className="rounded-lg bg-error px-3 py-1.5 text-xs font-semibold text-text transition-all hover:opacity-90 active:scale-[0.97] disabled:opacity-50"
-            >
-              {reportSubmitting ? "Sending..." : "Report"}
+              {replySubmitting && <Loader2 className="h-3 w-3 animate-spin" />}
+              Reply
             </button>
           </div>
         </div>

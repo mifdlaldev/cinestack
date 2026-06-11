@@ -11,6 +11,7 @@ interface DropdownMenuContextValue {
   open: boolean
   onOpenChange: (open: boolean) => void
   triggerRef: React.RefObject<HTMLButtonElement | null>
+  triggerElRef: React.MutableRefObject<HTMLElement | null>
 }
 
 const DropdownMenuContext = React.createContext<DropdownMenuContextValue | null>(null)
@@ -55,6 +56,7 @@ function DropdownMenu({ open: controlledOpen, defaultOpen, onOpenChange, childre
   const isControlled = controlledOpen !== undefined
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen ?? false)
   const triggerRef = React.useRef<HTMLButtonElement>(null)
+  const triggerElRef = React.useRef<HTMLElement | null>(null)
 
   const open = isControlled ? controlledOpen : uncontrolledOpen
   const setOpen = React.useCallback(
@@ -66,7 +68,7 @@ function DropdownMenu({ open: controlledOpen, defaultOpen, onOpenChange, childre
   )
 
   return (
-    <DropdownMenuContext.Provider value={{ open, onOpenChange: setOpen, triggerRef }}>
+    <DropdownMenuContext.Provider value={{ open, onOpenChange: setOpen, triggerRef, triggerElRef }}>
       {children}
     </DropdownMenuContext.Provider>
   )
@@ -83,11 +85,18 @@ function DropdownMenuPortal({ children }: { children?: React.ReactNode }) {
 function DropdownMenuTrigger({ children, render, ...props }: React.ComponentPropsWithoutRef<"button"> & {
   render?: React.ReactElement<{ className?: string; onClick?: (e: React.MouseEvent) => void }>
 }) {
-  const { open, onOpenChange, triggerRef } = useDropdownMenuContext()
+  const { open, onOpenChange, triggerRef, triggerElRef } = useDropdownMenuContext()
 
   if (render) {
+    // Capture the rendered DOM element so DropdownMenuContent can use it for positioning
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (React.cloneElement as any)(render, {
+      ref: (node: HTMLElement | null) => {
+        triggerElRef.current = node
+        // Forward ref if the wrapped component exposes one
+        const childRef = (render as any).ref
+        if (childRef && typeof childRef === "object") childRef.current = node
+      },
       "data-slot": "dropdown-menu-trigger",
       onClick: (e: React.MouseEvent) => {
         render.props.onClick?.(e)
@@ -127,7 +136,7 @@ function DropdownMenuContent({
   alignOffset = 0,
   ...props
 }: DropdownMenuContentProps) {
-  const { open, onOpenChange, triggerRef } = useDropdownMenuContext()
+  const { open, onOpenChange, triggerRef, triggerElRef } = useDropdownMenuContext()
   const contentRef = React.useRef<HTMLDivElement>(null)
   const [position, setPosition] = React.useState({ top: 0, left: 0 })
   const [positioned, setPositioned] = React.useState(false)
@@ -136,12 +145,9 @@ function DropdownMenuContent({
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => { setMounted(true) }, [])
 
-  // Position the menu — runs after mount + each open
-  // Content renders immediately with opacity-0, then becomes visible once positioned
-  React.useEffect(() => {
-    if (!open || !mounted || !contentRef.current) return
-    const triggerEl = triggerRef.current ?? document.querySelector('[data-slot="dropdown-menu-trigger"]')
-    if (!triggerEl) return
+  const recalcPosition = React.useCallback(() => {
+    const triggerEl = triggerRef.current ?? triggerElRef.current
+    if (!triggerEl || !contentRef.current) return
     const triggerRect = triggerEl.getBoundingClientRect()
     const content = contentRef.current
     const pos = { top: 0, left: 0 }
@@ -167,21 +173,36 @@ function DropdownMenuContent({
         break
     }
     setPosition(pos)
-    // Double rAF to ensure layout settled, then make visible
+  }, [side, sideOffset, align, alignOffset, triggerRef])
+
+  React.useEffect(() => {
+    if (!open || !mounted) return
+    recalcPosition()
+    // Recalc on next frame for settled layout, then make visible
     const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setPositioned(true)
-      })
+      recalcPosition()
+      requestAnimationFrame(() => setPositioned(true))
     })
     return () => cancelAnimationFrame(raf)
-  }, [open, mounted, side, sideOffset, align, alignOffset, triggerRef])
+  }, [open, mounted, recalcPosition])
+
+  // Close on scroll outside content — allows scrolling inside dropdown
+  React.useEffect(() => {
+    if (!open) return
+    const closeOnScroll = (e: Event) => {
+      if (contentRef.current?.contains(e.target as Node)) return
+      onOpenChange(false)
+    }
+    window.addEventListener("scroll", closeOnScroll, true)
+    return () => window.removeEventListener("scroll", closeOnScroll, true)
+  }, [open, onOpenChange])
 
   // Click outside handler
   React.useEffect(() => {
     if (!open) return
     const handler = (e: MouseEvent) => {
       const target = e.target as Node
-      const triggerEl = triggerRef.current ?? document.querySelector('[data-slot="dropdown-menu-trigger"]')
+    const triggerEl = triggerRef.current ?? triggerElRef.current
       if (triggerEl?.contains(target)) return
       if (contentRef.current?.contains(target)) return
       onOpenChange(false)
@@ -212,11 +233,11 @@ function DropdownMenuContent({
       data-side={side}
       data-open=""
       className={cn(
-        "fixed z-50 max-h-(--available-height) w-(--anchor-width) min-w-32 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-2xl p-1 shadow-lg duration-100 outline-none bg-black/70 backdrop-blur-[20px] border border-white/[0.06]",
+        "fixed z-50 max-h-(--available-height) w-(--anchor-width) min-w-32 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-2xl p-1 shadow-lg outline-none bg-black/70 backdrop-blur-[20px] border border-white/[0.06]",
         !positioned && "opacity-0 pointer-events-none",
         className,
       )}
-      style={{ top: position.top, left: position.left }}
+      style={positioned ? { top: position.top, left: position.left } : undefined}
       {...props}
     >
       {children}
