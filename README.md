@@ -10,6 +10,7 @@
     <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?style=flat-square&logo=supabase" alt="Supabase"/>
     <img src="https://img.shields.io/badge/Tailwind-v4-06B6D4?style=flat-square&logo=tailwindcss" alt="Tailwind"/>
     <img src="https://img.shields.io/badge/TMDB-API-01D277?style=flat-square&logo=themoviedatabase" alt="TMDB"/>
+    <a href="https://github.com/mifdlaldev/cinestack/actions"><img src="https://img.shields.io/github/actions/workflow/status/mifdlaldev/cinestack/ci.yml?branch=main&style=flat-square&logo=githubactions&label=CI" alt="CI Status"/></a>
   </p>
 
   <br/>
