@@ -598,7 +598,7 @@ export function ProfileContent({
         <h2 className="mb-4 font-display text-lg text-text">Account Settings</h2>
 
         <div className="rounded-lg border border-error/20 bg-error/[0.03] p-4">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
             <div>
               <h3 className="text-sm font-semibold text-error">Delete Account</h3>
               <p className="mt-1 text-xs text-text-secondary">
