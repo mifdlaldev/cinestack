@@ -36,10 +36,9 @@ create table if not exists public.reviews (
   movie_id int not null,
   rating int not null check (rating >= 1 and rating <= 10),
   content text not null,
-  parent_id uuid references public.reviews(id) on delete cascade,
+  parent_id uuid references public.reviews(id) on delete set null,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  constraint unique_user_movie_review unique (user_id, movie_id)
+  updated_at timestamptz not null default now()
 );
 
 create table if not exists public.review_reports (
@@ -89,6 +88,10 @@ create index if not exists idx_reviews_movie_id on public.reviews(movie_id);
 create index if not exists idx_reviews_user_id on public.reviews(user_id);
 create index if not exists idx_reviews_rating on public.reviews(rating desc);
 create index if not exists idx_reviews_created on public.reviews(created_at desc);
+-- Partial unique: only parent reviews enforce 1-review-per-user-per-movie
+create unique index if not exists idx_unique_user_movie_review
+  on public.reviews (user_id, movie_id)
+  where parent_id is null;
 create index if not exists idx_watchlists_user_id on public.watchlists(user_id);
 create index if not exists idx_watchlists_movie_id on public.watchlists(movie_id);
 create index if not exists idx_movie_cache_tmdb_id on public.movie_cache(tmdb_id);

@@ -33,7 +33,9 @@ interface ReviewsResponse {
 }
 
 async function fetchReviews(movieId: number, page: number): Promise<ReviewsResponse> {
-  const res = await fetch(`/api/reviews?movieId=${movieId}&page=${page}`);
+  const res = await fetch(`/api/reviews?movieId=${movieId}&page=${page}`, {
+    cache: "no-store",
+  });
   if (!res.ok) {
     throw new Error("Failed to fetch reviews");
   }
@@ -113,7 +115,11 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
   });
 
   // ── Recursive reply thread renderer ──
-  const renderThread = (item: Review, depth = 0): React.ReactNode => {
+  const renderThread = (
+    item: Review,
+    depth = 0,
+    parentAuthorName?: string,
+  ): React.ReactNode => {
     const nested = repliesByParent[item.id];
     const totalNested = nested ? countNested(item.id) : 0;
     const isCollapsed = depth >= 2 && !expandedThreads.has(item.id);
@@ -126,6 +132,7 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
           isAuthenticated={!!currentUserId}
           onDelete={item.user_id === currentUserId ? () => handleDelete(item.id) : undefined}
           onReplySuccess={refetchReviews}
+          parentAuthorName={parentAuthorName}
           className={deletingId === item.id ? "opacity-50 transition-opacity" : ""}
         />
         {nested?.length > 0 && (
@@ -133,20 +140,28 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
             {isCollapsed ? (
               <button
                 onClick={() => toggleThread(item.id)}
-                className="ml-6 mt-2 flex items-center gap-1.5 text-xs font-medium text-accent transition-colors hover:text-accent-hover"
+                className="mt-2 flex items-center gap-1.5 text-xs font-medium text-accent transition-colors hover:text-accent-hover"
               >
                 <span className="inline-block h-3 w-3 rounded-full border-2 border-accent" />
                 See {totalNested} more repl{totalNested > 1 ? "ies" : "y"}
               </button>
             ) : (
               <>
-                <div className="ml-6 mt-3 space-y-3 border-l-2 border-border pl-4">
-                  {nested.map((reply) => renderThread(reply, depth + 1))}
+                <div
+                  className={
+                    depth === 0
+                      ? "ml-6 mt-3 space-y-3 border-l-2 border-border pl-4"
+                      : "mt-3 space-y-3"
+                  }
+                >
+                  {nested.map((reply) =>
+                    renderThread(reply, depth + 1, item.user?.name ?? undefined),
+                  )}
                 </div>
                 {depth >= 2 && (
                   <button
                     onClick={() => toggleThread(item.id)}
-                    className="ml-6 mt-2 flex items-center gap-1.5 text-xs font-medium text-text-secondary transition-colors hover:text-text"
+                    className="mt-2 flex items-center gap-1.5 text-xs font-medium text-text-secondary transition-colors hover:text-text"
                   >
                     <span className="inline-block h-3 w-3 rounded-full border-2 border-text-secondary" />
                     Hide replies
@@ -212,31 +227,18 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
     },
     onMutate: async (reviewId) => {
       setDeletingId(reviewId);
-      // Optimistic removal
-      await queryClient.cancelQueries({ queryKey: ["reviews", movieId, page] });
-      const previousData = queryClient.getQueryData<ReviewsResponse>([
-        "reviews",
-        movieId,
-        page,
-      ]);
-      if (previousData) {
-        queryClient.setQueryData<ReviewsResponse>(["reviews", movieId, page], {
-          ...previousData,
-          data: previousData.data.filter((r) => r.id !== reviewId),
-          count: previousData.count - 1,
-        });
-      }
-      return { previousData };
+      // Cancel any in-flight refetch so stale data doesn't overwrite
+      await queryClient.cancelQueries({ queryKey: ["reviews", movieId] });
     },
-    onError: (_err, _reviewId, context) => {
-      // Rollback
-      if (context?.previousData) {
-        queryClient.setQueryData(["reviews", movieId, page], context.previousData);
-      }
+    onError: () => {
+      setDeletingId(null);
+    },
+    onSuccess: () => {
+      // Hard reset — remove cached data so useQuery fetches fresh from API
+      queryClient.resetQueries({ queryKey: ["reviews", movieId] });
     },
     onSettled: () => {
       setDeletingId(null);
-      refetchReviews();
     },
   });
 
