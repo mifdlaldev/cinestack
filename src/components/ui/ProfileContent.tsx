@@ -229,6 +229,7 @@ export function ProfileContent({
 
   const avatarUrl = profileData?.avatar_url ?? null;
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setNameInput(displayName);
   }, [displayName]);
