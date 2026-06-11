@@ -248,7 +248,7 @@ function DialogContent({
     </>
   )
 
-  if (!mountedPortal) return null
+  if (!mountedPortal || !open) return null
 
   return createPortal(content, document.body)
 }

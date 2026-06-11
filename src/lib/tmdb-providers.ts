@@ -63,7 +63,11 @@ export async function getProvidersForMovies(
     const chunk = uniqueIds.slice(i, i + chunkSize);
     await Promise.all(
       chunk.map(async (id) => {
-        result[id] = await getSingleProvider(id);
+        try {
+          result[id] = await getSingleProvider(id);
+        } catch {
+          result[id] = [];
+        }
       }),
     );
 

@@ -4,8 +4,12 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { searchMovies, TmdbApiError } from "@/lib/tmdb";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/rate-limiter";
 
 export async function GET(request: NextRequest) {
+  const rateLimit = await applyRateLimit(request, RATE_LIMITS.search);
+  if (rateLimit) return rateLimit;
+
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q");
   const page = searchParams.get("page") ?? "1";

@@ -37,9 +37,9 @@ export function SearchBar({
   }, [onSearch]);
 
   return (
-    <div className="relative w-full max-w-2xl">
+    <div className="relative w-full">
       <Search
-        className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-text-secondary"
+        className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-text-secondary"
         aria-hidden="true"
       />
       <Input
@@ -49,14 +49,14 @@ export function SearchBar({
         onChange={handleChange}
         placeholder={placeholder}
         aria-label="Search movies"
-        className="w-full py-3.5 pl-12 pr-12 text-base"
+        className="w-full h-11 rounded-full pl-12 pr-12 text-base"
       />
       {value.length > 0 && (
         <Button
           variant="ghost"
           size="icon"
           onClick={handleClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2"
+          className="absolute right-2 top-1/2 -translate-y-1/2"
           aria-label="Clear search"
         >
           <X />

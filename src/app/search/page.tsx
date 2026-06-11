@@ -160,7 +160,7 @@ function SearchPageContent() {
       </div>
 
       {/* Search bar */}
-      <div className="mb-8">
+      <div className="mb-8 max-w-lg mx-auto">
         <SearchBar
           value={query}
           onSearch={handleSearch}

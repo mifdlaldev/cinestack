@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { discoverMovies } from "@/lib/tmdb";
+import { applyRateLimit, RATE_LIMITS } from "@/lib/rate-limiter";
 
-export const revalidate = 3600; // ISR — 1 hour
+export const revalidate = 3600;
 
 export async function GET(request: NextRequest) {
+  const rateLimit = await applyRateLimit(request, RATE_LIMITS.tmdb);
+  if (rateLimit) return rateLimit;
+
   try {
     const { searchParams } = new URL(request.url);
 

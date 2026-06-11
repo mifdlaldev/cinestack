@@ -132,13 +132,14 @@ function SelectContent({ className, children, side = "bottom", sideOffset = 4, a
   const { open, onOpenChange, triggerRef } = useSelectContext()
   const contentRef = React.useRef<HTMLDivElement>(null)
   const [position, setPosition] = React.useState({ top: 0, left: 0 })
+  const [positioned, setPositioned] = React.useState(false)
   const [mounted, setMounted] = React.useState(false)
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => { setMounted(true) }, [])
 
-  React.useEffect(() => {
-    if (!open || !triggerRef.current || !contentRef.current) return
+  const recalcPosition = React.useCallback(() => {
+    if (!triggerRef.current || !contentRef.current) return
     const triggerRect = triggerRef.current.getBoundingClientRect()
     const content = contentRef.current
     let top = 0, left = 0
@@ -156,7 +157,29 @@ function SelectContent({ className, children, side = "bottom", sideOffset = 4, a
     }
 
     setPosition({ top, left })
-  }, [open, side, sideOffset, align, alignOffset, triggerRef])
+  }, [side, sideOffset, align, alignOffset, triggerRef])
+
+  React.useEffect(() => {
+    if (!open) return
+    recalcPosition()
+    // Recalc on next frame for settled layout, then make visible
+    const raf = requestAnimationFrame(() => {
+      recalcPosition()
+      requestAnimationFrame(() => setPositioned(true))
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [open, recalcPosition])
+
+  // Close on scroll outside dropdown — allows scrolling inside dropdown content
+  React.useEffect(() => {
+    if (!open) return
+    const closeOnScroll = (e: Event) => {
+      if (contentRef.current?.contains(e.target as Node)) return
+      onOpenChange(false)
+    }
+    window.addEventListener("scroll", closeOnScroll, true)
+    return () => window.removeEventListener("scroll", closeOnScroll, true)
+  }, [open, onOpenChange])
 
   // Click outside
   React.useEffect(() => {
@@ -191,10 +214,11 @@ function SelectContent({ className, children, side = "bottom", sideOffset = 4, a
       data-side={side}
       data-open=""
       className={cn(
-        "fixed z-50 max-h-(--available-height) w-(--anchor-width) min-w-36 origin-(--transform-origin) overflow-x-hidden overflow-y-auto rounded-2xl bg-popover text-popover-foreground shadow-lg duration-100",
+        "fixed z-50 max-h-60 w-(--anchor-width) min-w-36 origin-(--transform-origin) overflow-y-auto rounded-2xl bg-popover text-popover-foreground shadow-lg cine-scrollbar-thin",
+        !positioned && "opacity-0 pointer-events-none",
         className,
       )}
-      style={{ top: position.top, left: position.left }}
+      style={positioned ? { top: position.top, left: position.left } : undefined}
       {...props}
     >
       <SelectScrollUpButton />

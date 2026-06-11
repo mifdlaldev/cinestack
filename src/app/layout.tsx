@@ -2,14 +2,10 @@ import type { Metadata } from "next";
 import { Inter, Archivo_Black, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import dynamic from "next/dynamic";
-import { Footer } from "@/components/layout/Footer";
 import { cn } from "@/lib/utils";
 
-const Navbar = dynamic(() => import("@/components/layout/Navbar").then((m) => m.Navbar), {
-  loading: () => <div className="h-16" />,
-});
-
 const Providers = dynamic(() => import("@/components/Providers").then((m) => m.Providers));
+const LayoutShell = dynamic(() => import("@/components/layout/LayoutShell").then((m) => m.LayoutShell));
 
 const inter = Inter({
   subsets: ["latin"],
@@ -100,9 +96,7 @@ export default function RootLayout({
               }),
             }}
           />
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <LayoutShell>{children}</LayoutShell>
         </Providers>
       </body>
     </html>

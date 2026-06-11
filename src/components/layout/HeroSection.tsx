@@ -82,10 +82,10 @@ export function HeroSection({ movies: pool }: HeroSectionProps) {
   const backdropUrl = getBackdropUrl(currentMovie.backdrop_path, "original");
   const year = currentMovie.release_date?.slice(0, 4);
   const rating = currentMovie.vote_average.toFixed(1);
-  const overview =
-    currentMovie.overview.length > 300
-      ? `${currentMovie.overview.slice(0, 300)}...`
-      : currentMovie.overview;
+  const raw = currentMovie.overview;
+  const shortOverview = raw
+    ? raw.split(/[.!?]/)[0].trim().replace(/[,;:\s]+$/, "") + "."
+    : "";
 
   // ─── Animation variants ──────────────────────────────────
 
@@ -176,9 +176,9 @@ export function HeroSection({ movies: pool }: HeroSectionProps) {
               </h1>
 
               {/* Overview */}
-              {overview && (
+              {shortOverview && (
                 <p className="mt-4 max-w-xl text-sm leading-relaxed text-text/80 md:text-base">
-                  {overview}
+                  {shortOverview}
                 </p>
               )}
 

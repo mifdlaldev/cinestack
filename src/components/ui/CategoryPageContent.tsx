@@ -56,7 +56,7 @@ export function CategoryPageContent({
 
       {/* Pagination */}
       <nav
-        className="mt-10 flex items-center justify-center gap-2"
+        className="mt-10 flex flex-wrap items-center justify-center gap-1 md:gap-2"
         aria-label="Page navigation"
       >
         {page > 1 && (
