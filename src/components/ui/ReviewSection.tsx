@@ -306,7 +306,7 @@ export function ReviewSection({ movieId }: ReviewSectionProps) {
       )}
 
       {/* ── Review form (logged in, not already have a review OR editing) ── */}
-      {!authLoading && currentUserId && !userReview && (
+      {!authLoading && !isLoading && currentUserId && !userReview && (
         <div id="review-form-scroll" className="mb-8">
           <ReviewForm
             key="new"
