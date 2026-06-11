@@ -144,7 +144,7 @@ async function DashboardContent() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           icon={<Users className="h-5 w-5" />}
           label="Total Users"
@@ -176,17 +176,17 @@ async function DashboardContent() {
         <h2 className="mb-3 font-display text-lg tracking-tight text-text">
           Quick Actions
         </h2>
-        <div className="flex flex-wrap gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Link
             href="/admin/movies"
-            className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
+            className="flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
           >
             <Plus className="h-4 w-4" />
             Sync Movie
           </Link>
           <Link
             href="/admin/news"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text transition-all hover:bg-surface-hover active:scale-[0.97]"
+            className="flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text transition-all hover:bg-surface-hover active:scale-[0.97]"
           >
             <Plus className="h-4 w-4" />
             Write Article
@@ -299,7 +299,7 @@ async function DashboardContent() {
                           {userObj?.name ?? "Anonymous"}{" "}
                           <span className="font-normal text-text-secondary">
                             rated {movieTitles[r.movie_id as number] ?? `#${r.movie_id}`}{" "}
-                            <span className="text-accent">{r.rating as number}/10</span>
+                            <span className="text-accent">{r.rating ? ((r.rating as number) > 5 ? Math.round((r.rating as number) / 2) : (r.rating as number)) : "-"}{r.rating ? "/5" : ""}</span>
                           </span>
                         </p>
                         <p className="mt-0.5 line-clamp-1 text-xs text-text-secondary">

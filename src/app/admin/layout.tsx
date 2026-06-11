@@ -1,10 +1,6 @@
-// ─────────────────────────────────────────────────────────────
-// Admin Layout — Sidebar navigation + server-side admin guard
-// ─────────────────────────────────────────────────────────────
-
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase";
-import { AdminSidebar } from "./AdminSidebar";
+import { AdminLayoutClient } from "./AdminLayoutClient";
 
 export const dynamic = "force-dynamic";
 
@@ -33,12 +29,5 @@ export default async function AdminLayout({
     redirect("/");
   }
 
-  return (
-    <div className="flex min-h-[100dvh]">
-      <AdminSidebar />
-      <main className="flex-1 overflow-x-auto bg-bg px-4 pb-12 pt-6 md:px-6 md:pt-8 lg:px-8">
-        {children}
-      </main>
-    </div>
-  );
+  return <AdminLayoutClient>{children}</AdminLayoutClient>;
 }
