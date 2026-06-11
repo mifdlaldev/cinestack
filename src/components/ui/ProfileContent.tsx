@@ -607,7 +607,7 @@ export function ProfileContent({
             </div>
             <button
               onClick={() => setDeleteStep(1)}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-error/10 px-3 py-1.5 text-xs font-semibold text-error transition-all hover:bg-error/20 active:scale-[0.97]"
+              className="self-end sm:self-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-error/10 px-3 py-1.5 text-xs font-semibold text-error transition-all hover:bg-error/20 active:scale-[0.97]"
             >
               <Trash2 className="h-3.5 w-3.5" />
               Delete Account
