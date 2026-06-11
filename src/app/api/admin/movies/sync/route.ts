@@ -15,7 +15,10 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: { code: "UNAUTHORIZED", message: "Unauthorized" } },
+      { status: 401 },
+    );
   }
 
   const { data: profile } = await supabase
@@ -25,7 +28,10 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (profile?.role !== "admin") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json(
+      { error: { code: "FORBIDDEN", message: "Forbidden" } },
+      { status: 403 },
+    );
   }
 
   const body = await request.json().catch(() => ({}));
@@ -33,7 +39,7 @@ export async function POST(request: NextRequest) {
 
   if (!tmdbId || typeof tmdbId !== "number") {
     return NextResponse.json(
-      { error: "tmdbId (number) is required in request body" },
+      { error: { code: "INVALID_INPUT", message: "tmdbId (number) is required in request body" } },
       { status: 400 },
     );
   }
@@ -53,16 +59,21 @@ export async function POST(request: NextRequest) {
     );
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json(
+        { error: { code: "DB_ERROR", message: error.message } },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({
-      success: true,
-      movie: { id: tmdbId, title: movieDetail.title },
+      data: { success: true, movie: { id: tmdbId, title: movieDetail.title } },
     });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to sync movie";
-    return NextResponse.json({ error: message }, { status: 502 });
+    return NextResponse.json(
+      { error: { code: "FETCH_ERROR", message } },
+      { status: 502 },
+    );
   }
 }

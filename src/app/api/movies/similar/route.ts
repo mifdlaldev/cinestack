@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
   if (!movieIdParam) {
     return NextResponse.json(
-      { error: "movieId is required" },
+      { error: { code: "MISSING_PARAM", message: "movieId is required" } },
       { status: 400 },
     );
   }
@@ -17,13 +17,20 @@ export async function GET(request: NextRequest) {
   const page = parseInt(pageParam, 10);
 
   if (isNaN(movieId) || isNaN(page)) {
-    return NextResponse.json({ error: "Invalid params" }, { status: 400 });
+    return NextResponse.json(
+      { error: { code: "INVALID_PARAM", message: "Invalid params" } },
+      { status: 400 },
+    );
   }
 
   try {
     const data = await getSimilarMovies(movieId, page);
     return NextResponse.json({ data: data.results, totalPages: data.total_pages });
-  } catch {
-    return NextResponse.json({ error: "Failed to fetch similar movies" }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to fetch similar movies";
+    return NextResponse.json(
+      { error: { code: "FETCH_ERROR", message } },
+      { status: 500 },
+    );
   }
 }

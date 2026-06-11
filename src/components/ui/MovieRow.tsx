@@ -17,6 +17,8 @@ interface MovieRowProps {
 
 export function MovieRow({ title, movies, href, providersMap }: MovieRowProps) {
   const shouldReduceMotion = useReducedMotion();
+
+  if (movies.length === 0) return null;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
