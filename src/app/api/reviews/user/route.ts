@@ -37,7 +37,8 @@ export async function GET() {
 
     if (parents) {
       for (const p of parents) {
-        const u = p.user as { name: string | null } | null;
+        const users = p.user as Array<{ name: string | null }> | null;
+        const u = users?.[0] ?? null;
         parentInfo[p.id] = { name: u?.name ?? null };
       }
     }
