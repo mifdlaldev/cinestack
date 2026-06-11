@@ -31,8 +31,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# opencode session data
+.omo/
+.codedev-mcp/
+
 # env files (can opt-in for committing if needed)
 .env*.local
+.env*.secret
 
 # vercel
 .vercel
@@ -40,3 +45,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# testing coverage
+/coverage/
+coverage/

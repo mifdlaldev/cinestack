@@ -22,8 +22,8 @@ const contactMethods = [
   {
     icon: Mail,
     title: "Email",
-    value: "mifdlal@example.com",
-    href: "mailto:mifdlal@example.com",
+    value: "contact@cinestack.web.id",
+    href: "mailto:contact@cinestack.web.id",
     description: "I typically respond within 24 hours",
   },
   {
