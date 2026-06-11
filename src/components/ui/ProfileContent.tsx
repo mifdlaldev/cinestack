@@ -1,12 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, Star, LogOut, Calendar, Mail, Film, MessageSquare } from "lucide-react";
+import {
+  Heart,
+  Star,
+  LogOut,
+  Calendar,
+  Mail,
+  Film,
+  MessageSquare,
+  MessageCircle,
+  Pencil,
+  Camera,
+  Trash2,
+  Loader2,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase-client";
 import { getImageUrl } from "@/lib/tmdb";
 import { useRouter } from "next/navigation";
+import { updateProfile, updateAvatar, deleteAccount } from "@/actions/profile-actions";
 import type { TmdbMovie } from "@/types/tmdb";
 import type { User } from "@supabase/supabase-js";
 
@@ -16,9 +32,14 @@ interface Review {
   rating: number;
   content: string;
   created_at: string;
+  parent_id?: string | null;
+  parentAuthorName?: string | null;
   movieTitle?: string;
   posterPath?: string;
 }
+
+const AVATAR_SIZE_LIMIT = 2 * 1024 * 1024;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 function MovieCardSmall({ movie }: { movie: TmdbMovie }) {
   const posterUrl = getImageUrl(movie.poster_path, "w342");
@@ -26,10 +47,7 @@ function MovieCardSmall({ movie }: { movie: TmdbMovie }) {
   const rating = movie.vote_average.toFixed(1);
 
   return (
-    <Link
-      href={`/movies/${movie.id}`}
-      className="group w-full"
-    >
+    <Link href={`/movies/${movie.id}`} className="group w-full">
       <div className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-surface">
         {posterUrl ? (
           <Image
@@ -57,9 +75,14 @@ function MovieCardSmall({ movie }: { movie: TmdbMovie }) {
   );
 }
 
-function ReviewCard({ review }: { review: Review }) {
-  const stars = Array.from({ length: 5 }, (_, i) => i < Math.round((review.rating ?? 0) / 2));
-  const posterUrl = review.posterPath ? getImageUrl(review.posterPath, "w185") : null;
+function ReviewCardParent({ review }: { review: Review }) {
+  const stars = Array.from(
+    { length: 5 },
+    (_, i) => i < Math.round((review.rating ?? 0) / 2),
+  );
+  const posterUrl = review.posterPath
+    ? getImageUrl(review.posterPath, "w185")
+    : null;
 
   return (
     <Link
@@ -68,7 +91,13 @@ function ReviewCard({ review }: { review: Review }) {
     >
       <div className="relative h-[80px] w-[54px] flex-shrink-0 overflow-hidden rounded-lg bg-surface sm:h-[100px] sm:w-[67px]">
         {posterUrl ? (
-          <Image src={posterUrl} alt={review.movieTitle ?? ""} fill sizes="67px" className="object-cover" />
+          <Image
+            src={posterUrl}
+            alt={review.movieTitle ?? ""}
+            fill
+            sizes="67px"
+            className="object-cover"
+          />
         ) : (
           <div className="flex h-full items-center justify-center">
             <Film className="h-5 w-5 text-text-secondary/30" />
@@ -82,7 +111,10 @@ function ReviewCard({ review }: { review: Review }) {
           </h3>
           <div className="flex shrink-0 gap-0.5">
             {stars.map((filled, i) => (
-              <Star key={i} className={`h-3 w-3 ${filled ? "fill-accent text-accent" : "text-border"}`} />
+              <Star
+                key={i}
+                className={`h-3 w-3 ${filled ? "fill-accent text-accent" : "text-border"}`}
+              />
             ))}
           </div>
         </div>
@@ -90,7 +122,66 @@ function ReviewCard({ review }: { review: Review }) {
           {review.content || "No written review."}
         </p>
         <p className="mt-1.5 text-[10px] text-text-secondary/60">
-          {new Date(review.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          {new Date(review.created_at).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })}
+        </p>
+      </div>
+    </Link>
+  );
+}
+
+function ReviewCardReply({ review }: { review: Review }) {
+  const posterUrl = review.posterPath
+    ? getImageUrl(review.posterPath, "w185")
+    : null;
+
+  return (
+    <Link
+      href={`/movies/${review.movie_id}`}
+      className="group flex gap-4 rounded-xl border border-border/60 bg-surface/50 p-3 transition-all hover:border-accent/20"
+    >
+      <div className="relative h-[80px] w-[54px] flex-shrink-0 overflow-hidden rounded-lg bg-surface sm:h-[100px] sm:w-[67px]">
+        {posterUrl ? (
+          <Image
+            src={posterUrl}
+            alt={review.movieTitle ?? ""}
+            fill
+            sizes="67px"
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <Film className="h-5 w-5 text-text-secondary/30" />
+          </div>
+        )}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col justify-center">
+        <div className="flex items-center gap-1.5">
+          <MessageCircle className="h-3 w-3 text-accent" />
+          <h3 className="truncate text-sm font-medium text-text transition-colors group-hover:text-accent">
+            {review.movieTitle ?? `Movie #${review.movie_id}`}
+          </h3>
+        </div>
+        {review.parentAuthorName && (
+          <p className="mt-0.5 text-[11px] text-text-secondary">
+            Replying to{" "}
+            <span className="font-medium text-text">
+              @{review.parentAuthorName}
+            </span>
+          </p>
+        )}
+        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-text-secondary">
+          {review.content || "No written reply."}
+        </p>
+        <p className="mt-1.5 text-[10px] text-text-secondary/60">
+          {new Date(review.created_at).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })}
         </p>
       </div>
     </Link>
@@ -109,19 +200,150 @@ export function ProfileContent({
   reviewCount: number;
 }) {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [watchlistMovies, setWatchlistMovies] = useState<TmdbMovie[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
+
+  const [deleteStep, setDeleteStep] = useState(0);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const profileData = profile as {
+    name?: string;
+    avatar_url?: string | null;
+  } | null;
+
+  const displayName =
+    profileData?.name ??
+    user.user_metadata?.full_name ??
+    user.email?.split("@")[0] ??
+    "User";
+
+  const avatarUrl = profileData?.avatar_url ?? null;
+
+  useEffect(() => {
+    setNameInput(displayName);
+  }, [displayName]);
+
+  const initials = displayName
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const avatarColors = [
+    "bg-accent/20", "bg-blue-500/20", "bg-emerald-500/20", "bg-purple-500/20",
+    "bg-rose-500/20", "bg-amber-500/20", "bg-cyan-500/20", "bg-pink-500/20",
+  ];
+  const textColors = [
+    "text-accent", "text-blue-400", "text-emerald-400", "text-purple-400",
+    "text-rose-400", "text-amber-400", "text-cyan-400", "text-pink-400",
+  ];
+  let hash = 0;
+  for (let i = 0; i < displayName.length; i++)
+    hash = displayName.charCodeAt(i) + ((hash << 5) - hash);
+  const avatarColor = avatarColors[Math.abs(hash) % avatarColors.length];
+  const textColor = textColors[Math.abs(hash) % textColors.length];
+
+  // ── Avatar upload ──
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setProfileError("Only JPEG, PNG, and WebP images are allowed.");
+      return;
+    }
+    if (file.size > AVATAR_SIZE_LIMIT) {
+      setProfileError("Image must be under 2MB.");
+      return;
+    }
+
+    setAvatarUploading(true);
+    setProfileError(null);
+    setProfileSuccess(null);
+
+    try {
+      const supabase = createClient();
+      const ext = file.name.split(".").pop() ?? "jpg";
+      const filePath = `${user.id}/avatar.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw new Error(uploadError.message);
+
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      const result = await updateAvatar(urlData.publicUrl);
+      if (result.error) throw new Error(result.error);
+
+      setProfileSuccess("Avatar updated!");
+      router.refresh();
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setAvatarUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  // ── Save name ──
+  const handleNameSave = async () => {
+    if (!nameInput.trim()) return;
+    setProfileError(null);
+    setProfileSuccess(null);
+
+    const formData = new FormData();
+    formData.set("name", nameInput.trim());
+
+    const result = await updateProfile(formData);
+    if (result.error) {
+      setProfileError(result.error);
+    } else {
+      setProfileSuccess("Name updated!");
+      setEditingName(false);
+      router.refresh();
+    }
+  };
+
+  // ── Delete account ──
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const result = await deleteAccount();
+      if (result.error) throw new Error(result.error);
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete account");
+      setDeleting(false);
+    }
+  };
+
+  // ── Load data ──
   useEffect(() => {
     async function load() {
       try {
-        // Fetch watchlist IDs
         const wlRes = await fetch("/api/watchlist");
         const wlJson = await wlRes.json();
         const ids: number[] = wlJson.data ?? [];
 
-        // Fetch movie details for watchlist
         const movies = await Promise.all(
           ids.slice(0, 20).map(async (id: number) => {
             try {
@@ -136,13 +358,11 @@ export function ProfileContent({
         );
         setWatchlistMovies(movies.filter(Boolean));
 
-        // Fetch reviews from our API
         const revRes = await fetch(`/api/reviews/user`);
         if (revRes.ok) {
           const revJson = await revRes.json();
           const rawReviews = revJson.data ?? [];
 
-          // Fetch movie details for each review
           const enriched = await Promise.all(
             rawReviews.map(async (review: Review) => {
               try {
@@ -169,47 +389,100 @@ export function ProfileContent({
     load();
   }, []);
 
-  const displayName =
-    profile?.name ??
-    user.user_metadata?.full_name ??
-    user.email?.split("@")[0] ??
-    "User";
-
-  const initials = displayName
-    .split(" ")
-    .map((n: string) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-  const avatarColors = [
-    "bg-accent/20", "bg-blue-500/20", "bg-emerald-500/20", "bg-purple-500/20",
-    "bg-rose-500/20", "bg-amber-500/20", "bg-cyan-500/20", "bg-pink-500/20",
-  ];
-  const textColors = [
-    "text-accent", "text-blue-400", "text-emerald-400", "text-purple-400",
-    "text-rose-400", "text-amber-400", "text-cyan-400", "text-pink-400",
-  ];
-  let hash = 0;
-  for (let i = 0; i < displayName.length; i++) hash = displayName.charCodeAt(i) + ((hash << 5) - hash);
-  const avatarColor = avatarColors[Math.abs(hash) % avatarColors.length];
-  const textColor = textColors[Math.abs(hash) % textColors.length];
+  const parentReviews = reviews.filter((r) => !r.parent_id);
+  const replyReviews = reviews.filter((r) => r.parent_id);
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 pt-20 pb-12 md:px-6 md:pt-24 lg:px-8">
       {/* ─── Profile Header ─── */}
       <div className="mb-10 flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
-        <div
-          className={`flex h-20 w-20 items-center justify-center rounded-full sm:h-24 sm:w-24 ${avatarColor}`}
-        >
-          <span className={`text-lg font-bold sm:text-xl ${textColor}`}>
-            {initials || "?"}
-          </span>
+        {/* Avatar */}
+        <div className="relative">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={avatarUploading}
+            className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full sm:h-24 sm:w-24"
+          >
+            {avatarUrl ? (
+              <Image
+                src={avatarUrl}
+                alt={displayName}
+                fill
+                sizes="96px"
+                className="object-cover"
+              />
+            ) : (
+              <div className={`flex h-full w-full items-center justify-center ${avatarColor}`}>
+                <span className={`text-lg font-bold sm:text-xl ${textColor}`}>
+                  {avatarUploading ? "..." : initials || "?"}
+                </span>
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+              {avatarUploading ? (
+                <Loader2 className="h-6 w-6 animate-spin text-white" />
+              ) : (
+                <Camera className="h-6 w-6 text-white" />
+              )}
+            </div>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleAvatarSelect}
+          />
         </div>
 
         <div className="flex-1">
-          <h1 className="font-display text-2xl tracking-tight text-text md:text-3xl">
-            {displayName}
-          </h1>
+          {editingName ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value.slice(0, 50))}
+                maxLength={50}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleNameSave();
+                  if (e.key === "Escape") {
+                    setEditingName(false);
+                    setNameInput(displayName);
+                  }
+                }}
+                className="w-full max-w-xs rounded-lg border border-border bg-bg-alt px-3 py-1.5 text-lg font-display text-text outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30"
+              />
+              <button
+                onClick={handleNameSave}
+                className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setEditingName(false);
+                  setNameInput(displayName);
+                }}
+                className="text-xs text-text-secondary hover:text-text"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <h1 className="font-display text-2xl tracking-tight text-text md:text-3xl">
+                {displayName}
+              </h1>
+              <button
+                onClick={() => setEditingName(true)}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-accent"
+                aria-label="Edit name"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-text-secondary">
             <span className="inline-flex items-center gap-1">
               <Mail className="h-3 w-3" />
@@ -217,9 +490,26 @@ export function ProfileContent({
             </span>
             <span className="inline-flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              Joined {new Date(user.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long" })}
+              Joined{" "}
+              {new Date(user.created_at).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+              })}
             </span>
           </div>
+
+          {profileSuccess && (
+            <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {profileSuccess}
+            </p>
+          )}
+          {profileError && (
+            <p className="mt-2 flex items-center gap-1.5 text-xs text-error">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              {profileError}
+            </p>
+          )}
         </div>
 
         <button
@@ -262,6 +552,100 @@ export function ProfileContent({
         </div>
       </div>
 
+      {/* ─── Account Settings ─── */}
+      <section className="mb-12 rounded-xl border border-border bg-surface p-6">
+        <h2 className="mb-4 font-display text-lg text-text">Account Settings</h2>
+
+        {/* Delete Account */}
+        <div className="rounded-lg border border-error/20 bg-error/[0.03] p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-semibold text-error">Delete Account</h3>
+              <p className="mt-1 text-xs text-text-secondary">
+                Permanently delete your account and all your data. This action cannot be undone.
+              </p>
+            </div>
+            {deleteStep === 0 && (
+              <button
+                onClick={() => setDeleteStep(1)}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-error/10 px-3 py-1.5 text-xs font-semibold text-error transition-all hover:bg-error/20 active:scale-[0.97]"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete Account
+              </button>
+            )}
+          </div>
+
+          {deleteStep === 1 && (
+            <div className="mt-4 space-y-3 border-t border-error/10 pt-4">
+              <p className="text-sm text-text-secondary">
+                This will permanently delete your account, reviews, watchlist, and all associated data.
+                Are you sure you want to proceed?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setDeleteStep(2)}
+                  className="rounded-lg bg-error px-4 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-[0.97]"
+                >
+                  Yes, Continue
+                </button>
+                <button
+                  onClick={() => {
+                    setDeleteStep(0);
+                    setDeleteConfirmText("");
+                    setDeleteError(null);
+                  }}
+                  className="rounded-lg border border-border px-4 py-2 text-xs text-text-secondary transition-colors hover:text-text"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {deleteStep === 2 && (
+            <div className="mt-4 space-y-3 border-t border-error/10 pt-4">
+              <p className="text-sm font-medium text-error">
+                Type <span className="font-bold">DELETE</span> below to confirm:
+              </p>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Type DELETE"
+                className="w-full max-w-xs rounded-lg border border-error/30 bg-bg-alt px-3 py-2 text-sm text-text outline-none placeholder:text-text-secondary/50 focus:border-error/50 focus:ring-1 focus:ring-error/30"
+              />
+              {deleteError && (
+                <p className="flex items-center gap-1.5 text-xs text-error">
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  {deleteError}
+                </p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleteConfirmText !== "DELETE" || deleting}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-error px-4 py-2 text-xs font-semibold text-white transition-all hover:opacity-90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {deleting ? "Deleting..." : "Permanently Delete"}
+                </button>
+                <button
+                  onClick={() => {
+                    setDeleteStep(0);
+                    setDeleteConfirmText("");
+                    setDeleteError(null);
+                  }}
+                  className="rounded-lg border border-border px-4 py-2 text-xs text-text-secondary transition-colors hover:text-text"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* ─── Watchlist ─── */}
       {watchlistMovies.length > 0 && (
         <section className="mb-12">
@@ -273,24 +657,40 @@ export function ProfileContent({
               <MovieCardSmall key={movie.id} movie={movie} />
             ))}
           </div>
-          {watchlistMovies.length === 0 && !loading && (
-            <p className="py-8 text-center text-sm text-text-secondary">
-              No movies in your watchlist yet.
-            </p>
-          )}
         </section>
       )}
 
-      {/* ─── Reviews ─── */}
-      {reviews.length > 0 && (
-        <section>
+      {/* ─── My Reviews ─── */}
+      {parentReviews.length > 0 && (
+        <section className="mb-12">
           <h2 className="mb-4 font-display text-xl text-text">My Reviews</h2>
           <div className="space-y-3">
-            {reviews.slice(0, 10).map((review) => (
-              <ReviewCard key={review.id} review={review} />
+            {parentReviews.map((review) => (
+              <ReviewCardParent key={review.id} review={review} />
             ))}
           </div>
         </section>
+      )}
+
+      {/* ─── My Replies ─── */}
+      {replyReviews.length > 0 && (
+        <section className="mb-12">
+          <div className="mb-4 flex items-center gap-2">
+            <MessageCircle className="h-5 w-5 text-accent" />
+            <h2 className="font-display text-xl text-text">My Replies</h2>
+          </div>
+          <div className="space-y-3">
+            {replyReviews.map((review) => (
+              <ReviewCardReply key={review.id} review={review} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {!loading && parentReviews.length === 0 && replyReviews.length === 0 && (
+        <div className="rounded-xl border border-border bg-surface py-12 text-center">
+          <p className="text-sm text-text-secondary">No activity yet.</p>
+        </div>
       )}
 
       {loading && (
