@@ -14,7 +14,7 @@ import { normalizeAuthor } from "@/types/news";
 interface NewsCardProps {
   article: Pick<
     NewsArticle,
-    "title" | "slug" | "excerpt" | "cover_image" | "published_at"
+    "title" | "slug" | "excerpt" | "cover_image" | "published_at" | "created_at"
   > & { author: NewsAuthor };
   /** Stagger delay in seconds. Default: 0 */
   delay?: number;
@@ -89,7 +89,7 @@ export function NewsCard({ article, delay = 0 }: NewsCardProps) {
           )}
           <span className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5" />
-            {formatDate(article.published_at)}
+            {formatDate(article.published_at ?? article.created_at ?? null)}
           </span>
           <span className="flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" />

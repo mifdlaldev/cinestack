@@ -307,7 +307,7 @@ async function ArticleContent({ slug }: { slug: string }) {
                     excerpt: string | null;
                     cover_image: string | null;
                     published_at: string | null;
-                    created_at: string | null;
+                    created_at: string;
                     author: NewsAuthor;
                   }}
                   delay={i * 0.1}
