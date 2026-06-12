@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import Link from "next/link";
-import { ChevronRight, Newspaper } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { NewsCard } from "./NewsCard";
 import type { NewsAuthor } from "@/types/news";
@@ -36,8 +36,7 @@ export async function NewsSection() {
   return (
     <section>
       <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Newspaper className="h-6 w-6 text-accent" />
+        <div>
           <h2 className="font-display text-xl text-text md:text-2xl">
             Latest News
           </h2>
@@ -62,7 +61,7 @@ export async function NewsSection() {
                 excerpt: string | null;
                 cover_image: string | null;
                 published_at: string | null;
-                created_at: string | null;
+                created_at: string;
                 author: NewsAuthor;
               }
             }

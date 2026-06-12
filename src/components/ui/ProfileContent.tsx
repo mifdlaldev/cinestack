@@ -229,6 +229,7 @@ export function ProfileContent({
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false);
 
   const initials = displayName
     .split(" ")
@@ -396,7 +397,7 @@ export function ProfileContent({
         {/* Avatar */}
         <div className="relative">
           <button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => setAvatarModalOpen(true)}
             disabled={avatarUploading}
             className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full sm:h-24 sm:w-24"
           >
@@ -522,6 +523,79 @@ export function ProfileContent({
           Sign Out
         </button>
       </div>
+
+      {/* ─── Avatar Preview Modal ─── */}
+      {avatarModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-2xl border border-border bg-surface p-6 shadow-xl">
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative h-32 w-32 overflow-hidden rounded-full">
+                {avatarUrl ? (
+                  <Image
+                    src={avatarUrl}
+                    alt={displayName}
+                    fill
+                    sizes="128px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className={`flex h-full w-full items-center justify-center ${avatarColor}`}>
+                    <span className={`text-2xl font-bold ${textColor}`}>
+                      {initials || "?"}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold text-text">{displayName}</p>
+                <p className="text-xs text-text-secondary">Profile Photo</p>
+              </div>
+              <div className="flex w-full flex-col gap-2">
+                <button
+                  onClick={() => {
+                    fileInputRef.current?.click();
+                    setAvatarModalOpen(false);
+                  }}
+                  className="w-full rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
+                >
+                  Change Photo
+                </button>
+                {avatarUrl && (
+                  <button
+                    onClick={async () => {
+                      setAvatarModalOpen(false);
+                      if (avatarUrl) {
+                        const prefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/`;
+                        if (avatarUrl.startsWith(prefix)) {
+                          const filePath = avatarUrl.slice(prefix.length);
+                          const supabase = createClient();
+                          await supabase.storage.from("avatars").remove([filePath]);
+                        }
+                      }
+                      const result = await updateAvatar("");
+                      if (result.error) {
+                        setProfileError(result.error);
+                      } else {
+                        setProfileSuccess("Avatar removed");
+                        router.refresh();
+                      }
+                    }}
+                    className="w-full rounded-lg border border-error/20 px-4 py-2.5 text-sm font-medium text-error transition-all hover:bg-error/5 active:scale-[0.97]"
+                  >
+                    Remove Photo
+                  </button>
+                )}
+                <button
+                  onClick={() => setAvatarModalOpen(false)}
+                  className="w-full rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── Stats ─── */}
       <div className="mb-12 grid grid-cols-2 gap-4">
