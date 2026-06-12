@@ -5,7 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -43,8 +43,30 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // Fetch author names
+  const authorIds = [...new Set((data ?? []).map((a) => a.author_id).filter(Boolean))];
+  const authorNames: Record<string, string> = {};
+
+  if (authorIds.length > 0) {
+    const { data: users } = await supabase
+      .from("users")
+      .select("id, name")
+      .in("id", authorIds);
+
+    if (users) {
+      for (const u of users) {
+        authorNames[u.id] = u.name ?? "Unknown";
+      }
+    }
+  }
+
+  const enriched = (data ?? []).map((article) => ({
+    ...article,
+    author_name: authorNames[article.author_id] ?? "Unknown",
+  }));
+
   return NextResponse.json({
-    data: data ?? [],
+    data: enriched,
     count: count ?? 0,
     page,
     pageSize: PAGE_SIZE,
@@ -82,23 +104,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { data, error } = await supabase
-    .from("news_articles")
-    .insert({
-      title,
-      slug,
-      content,
-      excerpt: excerpt ?? null,
-      cover_image: cover_image ?? null,
-      author_id: user.id,
-      status: status ?? "draft",
-      published_at: status === "published" ? new Date().toISOString() : null,
-    })
-    .select()
-    .single();
+  const { data, error } = await supabase.rpc("admin_insert_article", {
+    _title: title,
+    _slug: slug,
+    _content: content,
+    _excerpt: excerpt ?? null,
+    _cover_image: cover_image ?? null,
+    _status: status ?? "draft",
+  });
 
   if (error) {
-    if (error.code === "23505") {
+    if (error.message?.includes("already exists")) {
       return NextResponse.json(
         { error: "An article with this slug already exists" },
         { status: 409 },

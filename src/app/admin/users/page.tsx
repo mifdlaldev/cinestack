@@ -1,14 +1,24 @@
 // ─────────────────────────────────────────────────────────────
-// Admin Users Management — List, search, view user roles
+// Admin Users Management — List, search, delete users
 // ─────────────────────────────────────────────────────────────
 
 "use client";
 
-import { useState, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Search, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useState, useCallback, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Trash2,
+  AlertTriangle,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatRelativeTime } from "@/lib/format-relative-time";
+import { adminDeleteUser } from "@/actions/admin-actions";
 
 interface User {
   id: string;
@@ -40,14 +50,8 @@ function getInitials(name: string | null): string {
 function getAvatarColor(name: string | null): string {
   if (!name) return "bg-surface-hover";
   const colors = [
-    "bg-accent/20",
-    "bg-blue-500/20",
-    "bg-emerald-500/20",
-    "bg-purple-500/20",
-    "bg-rose-500/20",
-    "bg-amber-500/20",
-    "bg-cyan-500/20",
-    "bg-pink-500/20",
+    "bg-accent/20", "bg-blue-500/20", "bg-emerald-500/20", "bg-purple-500/20",
+    "bg-rose-500/20", "bg-amber-500/20", "bg-cyan-500/20", "bg-pink-500/20",
   ];
   let hash = 0;
   for (let i = 0; i < (name ?? "").length; i++) {
@@ -57,25 +61,18 @@ function getAvatarColor(name: string | null): string {
 }
 
 export default function AdminUsersPage() {
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
   const [sort, setSort] = useState("created_at");
   const [order, setOrder] = useState("desc");
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-  } = useQuery<UsersResponse>({
+  const { data, isLoading, isError, error } = useQuery<UsersResponse>({
     queryKey: ["admin-users", page, search, sort, order],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(page),
-        sort,
-        order,
-      });
+      const params = new URLSearchParams({ page: String(page), sort, order });
       if (search) params.set("search", search);
       const res = await fetch(`/api/admin/users?${params}`);
       if (!res.ok) {
@@ -86,14 +83,34 @@ export default function AdminUsersPage() {
     },
   });
 
-  const handleSearch = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      setSearch(searchInput);
-      setPage(1);
+  const deleteMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const result = await adminDeleteUser(userId);
+      if (result.error) throw new Error(result.error);
     },
-    [searchInput],
+    onSuccess: () => {
+      setDeleteTarget(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+  });
+
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        setSearch(value);
+        setPage(1);
+      }, 400);
+    },
+    [],
   );
+
+  const handleClear = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSearch("");
+    setPage(1);
+  }, []);
 
   const toggleSort = (column: string) => {
     if (sort === column) {
@@ -118,24 +135,25 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Search */}
-      <form onSubmit={handleSearch} className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search by name or email..."
-            className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-4 text-sm text-text placeholder:text-text-secondary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
-        >
-          Search
-        </button>
-      </form>
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+        <input
+          type="text"
+          defaultValue={search}
+          onChange={handleSearchChange}
+          placeholder="Search by name or email..."
+          className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-10 text-sm text-text placeholder:text-text-secondary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+        />
+        {search.length > 0 && (
+          <button
+            onClick={handleClear}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1 text-text-secondary transition-colors hover:text-text"
+            aria-label="Clear search"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
 
       {/* Loading state */}
       {isLoading && (
@@ -188,13 +206,22 @@ export default function AdminUsersPage() {
                       </span>
                     )}
                   </th>
+                  <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                    Joining Date
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                    Time
+                  </th>
+                  <th className="w-16 px-4 py-3 text-center font-medium text-text-secondary">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {data.data.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={4}
+                      colSpan={7}
                       className="px-4 py-12 text-center text-sm text-text-secondary"
                     >
                       No users found
@@ -208,15 +235,27 @@ export default function AdminUsersPage() {
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={
-                              "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold " +
-                              getAvatarColor(user.name)
-                            }
-                            aria-hidden="true"
-                          >
-                            {getInitials(user.name)}
-                          </div>
+                          {user.avatar_url ? (
+                            <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
+                              <Image
+                                src={user.avatar_url}
+                                alt={user.name ?? "User"}
+                                fill
+                                sizes="36px"
+                                className="object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              className={
+                                "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold " +
+                                getAvatarColor(user.name)
+                              }
+                              aria-hidden="true"
+                            >
+                              {getInitials(user.name)}
+                            </div>
+                          )}
                           <span className="font-medium text-text">
                             {user.name ?? "Unnamed"}
                           </span>
@@ -239,6 +278,29 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-4 py-3 text-text-secondary">
                         {formatRelativeTime(user.created_at)}
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary whitespace-nowrap">
+                        {new Date(user.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary whitespace-nowrap">
+                        {new Date(user.created_at).toLocaleTimeString("en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        })}
+                      </td>
+                      <td className="w-16 px-4 py-3 text-center">
+                        <button
+                          onClick={() => setDeleteTarget(user.id)}
+                          className="flex h-8 items-center justify-center rounded-lg px-2 text-text-secondary transition-colors hover:bg-error/10 hover:text-error"
+                          aria-label="Delete user"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -270,6 +332,54 @@ export default function AdminUsersPage() {
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Delete confirmation modal */}
+          {deleteTarget && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+              <div className="mx-4 w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
+                <div className="mb-4 flex items-center gap-3">
+                  <AlertTriangle className="h-5 w-5 text-error" />
+                  <h3 className="font-display text-lg text-text">Delete User</h3>
+                  <button
+                    onClick={() => setDeleteTarget(null)}
+                    className="ml-auto text-text-secondary hover:text-text"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                <p className="text-sm text-text-secondary">
+                  This will permanently delete this user, their reviews, watchlist,
+                  and all associated data. This action cannot be undone.
+                </p>
+                {deleteMutation.isError && (
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-error">
+                    <AlertTriangle className="h-3.5 w-3.5" />
+                    {deleteMutation.error instanceof Error
+                      ? deleteMutation.error.message
+                      : "Failed to delete user"}
+                  </p>
+                )}
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    onClick={() => setDeleteTarget(null)}
+                    className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => deleteMutation.mutate(deleteTarget)}
+                    disabled={deleteMutation.isPending}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-error px-4 py-2 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {deleteMutation.isPending && (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    )}
+                    {deleteMutation.isPending ? "Deleting..." : "Delete User"}
+                  </button>
+                </div>
               </div>
             </div>
           )}

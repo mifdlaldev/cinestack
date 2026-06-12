@@ -7,19 +7,17 @@ import { createClient } from "@/lib/supabase";
 
 const PAGE_SIZE = 18;
 
-export async function GET(request: NextRequest) {
-  const supabase = await createClient();
+type AuthResult =
+  | { ok: false; error: string; status: number }
+  | { ok: true; userId: string };
 
-  // Verify admin role server-side
+async function verifyAdmin(supabase: Awaited<ReturnType<typeof createClient>>): Promise<AuthResult> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json(
-      { error: { code: "UNAUTHORIZED", message: "Unauthorized" } },
-      { status: 401 },
-    );
+    return { ok: false, error: "Unauthorized", status: 401 };
   }
 
   const { data: profile } = await supabase
@@ -29,13 +27,30 @@ export async function GET(request: NextRequest) {
     .single();
 
   if (profile?.role !== "admin") {
-    return NextResponse.json(
-      { error: { code: "FORBIDDEN", message: "Forbidden" } },
-      { status: 403 },
-    );
+    return { ok: false, error: "Forbidden", status: 403 };
+  }
+
+  return { ok: true, userId: user.id };
+}
+
+export async function GET(request: NextRequest) {
+  const supabase = await createClient();
+
+  const auth = await verifyAdmin(supabase);
+  if (!auth.ok) {
+    return NextResponse.json({ error: { code: auth.error.toUpperCase(), message: auth.error } }, { status: auth.status });
   }
 
   const { searchParams } = new URL(request.url);
+
+  // Return all cached TMDB IDs (for sync status checking)
+  if (searchParams.get("all_ids") === "true") {
+    const { data: ids } = await supabase
+      .from("movie_cache")
+      .select("tmdb_id");
+    return NextResponse.json({ ids: (ids ?? []).map((r) => r.tmdb_id) });
+  }
+
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
@@ -60,4 +75,36 @@ export async function GET(request: NextRequest) {
     pageSize: PAGE_SIZE,
     totalPages: Math.ceil((count ?? 0) / PAGE_SIZE),
   });
+}
+
+export async function DELETE(request: NextRequest) {
+  const supabase = await createClient();
+
+  const auth = await verifyAdmin(supabase);
+  if (!auth.ok) {
+    return NextResponse.json({ error: { code: auth.error.toUpperCase(), message: auth.error } }, { status: auth.status });
+  }
+
+  const { tmdbId } = await request.json().catch(() => ({}));
+
+  if (!tmdbId || typeof tmdbId !== "number") {
+    return NextResponse.json(
+      { error: { code: "INVALID_INPUT", message: "tmdbId (number) is required" } },
+      { status: 400 },
+    );
+  }
+
+  const { error } = await supabase
+    .from("movie_cache")
+    .delete()
+    .eq("tmdb_id", tmdbId);
+
+  if (error) {
+    return NextResponse.json(
+      { error: { code: "DB_ERROR", message: error.message } },
+      { status: 500 },
+    );
+  }
+
+  return NextResponse.json({ data: { success: true } });
 }

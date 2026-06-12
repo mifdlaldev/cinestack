@@ -4,8 +4,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
+import { getMovieDetail } from "@/lib/tmdb";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -51,7 +52,9 @@ export async function GET(request: NextRequest) {
       user:users(name, avatar_url, email)
     `,
       { count: "exact" },
-    );
+    )
+    .is("parent_id", null)
+    .not("rating", "is", null);
 
   if (search) {
     // Search by joining with users table for user name/email
@@ -97,6 +100,21 @@ export async function GET(request: NextRequest) {
     if (cachedMovies) {
       for (const m of cachedMovies) {
         movieTitles[m.tmdb_id] = m.title;
+      }
+    }
+
+    // TMDB fallback for movies not in cache
+    const cachedIds = new Set((cachedMovies ?? []).map((m) => m.tmdb_id));
+    const missingIds = movieIds.filter((id) => !cachedIds.has(id));
+
+    if (missingIds.length > 0) {
+      const results = await Promise.allSettled(
+        missingIds.map((id) => getMovieDetail(id)),
+      );
+      for (const result of results) {
+        if (result.status === "fulfilled") {
+          movieTitles[result.value.id] = result.value.title;
+        }
       }
     }
   }

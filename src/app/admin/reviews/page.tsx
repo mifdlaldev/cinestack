@@ -4,8 +4,9 @@
 
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import {
   Search,
   Trash2,
@@ -22,6 +23,28 @@ interface ReviewUser {
   name: string | null;
   avatar_url: string | null;
   email: string;
+}
+
+function getInitials(name: string | null): string {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+function getAvatarColor(name: string | null): string {
+  if (!name) return "bg-surface-hover";
+  const colors = [
+    "bg-accent/20", "bg-blue-500/20", "bg-emerald-500/20", "bg-purple-500/20",
+    "bg-rose-500/20", "bg-amber-500/20", "bg-cyan-500/20", "bg-pink-500/20",
+  ];
+  let hash = 0;
+  for (let i = 0; i < (name ?? "").length; i++)
+    hash = (name ?? "").charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
 }
 
 interface Review {
@@ -106,11 +129,11 @@ export default function AdminReviewsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<{
     id: string;
     label: string;
   } | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     data,
@@ -147,14 +170,23 @@ export default function AdminReviewsPage() {
     },
   });
 
-  const handleSearch = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      setSearch(searchInput);
-      setPage(1);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        setSearch(value);
+        setPage(1);
+      }, 400);
     },
-    [searchInput],
+    [],
   );
+
+  const handleClear = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSearch("");
+    setPage(1);
+  }, []);
 
   const handleDeleteConfirm = () => {
     if (!deleteConfirm) return;
@@ -175,24 +207,25 @@ export default function AdminReviewsPage() {
       </div>
 
       {/* Search */}
-      <form onSubmit={handleSearch} className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search by username or email..."
-            className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-4 text-sm text-text placeholder:text-text-secondary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
-        >
-          Search
-        </button>
-      </form>
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+        <input
+          type="text"
+          defaultValue={search}
+          onChange={handleSearchChange}
+          placeholder="Search by username or email..."
+          className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-10 text-sm text-text placeholder:text-text-secondary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+        />
+        {search.length > 0 && (
+          <button
+            onClick={handleClear}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1 text-text-secondary transition-colors hover:text-text"
+            aria-label="Clear search"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
 
       {/* Loading */}
       {isLoading && (
@@ -232,6 +265,12 @@ export default function AdminReviewsPage() {
                   <th className="px-4 py-3 text-left font-medium text-text-secondary">
                     Date
                   </th>
+                  <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                    Message Date
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-text-secondary">
+                    Time
+                  </th>
                   <th className="px-4 py-3 text-right font-medium text-text-secondary">
                     Actions
                   </th>
@@ -241,7 +280,7 @@ export default function AdminReviewsPage() {
                 {data.data.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={8}
                       className="px-4 py-12 text-center text-sm text-text-secondary"
                     >
                       No reviews found
@@ -254,9 +293,32 @@ export default function AdminReviewsPage() {
                       className="bg-bg transition-colors hover:bg-surface/50"
                     >
                       <td className="px-4 py-3">
-                        <span className="font-medium text-text">
-                          {review.user?.name ?? "Anonymous"}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          {review.user?.avatar_url ? (
+                            <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
+                              <Image
+                                src={review.user.avatar_url}
+                                alt={review.user?.name ?? "User"}
+                                fill
+                                sizes="36px"
+                                className="object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              className={
+                                "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold " +
+                                getAvatarColor(review.user?.name ?? null)
+                              }
+                              aria-hidden="true"
+                            >
+                              {getInitials(review.user?.name ?? null)}
+                            </div>
+                          )}
+                          <span className="font-medium text-text">
+                            {review.user?.name ?? "Anonymous"}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-text-secondary">
                         {review.movie_title}
@@ -273,6 +335,20 @@ export default function AdminReviewsPage() {
                       </td>
                       <td className="px-4 py-3 text-text-secondary">
                         {formatRelativeTime(review.created_at)}
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary whitespace-nowrap">
+                        {new Date(review.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary whitespace-nowrap">
+                        {new Date(review.created_at).toLocaleTimeString("en-US", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        })}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button
