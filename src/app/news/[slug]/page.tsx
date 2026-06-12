@@ -9,8 +9,9 @@ import Link from "next/link";
 import { ChevronLeft, Calendar, Clock, User } from "lucide-react";
 import DOMPurify from "isomorphic-dompurify";
 import { createClient } from "@/lib/supabase";
-import { normalizeAuthor } from "@/types/news";
+import { normalizeAuthor, NewsAuthor } from "@/types/news";
 import { ShareButton } from "@/components/ui/ShareButton";
+import { NewsCard } from "@/components/ui/NewsCard";
 
 export const revalidate = 7200;
 
@@ -156,6 +157,27 @@ async function ArticleContent({ slug }: { slug: string }) {
 
   const articleUrl = `https://cinestack.vercel.app/news/${slug}`;
 
+  // Fetch 3 related articles
+  const supabase2 = await createClient();
+  const { data: relatedArticles } = await supabase2
+    .from("news_articles")
+    .select(
+      `
+      title,
+      slug,
+      excerpt,
+      cover_image,
+      published_at,
+      created_at,
+      author:users(name, avatar_url)
+    `,
+    )
+    .eq("status", "published")
+    .is("deleted_at", null)
+    .neq("slug", slug)
+    .order("published_at", { ascending: false })
+    .limit(3);
+
   return (
     <article>
       {/* NewsArticle JSON-LD */}
@@ -194,7 +216,7 @@ async function ArticleContent({ slug }: { slug: string }) {
       {/* Back link */}
       <Link
         href="/news"
-        className="mb-8 inline-flex items-center gap-1.5 text-sm font-medium text-text-secondary transition-colors hover:text-accent"
+        className="mb-8 inline-flex items-center gap-1.5 pt-10 text-sm font-medium text-text-secondary transition-colors hover:text-accent"
       >
         <ChevronLeft className="h-4 w-4" />
         Back to News
@@ -235,7 +257,7 @@ async function ArticleContent({ slug }: { slug: string }) {
           )}
           <span className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
-            {formatDate(article.published_at)}
+            {formatDate(article.published_at ?? article.created_at)}
           </span>
           <span className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" />
@@ -271,16 +293,29 @@ async function ArticleContent({ slug }: { slug: string }) {
           dangerouslySetInnerHTML={{ __html: formattedContent }}
         />
 
-        {/* Footer */}
-        <div className="mt-12 border-t border-border pt-6">
-          <Link
-            href="/news"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-accent transition-colors hover:text-accent-hover"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            More articles
-          </Link>
-        </div>
+        {/* Related articles */}
+        {relatedArticles && relatedArticles.length > 0 && (
+          <div className="mt-12 border-t border-border pt-8">
+            <h2 className="mb-6 font-display text-xl text-text">More articles</h2>
+            <div className="space-y-6">
+              {relatedArticles.map((related, i) => (
+                <NewsCard
+                  key={related.slug}
+                  article={related as unknown as {
+                    title: string;
+                    slug: string;
+                    excerpt: string | null;
+                    cover_image: string | null;
+                    published_at: string | null;
+                    created_at: string | null;
+                    author: NewsAuthor;
+                  }}
+                  delay={i * 0.1}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </article>
   );

@@ -43,6 +43,7 @@ async function NewsList({ page }: { page: number }) {
       excerpt,
       cover_image,
       published_at,
+      created_at,
       author:users(name, avatar_url)
     `,
       { count: "exact" },
@@ -80,6 +81,7 @@ async function NewsList({ page }: { page: number }) {
                 excerpt: string | null;
                 cover_image: string | null;
                 published_at: string | null;
+                created_at: string | null;
                 author: NewsAuthor;
               }
             }
