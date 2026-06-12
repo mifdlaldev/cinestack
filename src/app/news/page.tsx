@@ -57,7 +57,7 @@ async function NewsList({ page }: { page: number }) {
   if (!articles || articles.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <Newspaper className="h-12 w-12 text-text-secondary/20" />
+        <Newspaper className="mb-4 h-12 w-12 text-text-secondary/20" />
         <h2 className="font-display text-xl text-text">No articles yet</h2>
         <p className="mt-2 text-text-secondary">
           Check back soon for the latest movie news.
