@@ -229,8 +229,30 @@ export default function AdminReviewsPage() {
 
       {/* Loading */}
       {isLoading && (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-accent" />
+        <div className="overflow-x-auto rounded-xl border border-border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-surface">
+                {["User", "Movie", "Rating", "Content", "Date", "Message Date", "Time", "Actions"].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left font-medium text-text-secondary">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i} className="bg-bg">
+                  <td className="px-4 py-3"><div className="flex items-center gap-3"><div className="h-9 w-9 animate-pulse rounded-full bg-surface-hover" /><div className="h-4 w-28 animate-pulse rounded bg-surface-hover" /></div></td>
+                  <td className="px-4 py-3"><div className="h-4 w-32 animate-pulse rounded bg-surface-hover" /></td>
+                  <td className="px-4 py-3"><div className="h-4 w-12 animate-pulse rounded bg-surface-hover" /></td>
+                  <td className="hidden px-4 py-3 md:table-cell"><div className="h-4 w-48 animate-pulse rounded bg-surface-hover" /></td>
+                  <td className="px-4 py-3"><div className="h-4 w-16 animate-pulse rounded bg-surface-hover" /></td>
+                  <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse rounded bg-surface-hover" /></td>
+                  <td className="px-4 py-3"><div className="h-4 w-12 animate-pulse rounded bg-surface-hover" /></td>
+                  <td className="px-4 py-3"><div className="h-4 w-16 animate-pulse rounded bg-surface-hover" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

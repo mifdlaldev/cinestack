@@ -201,9 +201,38 @@ export default function AdminMoviesPage() {
       </div>
 
       {/* Loading */}
-      {(cachedQuery.isLoading || tmdbSearchQuery.isLoading) && !showSearch && (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-accent" />
+      {cachedQuery.isLoading && !showSearch && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="flex gap-4 rounded-xl border border-border bg-surface p-4 overflow-hidden">
+              <div className="h-24 w-16 flex-shrink-0 animate-pulse rounded-lg bg-surface-hover" />
+              <div className="min-w-0 flex-1 space-y-2.5">
+                <div className="h-4 w-3/4 animate-pulse rounded bg-surface-hover" />
+                <div className="h-3 w-1/2 animate-pulse rounded bg-surface-hover" />
+                <div className="h-3 w-full animate-pulse rounded bg-surface-hover" />
+                <div className="h-3 w-2/3 animate-pulse rounded bg-surface-hover" />
+                <div className="h-6 w-24 animate-pulse rounded-lg bg-surface-hover" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* TMDB Search loading */}
+      {tmdbSearchQuery.isLoading && showSearch && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="flex gap-4 rounded-xl border border-border bg-surface p-4 overflow-hidden">
+              <div className="h-24 w-16 flex-shrink-0 animate-pulse rounded-lg bg-surface-hover" />
+              <div className="min-w-0 flex-1 space-y-2.5">
+                <div className="h-4 w-3/4 animate-pulse rounded bg-surface-hover" />
+                <div className="h-3 w-1/2 animate-pulse rounded bg-surface-hover" />
+                <div className="h-3 w-full animate-pulse rounded bg-surface-hover" />
+                <div className="h-3 w-2/3 animate-pulse rounded bg-surface-hover" />
+                <div className="h-6 w-24 animate-pulse rounded-lg bg-surface-hover" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

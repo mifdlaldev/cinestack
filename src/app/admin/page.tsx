@@ -5,6 +5,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { Suspense } from "react";
 import {
   Users,
   Film,
@@ -389,6 +390,67 @@ async function DashboardContent() {
   );
 }
 
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-8">
+      {/* Page header */}
+      <div>
+        <div className="h-8 w-32 animate-pulse rounded bg-surface" />
+        <div className="mt-2 h-4 w-64 animate-pulse rounded bg-surface" />
+      </div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4 rounded-xl border border-border bg-surface p-5">
+            <div className="h-12 w-12 animate-pulse rounded-lg bg-surface-hover" />
+            <div className="space-y-2">
+              <div className="h-7 w-16 animate-pulse rounded bg-surface-hover" />
+              <div className="h-3 w-20 animate-pulse rounded bg-surface-hover" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick actions */}
+      <div>
+        <div className="mb-3 h-5 w-32 animate-pulse rounded bg-surface" />
+        <div className="grid grid-cols-2 gap-3">
+          <div className="h-10 animate-pulse rounded-lg bg-surface" />
+          <div className="h-10 animate-pulse rounded-lg bg-surface" />
+        </div>
+      </div>
+
+      {/* Two-column skeleton */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-border bg-surface">
+            <div className="border-b border-border px-5 py-4">
+              <div className="h-4 w-28 animate-pulse rounded bg-surface-hover" />
+            </div>
+            <div className="divide-y divide-border">
+              {Array.from({ length: 5 }).map((_, j) => (
+                <div key={j} className="flex items-center gap-3 px-5 py-3">
+                  <div className="h-9 w-9 flex-shrink-0 animate-pulse rounded-full bg-surface-hover" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3.5 w-32 animate-pulse rounded bg-surface-hover" />
+                    <div className="h-3 w-24 animate-pulse rounded bg-surface-hover" />
+                  </div>
+                  <div className="h-3 w-16 animate-pulse rounded bg-surface-hover" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboardPage() {
-  return <DashboardContent />;
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardContent />
+    </Suspense>
+  );
 }
