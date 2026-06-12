@@ -4,8 +4,10 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createClient } from "@/lib/supabase-client";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import {
   Plus,
   Pencil,
@@ -17,6 +19,7 @@ import {
   X,
   Eye,
   EyeOff,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import { formatRelativeTime } from "@/lib/format-relative-time";
@@ -29,6 +32,7 @@ interface Article {
   excerpt: string | null;
   cover_image: string | null;
   author_id: string;
+  author_name: string;
   source: string;
   status: "draft" | "published";
   published_at: string | null;
@@ -40,6 +44,7 @@ interface ArticlesResponse {
   data: Article[];
   count: number;
   page: number;
+  pageSize: number;
   totalPages: number;
 }
 
@@ -130,6 +135,7 @@ function ArticleEditor({
 }) {
   const queryClient = useQueryClient();
   const isEditing = !!article;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState(article?.title ?? "");
   const [excerpt, setExcerpt] = useState(article?.excerpt ?? "");
@@ -137,7 +143,36 @@ function ArticleEditor({
   const [, setStatus] = useState<"draft" | "published">(
     article?.status ?? "draft",
   );
-  const [coverImage, setCoverImage] = useState(article?.cover_image ?? "");
+  const [coverPreview, setCoverPreview] = useState<string | null>(
+    article?.cover_image ?? null,
+  );
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverRemoved, setCoverRemoved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      alert("Only JPEG, PNG, and WebP images are allowed.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image must be under 2MB.");
+      return;
+    }
+
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+  };
+
+  const removeCover = () => {
+    setCoverFile(null);
+    setCoverPreview(null);
+    setCoverRemoved(true);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const saveMutation = useMutation({
     mutationFn: async (data: ArticleFormData & { slug: string }) => {
@@ -157,22 +192,63 @@ function ArticleEditor({
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-news"] });
+      queryClient.resetQueries({ queryKey: ["admin-news"] });
       onClose();
     },
   });
 
-  const handleSave = (publish: boolean) => {
-    const finalStatus = publish ? "published" : "draft";
-    setStatus(finalStatus);
-    saveMutation.mutate({
-      title,
-      excerpt,
-      content,
-      status: finalStatus,
-      cover_image: coverImage,
-      slug: slugify(title),
-    });
+  const handleSave = async (publish: boolean) => {
+    setSaving(true);
+    try {
+      let coverUrl = coverRemoved ? "" : (article?.cover_image ?? "");
+
+      // Upload new cover if a file was selected
+      if (coverFile) {
+        const ext = coverFile.name.split(".").pop() ?? "jpg";
+        const filePath = `${crypto.randomUUID()}.${ext}`;
+        const supabase = createClient();
+
+        const { error: uploadError } = await supabase.storage
+          .from("news-covers")
+          .upload(filePath, coverFile, { upsert: true });
+
+        if (uploadError) throw new Error(uploadError.message);
+
+        const { data: urlData } = supabase.storage
+          .from("news-covers")
+          .getPublicUrl(filePath);
+
+        coverUrl = urlData.publicUrl;
+      }
+
+      // Delete old cover from storage if removed
+      if (coverRemoved && article?.cover_image) {
+        const prefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/news-covers/`;
+        if (article.cover_image.startsWith(prefix)) {
+          const supabase = createClient();
+          const filePath = article.cover_image.slice(prefix.length);
+          await supabase.storage.from("news-covers").remove([filePath]);
+        }
+      }
+
+      const finalStatus = publish ? "published" : "draft";
+      setStatus(finalStatus);
+
+      await saveMutation.mutateAsync({
+        title,
+        excerpt,
+        content,
+        status: finalStatus,
+        cover_image: coverUrl,
+        slug: slugify(title),
+      });
+    } catch (err) {
+      if (err instanceof Error && err.message !== "Failed to save") {
+        alert(err instanceof Error ? err.message : "Failed to save");
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -227,39 +303,62 @@ function ArticleEditor({
           />
         </div>
 
-        {/* Cover Image URL */}
+        {/* Cover Image */}
         <div>
-          <label
-            htmlFor="article-cover"
-            className="mb-1.5 block text-sm font-medium text-text"
-          >
-            Cover Image URL
+          <label className="mb-1.5 block text-sm font-medium text-text">
+            Cover Image
           </label>
-          <input
-            id="article-cover"
-            type="text"
-            value={coverImage}
-            onChange={(e) => setCoverImage(e.target.value)}
-            placeholder="https://example.com/image.jpg (optional)"
-            className="w-full rounded-lg border border-border bg-bg px-4 py-2.5 text-sm text-text placeholder:text-text-secondary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-          />
+          <div className="flex items-start gap-4">
+            {coverPreview && (
+              <img
+                src={coverPreview}
+                alt="Cover preview"
+                className="h-20 w-32 flex-shrink-0 rounded-lg object-cover"
+              />
+            )}
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text transition-all hover:bg-surface-hover active:scale-[0.97]"
+              >
+                <Upload className="h-4 w-4" />
+                {coverPreview ? "Change Image" : "Choose Image"}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleCoverSelect}
+              />
+              {coverPreview && (
+                <button
+                  type="button"
+                  onClick={removeCover}
+                  className="text-left text-xs text-error/70 hover:text-error"
+                >
+                  Remove image
+                </button>
+              )}
+              {!coverPreview && !article?.cover_image && (
+                <p className="text-xs text-text-secondary/60">
+                  Image will be uploaded when you save
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Content */}
         <div>
-          <label
-            htmlFor="article-content"
-            className="mb-1.5 block text-sm font-medium text-text"
-          >
+          <label className="mb-1.5 block text-sm font-medium text-text">
             Content
           </label>
-          <textarea
-            id="article-content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
+          <RichTextEditor
+            content={content}
+            onChange={setContent}
             placeholder="Write your article content here..."
-            rows={12}
-            className="w-full rounded-lg border border-border bg-bg px-4 py-2.5 text-sm text-text placeholder:text-text-secondary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-y min-h-[200px]"
           />
         </div>
       </div>
@@ -285,10 +384,10 @@ function ArticleEditor({
         </button>
         <button
           onClick={() => handleSave(false)}
-          disabled={saveMutation.isPending || !title.trim()}
+          disabled={saving || !title.trim()}
           className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text transition-all hover:bg-surface-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {saveMutation.isPending ? (
+          {saving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <EyeOff className="h-4 w-4" />
@@ -297,10 +396,10 @@ function ArticleEditor({
         </button>
         <button
           onClick={() => handleSave(true)}
-          disabled={saveMutation.isPending || !title.trim()}
+          disabled={saving || !title.trim()}
           className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {saveMutation.isPending ? (
+          {saving ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Eye className="h-4 w-4" />
@@ -425,6 +524,12 @@ export default function AdminNewsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-surface">
+                  <th className="w-12 px-4 py-3 text-left font-medium text-text-secondary">
+                    No.
+                  </th>
+                  <th className="w-16 px-4 py-3 text-left font-medium text-text-secondary">
+                    Image
+                  </th>
                   <th className="px-4 py-3 text-left font-medium text-text-secondary">
                     Title
                   </th>
@@ -437,6 +542,12 @@ export default function AdminNewsPage() {
                   <th className="hidden px-4 py-3 text-left font-medium text-text-secondary md:table-cell">
                     Date
                   </th>
+                  <th className="hidden px-4 py-3 text-left font-medium text-text-secondary md:table-cell">
+                    Published
+                  </th>
+                  <th className="hidden px-4 py-3 text-left font-medium text-text-secondary md:table-cell">
+                    Time
+                  </th>
                   <th className="px-4 py-3 text-right font-medium text-text-secondary">
                     Actions
                   </th>
@@ -446,18 +557,36 @@ export default function AdminNewsPage() {
                 {data.data.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={9}
                       className="px-4 py-12 text-center text-sm text-text-secondary"
                     >
                       No articles yet. Click &quot;New Article&quot; to create one.
                     </td>
                   </tr>
                 ) : (
-                  data.data.map((article) => (
+                  data.data.map((article, idx) => (
                     <tr
                       key={article.id}
                       className="bg-bg transition-colors hover:bg-surface/50"
                     >
+                      <td className="w-12 px-4 py-3 text-xs text-text-secondary">
+                        {(data.page - 1) * data.pageSize + idx + 1}
+                      </td>
+                      <td className="w-16 px-4 py-3">
+                        {article.cover_image ? (
+                          <Link href={`/news/${article.slug}`}>
+                            <img
+                              src={article.cover_image}
+                              alt={article.title}
+                              className="h-10 w-14 rounded object-cover transition-opacity hover:opacity-80"
+                            />
+                          </Link>
+                        ) : (
+                          <div className="flex h-10 w-14 items-center justify-center rounded bg-surface">
+                            <span className="text-[10px] text-text-secondary/40">N/A</span>
+                          </div>
+                        )}
+                      </td>
                       <td className="px-4 py-3">
                         <Link
                           href={`/news/${article.slug}`}
@@ -484,12 +613,22 @@ export default function AdminNewsPage() {
                         </span>
                       </td>
                       <td className="hidden px-4 py-3 text-text-secondary md:table-cell">
-                        {article.author_id.slice(0, 8)}...
+                        {article.author_name}
                       </td>
                       <td className="hidden px-4 py-3 text-text-secondary md:table-cell">
                         {article.published_at
                           ? formatRelativeTime(article.published_at)
                           : formatRelativeTime(article.created_at)}
+                      </td>
+                      <td className="hidden px-4 py-3 text-text-secondary whitespace-nowrap md:table-cell">
+                        {new Date(article.published_at ?? article.created_at).toLocaleDateString("en-US", {
+                          month: "short", day: "numeric", year: "numeric",
+                        })}
+                      </td>
+                      <td className="hidden px-4 py-3 text-text-secondary whitespace-nowrap md:table-cell">
+                        {new Date(article.published_at ?? article.created_at).toLocaleTimeString("en-US", {
+                          hour: "2-digit", minute: "2-digit", hour12: false,
+                        })}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import {
   Search,
   Trash2,
@@ -27,9 +28,11 @@ interface Reply {
   content: string;
   created_at: string;
   updated_at: string;
-  parent_id: string;
+  parent_id?: string | null;
   user: ReplyUser | null;
   movie_title: string;
+  parentAuthorName?: string | null;
+  parentContent?: string | null;
 }
 
 interface RepliesResponse {
@@ -38,6 +41,28 @@ interface RepliesResponse {
   page: number;
   pageSize: number;
   totalPages: number;
+}
+
+function getInitials(name: string | null): string {
+  if (!name) return "?";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+function getAvatarColor(name: string | null): string {
+  if (!name) return "bg-surface-hover";
+  const colors = [
+    "bg-accent/20", "bg-blue-500/20", "bg-emerald-500/20", "bg-purple-500/20",
+    "bg-rose-500/20", "bg-amber-500/20", "bg-cyan-500/20", "bg-pink-500/20",
+  ];
+  let hash = 0;
+  for (let i = 0; i < (name ?? "").length; i++)
+    hash = (name ?? "").charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
 }
 
 function ConfirmDialog({
@@ -91,28 +116,36 @@ export default function AdminRepliesPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<Reply | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounce search
-  const [searchTimer, setSearchTimer] = useState<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setSearchInput(value);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        setSearch(value);
+        setPage(1);
+      }, 400);
+    },
+    [],
+  );
 
-  const handleSearchChange = useCallback((value: string) => {
-    setSearch(value);
-    if (searchTimer) clearTimeout(searchTimer);
-    const timer = setTimeout(() => {
-      setDebouncedSearch(value);
-      setPage(1);
-    }, 400);
-    setSearchTimer(timer);
-  }, [searchTimer]);
+  const handleClear = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSearchInput("");
+    setSearch("");
+    setPage(1);
+  }, []);
 
   const { data, isLoading, isError } = useQuery<RepliesResponse>({
-    queryKey: ["admin-replies", page, debouncedSearch],
+    queryKey: ["admin-replies", page, search],
     queryFn: async () => {
       const params = new URLSearchParams({ page: String(page) });
-      if (debouncedSearch) params.set("search", debouncedSearch);
+      if (search) params.set("search", search);
       const res = await fetch(`/api/admin/replies?${params}`);
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -134,7 +167,7 @@ export default function AdminRepliesPage() {
     },
     onMutate: async (replyId) => {
       setDeletingId(replyId);
-      await queryClient.cancelQueries({ queryKey: ["admin-replies", page, debouncedSearch] });
+      await queryClient.cancelQueries({ queryKey: ["admin-replies", page, search] });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-replies"] });
@@ -163,15 +196,24 @@ export default function AdminRepliesPage() {
       </div>
 
       {/* Search */}
-      <div className="relative max-w-sm">
+      <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
         <input
           type="text"
-          value={search}
-          onChange={(e) => handleSearchChange(e.target.value)}
+          value={searchInput}
+          onChange={handleSearchChange}
           placeholder="Search by user name or email..."
-          className="w-full rounded-lg border border-border bg-surface py-2 pl-10 pr-3 text-sm text-text placeholder:text-text-secondary/50 outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+          className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-10 text-sm text-text placeholder:text-text-secondary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         />
+        {searchInput.length > 0 && (
+          <button
+            onClick={handleClear}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1 text-text-secondary transition-colors hover:text-text"
+            aria-label="Clear search"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Loading */}
@@ -196,56 +238,102 @@ export default function AdminRepliesPage() {
         </div>
       )}
 
-      {/* Replies list */}
+      {/* Replies table */}
       {!isLoading && !isError && (data?.data ?? []).length > 0 && (
-        <div className="space-y-3">
-          {(data?.data ?? []).map((reply) => (
-            <div
-              key={reply.id}
-              className={`rounded-xl border border-border bg-surface p-5 transition-opacity ${
-                deletingId === reply.id ? "opacity-50" : ""
-              }`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                {/* Avatar + info */}
-                <div className="flex items-start gap-3 min-w-0">
-                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent">
-                    {(reply.user?.name ?? "?")[0]}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-semibold text-text">
-                        {reply.user?.name ?? "Anonymous"}
-                      </span>
-                      <span className="text-[10px] text-text-secondary/60">
-                        {reply.user?.email ?? ""}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm text-text/90 leading-relaxed">
-                      {reply.content}
-                    </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-text-secondary/60">
-                      <span>{formatRelativeTime(reply.created_at)}</span>
-                      <span className="inline-flex items-center gap-1">
-                        <MessageCircle className="h-3 w-3" />
-                        Reply to review #{reply.parent_id.slice(0, 8)}
-                      </span>
-                      <span>{reply.movie_title}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Delete button */}
-                <button
-                  onClick={() => setDeleteTarget(reply)}
-                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-error/10 hover:text-error"
-                  aria-label={`Delete reply by ${reply.user?.name ?? "anonymous"}`}
+        <div className="overflow-x-auto rounded-xl border border-border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-surface">
+                <th className="px-4 py-3 text-left font-medium text-text-secondary">User</th>
+                <th className="px-4 py-3 text-left font-medium text-text-secondary">Movie</th>
+                <th className="hidden px-4 py-3 text-left font-medium text-text-secondary md:table-cell">Content</th>
+                <th className="px-4 py-3 text-left font-medium text-text-secondary">Date</th>
+                <th className="px-4 py-3 text-left font-medium text-text-secondary">Message Date</th>
+                <th className="px-4 py-3 text-left font-medium text-text-secondary">Time</th>
+                <th className="px-4 py-3 text-right font-medium text-text-secondary">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {(data?.data ?? []).map((reply) => (
+                <tr
+                  key={reply.id}
+                  className={`bg-bg transition-colors hover:bg-surface/50 ${deletingId === reply.id ? "opacity-50" : ""}`}
                 >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {reply.user?.avatar_url ? (
+                        <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
+                          <Image
+                            src={reply.user.avatar_url}
+                            alt={reply.user?.name ?? "User"}
+                            fill
+                            sizes="36px"
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className={
+                            "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold " +
+                            getAvatarColor(reply.user?.name ?? null)
+                          }
+                          aria-hidden="true"
+                        >
+                          {getInitials(reply.user?.name ?? null)}
+                        </div>
+                      )}
+                      <div>
+                        <span className="font-medium text-text">
+                          {reply.user?.name ?? "Anonymous"}
+                        </span>
+                        <p className="text-[10px] text-text-secondary/60">{reply.user?.email ?? ""}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-text-secondary">
+                    <div className="flex flex-col">
+                      <span>{reply.movie_title}</span>
+                      {reply.parentAuthorName && (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-text-secondary/60">
+                          <MessageCircle className="h-2.5 w-2.5" />
+                          Replied to @{reply.parentAuthorName}
+                          {reply.parentContent && (
+                            <>: &ldquo;{reply.parentContent}&rdquo;</>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="hidden max-w-xs px-4 py-3 text-text-secondary md:table-cell">
+                    <p className="line-clamp-1">{reply.content}</p>
+                  </td>
+                  <td className="px-4 py-3 text-text-secondary whitespace-nowrap">
+                    {formatRelativeTime(reply.created_at)}
+                  </td>
+                  <td className="px-4 py-3 text-text-secondary whitespace-nowrap">
+                    {new Date(reply.created_at).toLocaleDateString("en-US", {
+                      month: "short", day: "numeric", year: "numeric",
+                    })}
+                  </td>
+                  <td className="px-4 py-3 text-text-secondary whitespace-nowrap">
+                    {new Date(reply.created_at).toLocaleTimeString("en-US", {
+                      hour: "2-digit", minute: "2-digit", hour12: false,
+                    })}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => setDeleteTarget(reply)}
+                      className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-error/10 hover:text-error"
+                      aria-label={`Delete reply by ${reply.user?.name ?? "anonymous"}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 

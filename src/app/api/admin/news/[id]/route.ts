@@ -45,29 +45,30 @@ export async function PATCH(
     }
   }
 
-  const { data, error } = await supabase
-    .from("news_articles")
-    .update(updateData)
-    .eq("id", id)
-    .is("deleted_at", null)
-    .select()
-    .single();
+  const { data, error } = await supabase.rpc("admin_update_article", {
+    _article_id: id,
+    _title: updateData.title ?? null,
+    _slug: updateData.slug ?? null,
+    _content: updateData.content ?? null,
+    _excerpt: updateData.excerpt ?? null,
+    _cover_image: updateData.cover_image ?? null,
+    _status: updateData.status ?? null,
+  });
 
   if (error) {
-    if (error.code === "23505") {
+    if (error.message?.includes("already exists")) {
       return NextResponse.json(
         { error: "An article with this slug already exists" },
         { status: 409 },
       );
     }
+    if (error.message?.includes("not found")) {
+      return NextResponse.json(
+        { error: "Article not found" },
+        { status: 404 },
+      );
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  if (!data) {
-    return NextResponse.json(
-      { error: "Article not found" },
-      { status: 404 },
-    );
   }
 
   return NextResponse.json({ data });
@@ -98,12 +99,23 @@ export async function DELETE(
 
   const { id } = await params;
 
-  // Soft delete
-  const { error } = await supabase
+  const { data: article } = await supabase
     .from("news_articles")
-    .update({ deleted_at: new Date().toISOString() })
+    .select("cover_image")
     .eq("id", id)
-    .is("deleted_at", null);
+    .maybeSingle();
+
+  if (article?.cover_image) {
+    const publicUrlPrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/news-covers/`;
+    if (article.cover_image.startsWith(publicUrlPrefix)) {
+      const filePath = article.cover_image.slice(publicUrlPrefix.length);
+      await supabase.storage.from("news-covers").remove([filePath]);
+    }
+  }
+
+  const { error } = await supabase.rpc("admin_delete_article", {
+    article_id: id,
+  });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

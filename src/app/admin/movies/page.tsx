@@ -4,7 +4,8 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Search,
@@ -14,6 +15,8 @@ import {
   ChevronRight,
   RefreshCw,
   CheckCircle2,
+  X,
+  Trash2,
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -53,8 +56,8 @@ export default function AdminMoviesPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchInput, setSearchInput] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fetch cached movies
   const cachedQuery = useQuery<CachedMoviesResponse>({
@@ -65,6 +68,18 @@ export default function AdminMoviesPage() {
       if (!res.ok) throw new Error("Failed to fetch cached movies");
       return res.json();
     },
+  });
+
+  // Fetch all cached TMDB IDs to show sync status across refreshes
+  const cachedIdsQuery = useQuery<number[]>({
+    queryKey: ["admin-movies-cached-ids"],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/movies?all_ids=true`);
+      if (!res.ok) return [];
+      const json = await res.json();
+      return json.ids ?? [];
+    },
+    staleTime: 30_000,
   });
 
   // TMDB search
@@ -84,8 +99,13 @@ export default function AdminMoviesPage() {
   });
 
   // Sync movie to cache
+  const [syncedIds, setSyncedIds] = useState<Record<number, boolean>>({});
+  const [syncingId, setSyncingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
   const syncMutation = useMutation({
     mutationFn: async (tmdbId: number) => {
+      setSyncingId(tmdbId);
       const res = await fetch("/api/admin/movies/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -95,26 +115,64 @@ export default function AdminMoviesPage() {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error ?? "Failed to sync movie");
       }
-      return res.json();
+      return tmdbId;
     },
-    onSuccess: () => {
+    onSuccess: (tmdbId) => {
+      setSyncedIds((prev) => ({ ...prev, [tmdbId]: true }));
+      setSyncingId(null);
       queryClient.invalidateQueries({ queryKey: ["admin-movies-cached"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-movies-cached-ids"] });
+    },
+    onError: () => {
+      setSyncingId(null);
     },
   });
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchInput.trim()) return;
-    setSearchQuery(searchInput.trim());
-    setTmdbPage(1);
-    setShowSearch(true);
+  const deleteFromCache = useMutation({
+    mutationFn: async (tmdbId: number) => {
+      setDeletingId(tmdbId);
+      const res = await fetch("/api/admin/movies", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tmdbId }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Failed to remove from cache");
+      }
+    },
+    onSuccess: () => {
+      setDeletingId(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-movies-cached"] });
+    },
+    onError: () => {
+      setDeletingId(null);
+    },
+  });
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSearchQuery(value.trim());
+      setTmdbPage(1);
+      setShowSearch(true);
+    }, 400);
   };
+
+  const handleClear = () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    setSearchQuery("");
+    if (inputRef.current) inputRef.current.value = "";
+  };
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex-1">
           <h1 className="font-display text-2xl tracking-tight text-text md:text-3xl">
             Movies
           </h1>
@@ -125,13 +183,13 @@ export default function AdminMoviesPage() {
         <button
           onClick={() => {
             setShowSearch(!showSearch);
-            if (showSearch) {
+            if (!showSearch) {
               setSearchQuery("");
-              setSearchInput("");
+              if (debounceRef.current) clearTimeout(debounceRef.current);
             }
           }}
           className={cn(
-            "inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all active:scale-[0.97]",
+            "self-end sm:self-auto inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all active:scale-[0.97]",
             showSearch
               ? "border border-border bg-surface text-text hover:bg-surface-hover"
               : "bg-accent text-bg hover:bg-accent-hover",
@@ -152,24 +210,26 @@ export default function AdminMoviesPage() {
       {/* TMDB Search Panel */}
       {showSearch && (
         <div className="space-y-4">
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Search TMDB movies..."
-                className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-4 text-sm text-text placeholder:text-text-secondary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-              />
-            </div>
-            <button
-              type="submit"
-              className="rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition-all hover:bg-accent-hover active:scale-[0.97]"
-            >
-              Search
-            </button>
-          </form>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+            <input
+              ref={inputRef}
+              type="text"
+              defaultValue=""
+              onChange={handleSearchChange}
+              placeholder="Search TMDB movies..."
+              className="w-full rounded-lg border border-border bg-surface py-2.5 pl-10 pr-10 text-sm text-text placeholder:text-text-secondary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+            />
+            {searchQuery.length > 0 && (
+              <button
+                onClick={handleClear}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1 text-text-secondary transition-colors hover:text-text"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
 
           {/* TMDB Search Results */}
           {tmdbSearchQuery.isLoading && (
@@ -201,13 +261,17 @@ export default function AdminMoviesPage() {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {tmdbSearchQuery.data.map((movie) => {
                 const posterUrl = getImageUrl(movie.poster_path, "w185");
-                const isSyncing = syncMutation.isPending;
+                const isSyncing = syncingId === movie.id;
+                const isSynced = syncedIds[movie.id] || cachedIdsQuery.data?.includes(movie.id);
                 return (
                   <div
                     key={movie.id}
-                    className="flex gap-4 rounded-xl border border-border bg-surface p-4"
+                    className="flex gap-4 rounded-xl border border-border bg-surface p-4 transition-all hover:border-accent/30 hover:shadow-[0_0_15px_rgba(245,197,24,0.06)] overflow-hidden"
                   >
-                    <div className="relative h-24 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-surface-hover">
+                    <Link
+                      href={`/movies/${movie.id}`}
+                      className="relative h-24 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-surface-hover"
+                    >
                       {posterUrl ? (
                         <Image
                           src={posterUrl}
@@ -221,35 +285,45 @@ export default function AdminMoviesPage() {
                           <Film className="h-5 w-5 text-text-secondary" />
                         </div>
                       )}
-                    </div>
+                    </Link>
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-sm font-semibold text-text">
+                      <Link
+                        href={`/movies/${movie.id}`}
+                        className="line-clamp-2 text-sm font-semibold text-text transition-colors hover:text-accent"
+                      >
                         {movie.title}
-                      </h3>
-                      <p className="text-xs text-text-secondary">
-                        {movie.release_date?.slice(0, 4) ?? "N/A"} &middot;{" "}
-                        {(movie.vote_average / 2).toFixed(1)}/5
+                      </Link>
+                      <p className="line-clamp-1 text-xs text-text-secondary">
+                      {movie.release_date?.slice(0, 4) ?? "N/A"} &middot;{" "}
+                      {movie.vote_average ? (movie.vote_average).toFixed(1) : "?"}/10
                       </p>
                       <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
                         {movie.overview || "No overview available"}
                       </p>
-                      <button
-                        onClick={() => syncMutation.mutate(movie.id)}
-                        disabled={isSyncing}
-                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-all hover:bg-accent/20 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isSyncing ? (
-                          <>
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                            Syncing...
-                          </>
-                        ) : (
-                          <>
-                            <RefreshCw className="h-3 w-3" />
-                            Sync to Cache
-                          </>
-                        )}
-                      </button>
+                      {isSynced ? (
+                        <span className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/15 px-3 py-1.5 text-xs font-medium text-emerald-400">
+                          <CheckCircle2 className="h-3 w-3" />
+                          In Cache
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => syncMutation.mutate(movie.id)}
+                          disabled={isSyncing}
+                          className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-all hover:bg-accent/20 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {isSyncing ? (
+                            <>
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                              Syncing...
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw className="h-3 w-3" />
+                              Sync to Cache
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -275,9 +349,12 @@ export default function AdminMoviesPage() {
               {(cachedQuery.data?.data ?? []).map((movie) => (
                 <div
                   key={movie.id}
-                  className="flex gap-4 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-border/80"
+                  className="flex gap-4 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-border/80 overflow-hidden"
                 >
-                  <div className="relative h-24 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-surface-hover">
+                  <Link
+                    href={`/movies/${movie.tmdb_id}`}
+                    className="relative h-24 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-surface-hover"
+                  >
                     {movie.data.poster_path ? (
                       <Image
                         src={getImageUrl(movie.data.poster_path, "w185") ?? ""}
@@ -291,17 +368,20 @@ export default function AdminMoviesPage() {
                         <Film className="h-5 w-5 text-text-secondary" />
                       </div>
                     )}
-                  </div>
+                  </Link>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="truncate text-sm font-semibold text-text">
+                      <Link
+                        href={`/movies/${movie.tmdb_id}`}
+                        className="line-clamp-2 text-sm font-semibold text-text transition-colors hover:text-accent"
+                      >
                         {movie.title}
-                      </h3>
+                      </Link>
                       <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-success" />
                     </div>
                     <p className="text-xs text-text-secondary">
                       {movie.data.release_date?.slice(0, 4) ?? "N/A"} &middot;{" "}
-                      {movie.data.vote_average ? (movie.data.vote_average / 2).toFixed(1) : "?"}/5
+                      {movie.data.vote_average ? movie.data.vote_average.toFixed(1) : "?"}/10
                     </p>
                     <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
                       {movie.data.overview || "No overview"}
@@ -309,6 +389,23 @@ export default function AdminMoviesPage() {
                     <p className="mt-1 text-[10px] text-text-secondary">
                       Cached {formatRelativeTime(movie.cached_at)}
                     </p>
+                    <button
+                      onClick={() => deleteFromCache.mutate(movie.tmdb_id)}
+                      disabled={deletingId === movie.tmdb_id}
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-error/20 px-2.5 py-1 text-[11px] font-medium text-error/70 transition-all hover:bg-error/5 hover:text-error active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {deletingId === movie.tmdb_id ? (
+                        <>
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Removing...
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="h-3 w-3" />
+                          Remove
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               ))}

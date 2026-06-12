@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { formatRelativeTime } from "@/lib/format-relative-time";
-import { getImageUrl } from "@/lib/tmdb";
+import { getImageUrl, getMovieDetail } from "@/lib/tmdb";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -111,6 +111,7 @@ async function DashboardContent() {
         user:users(name, avatar_url)
       `,
       )
+      .is("parent_id", null)
       .not("rating", "is", null)
       .order("created_at", { ascending: false })
       .limit(5),
@@ -127,6 +128,16 @@ async function DashboardContent() {
         .in("tmdb_id", movieIds)
     : { data: [] };
 
+  const cachedIds = new Set((cachedMovies ?? []).map((m) => m.tmdb_id));
+  const missingIds = movieIds.filter((id) => !cachedIds.has(id));
+
+  // Fetch missing movies from TMDB API as fallback
+  const tmdbResults = missingIds.length
+    ? await Promise.allSettled(
+        missingIds.map((id) => getMovieDetail(id)),
+      )
+    : [];
+
   const movieInfo: Record<number, { title: string; posterUrl: string | null }> = {};
   if (cachedMovies) {
     for (const m of cachedMovies) {
@@ -134,6 +145,17 @@ async function DashboardContent() {
       movieInfo[m.tmdb_id] = {
         title: m.title,
         posterUrl: posterPath ? getImageUrl(posterPath, "w92") : null,
+      };
+    }
+  }
+  for (const result of tmdbResults) {
+    if (result.status === "fulfilled") {
+      const movie = result.value;
+      movieInfo[movie.id] = {
+        title: movie.title,
+        posterUrl: movie.poster_path
+          ? getImageUrl(movie.poster_path, "w92")
+          : null,
       };
     }
   }
@@ -232,18 +254,30 @@ async function DashboardContent() {
                   created_at: string;
                 }) => (
                   <div
-                    key={u.id}
-                    className="flex items-center gap-3 px-5 py-3"
-                  >
-                    <div
-                      className={
-                        "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold " +
-                        getAvatarColor(u.name)
-                      }
-                      aria-hidden="true"
+                      key={u.id}
+                      className="flex items-center gap-3 px-5 py-3"
                     >
-                      {getInitials(u.name)}
-                    </div>
+                      {u.avatar_url ? (
+                        <div className="relative h-9 w-9 flex-shrink-0 overflow-hidden rounded-full">
+                          <Image
+                            src={u.avatar_url}
+                            alt={u.name ?? "User"}
+                            fill
+                            sizes="36px"
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className={
+                            "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold " +
+                            getAvatarColor(u.name)
+                          }
+                          aria-hidden="true"
+                        >
+                          {getInitials(u.name)}
+                        </div>
+                      )}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-text">
                         {u.name ?? "Unnamed"}
@@ -330,14 +364,15 @@ async function DashboardContent() {
                             </p>
                           </div>
                           <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                            <span className="flex items-center gap-0.5 text-xs font-medium text-accent">
-                              <Star className="h-3 w-3 fill-accent" />
-                              {r.rating
-                                ? (r.rating as number) > 5
-                                  ? Math.round((r.rating as number) / 2)
-                                  : (r.rating as number)
-                                : "-"}
-                            </span>
+                            {(() => {
+                              const rt = r.rating as number | undefined;
+                              return rt && rt > 0 ? (
+                                <span className="flex items-center gap-0.5 text-xs font-medium text-accent">
+                                  <Star className="h-3 w-3 fill-accent" />
+                                  {rt > 5 ? Math.round(rt / 2) : rt}
+                                </span>
+                              ) : null;
+                            })()}
                             <span className="text-xs text-text-secondary">
                               {formatRelativeTime(r.created_at as string)}
                             </span>

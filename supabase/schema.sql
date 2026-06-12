@@ -194,9 +194,13 @@ do $$ begin
   create policy "Users can insert own watchlist" on public.watchlists for insert with check (auth.uid() = user_id);
   create policy "Users can delete own watchlist" on public.watchlists for delete using (auth.uid() = user_id);
   create policy "Anyone can read movie cache" on public.movie_cache for select using (true);
+  create policy "Admins can insert movie cache" on public.movie_cache for insert with check (public.is_admin());
+  create policy "Admins can update movie cache" on public.movie_cache for update using (public.is_admin());
+  create policy "Admins can delete movie cache" on public.movie_cache for delete using (public.is_admin());
   create policy "Anyone can read published articles" on public.news_articles for select using (status = 'published' and deleted_at is null);
+  create policy "Admins can read all articles" on public.news_articles for select using (public.is_admin());
   create policy "Admins can insert articles" on public.news_articles for insert with check (public.is_admin());
-  create policy "Admins can update articles" on public.news_articles for update using (public.is_admin());
+  create policy "Admins can update articles" on public.news_articles for update using (public.is_admin()) with check (public.is_admin());
   create policy "Admins can delete articles" on public.news_articles for delete using (public.is_admin());
   create policy "Admins can delete reviews" on public.reviews for delete using (public.is_admin());
 exception when duplicate_object then null;

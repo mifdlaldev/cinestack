@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase";
+import { getMovieDetail } from "@/lib/tmdb";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
     `,
       { count: "exact" },
     )
-    .not("parent_id", "is", null);
+    .is("rating", null);
 
   if (search) {
     const { data: matchingUsers } = await supabase
@@ -78,8 +79,11 @@ export async function GET(request: NextRequest) {
   }
 
   const movieIds = [...new Set((data ?? []).map((r) => r.movie_id))];
+  const parentIds = [...new Set((data ?? []).map((r) => r.parent_id).filter(Boolean))] as string[];
   const movieTitles: Record<number, string> = {};
+  const parentInfo: Record<string, { name: string | null; content: string }> = {};
 
+  // Fetch movie titles
   if (movieIds.length > 0) {
     const { data: cachedMovies } = await supabase
       .from("movie_cache")
@@ -91,11 +95,45 @@ export async function GET(request: NextRequest) {
         movieTitles[m.tmdb_id] = m.title;
       }
     }
+
+    // TMDB fallback for missing movies
+    const cachedIds = new Set((cachedMovies ?? []).map((m) => m.tmdb_id));
+    const missingIds = movieIds.filter((id) => !cachedIds.has(id));
+    if (missingIds.length > 0) {
+      const results = await Promise.allSettled(missingIds.map((id) => getMovieDetail(id)));
+      for (const result of results) {
+        if (result.status === "fulfilled") {
+          movieTitles[result.value.id] = result.value.title;
+        }
+      }
+    }
+  }
+
+  // Fetch parent review info
+  if (parentIds.length > 0) {
+    const { data: parents } = await supabase
+      .from("reviews")
+      .select("id, content, user:users(name)")
+      .in("id", parentIds);
+
+    if (parents) {
+      for (const p of parents) {
+        const user = Array.isArray(p.user)
+          ? (p.user as Array<{ name: string | null }>)[0]
+          : (p.user as { name: string | null } | null);
+        parentInfo[p.id] = {
+          name: user?.name ?? null,
+          content: p.content.slice(0, 60),
+        };
+      }
+    }
   }
 
   const enrichedData = (data ?? []).map((review) => ({
     ...review,
     movie_title: movieTitles[review.movie_id] ?? `Movie #${review.movie_id}`,
+    parentAuthorName: parentInfo[review.parent_id]?.name ?? null,
+    parentContent: parentInfo[review.parent_id]?.content ?? null,
   }));
 
   return NextResponse.json({
