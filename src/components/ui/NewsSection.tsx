@@ -20,6 +20,7 @@ export async function NewsSection() {
       excerpt,
       cover_image,
       published_at,
+      created_at,
       author:users(name, avatar_url)
     `,
     )
@@ -61,6 +62,7 @@ export async function NewsSection() {
                 excerpt: string | null;
                 cover_image: string | null;
                 published_at: string | null;
+                created_at: string | null;
                 author: NewsAuthor;
               }
             }
