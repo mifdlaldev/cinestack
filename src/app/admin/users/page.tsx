@@ -157,8 +157,27 @@ export default function AdminUsersPage() {
 
       {/* Loading state */}
       {isLoading && (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-accent" />
+        <div className="overflow-x-auto rounded-xl border border-border">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-surface">
+                {["User", "Email", "Role", "Joined", "Joining Date", "Time", "Actions"].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left font-medium text-text-secondary">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i} className="bg-bg">
+                  {Array.from({ length: 7 }).map((_, j) => (
+                    <td key={j} className="px-4 py-3">
+                      <div className="h-5 animate-pulse rounded bg-surface-hover" style={{ width: j === 0 ? "160px" : j === 6 ? "32px" : j === 1 ? "200px" : "80px" }} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
